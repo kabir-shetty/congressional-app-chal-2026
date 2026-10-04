@@ -32,6 +32,12 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow this app to access your photos so it can check them for scams."
+        }
       ]
     ],
     "experiments": {
