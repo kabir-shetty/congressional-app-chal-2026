@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text } from "react-native";
 
-import { colors, fontSize, minTouchTarget, radius, spacing } from "@/constants/theme";
+import { colors, fontFamily, fontSize, minTouchTarget, radius, spacing } from "@/constants/theme";
 
 type AppButtonVariant = "primary" | "secondary" | "danger";
 
@@ -46,8 +46,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   text: {
+    fontFamily: fontFamily.bodyMedium,
     fontSize: fontSize.button,
-    fontWeight: "700",
   },
   disabled: {
     opacity: 0.5,

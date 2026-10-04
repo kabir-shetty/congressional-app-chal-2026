@@ -1,84 +1,49 @@
-import { Link, Tabs } from "expo-router";
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Tabs } from "expo-router";
+import { StyleSheet } from "react-native";
 
-SplashScreen.preventAutoHideAsync().catch(() => {});
+import { colors, fontFamily, fontSize } from "@/constants/theme";
 
-export default function RootLayout() {
-  useEffect(() => {
-    SplashScreen.hideAsync().catch((err) => console.log(err));
-  }, []);
-
-  return <Tabs
+// Bottom tab bar + header shared by the three main screens. "info/ai-scams"
+// hides its header here because its own nested layout
+// (src/app/(tabs)/info/_layout.tsx) renders one instead.
+export default function TabsLayout() {
+  return (
+    <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#7be0a2",
-        tabBarInactiveTintColor: "#7be0a2",
-        tabBarInactiveBackgroundColor: "rgba(16, 40, 59, 0.94)",
-        tabBarActiveBackgroundColor: "rgba(10, 24, 38, 0.94)",
-        tabBarStyle: { borderTopWidth: 0 },
-        
-        header: () => (
-          <View style={styles.headerBox}>
-            <Text style={styles.headerText}>dih</Text>
-            <Link href="../settings" style={styles.logout}></Link>
-          </View>
-        ),
-      }}>
-        
-      <Tabs.Screen name="check" options={({ navigation }) => ({
-        headerShown: true,
-        tabBarLabelStyle: {
-          fontWeight: navigation.isFocused() ? '700' : '400',
-        }
-      })}/>
-
-      <Tabs.Screen name="quiz" options={({ navigation }) => ({
-        headerShown: true,
-        tabBarLabelStyle: {
-          fontWeight: navigation.isFocused() ? '700' : '400',
-        }
-      })}/>
-
-      <Tabs.Screen name="info/ai-scams" options={({ navigation }) => ({
-        headerShown: true,
-        tabBarLabelStyle: {
-          fontWeight: navigation.isFocused() ? '700' : '400',
-        }
-      })}/>
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.secondary,
+        tabBarStyle: styles.tabBar,
+        tabBarLabelStyle: styles.tabLabel,
+        headerStyle: styles.header,
+        headerTitleStyle: styles.headerTitle,
+        headerShadowVisible: false,
+      }}
+    >
+      <Tabs.Screen name="check" options={{ title: "Scam Checker" }} />
+      <Tabs.Screen name="quiz" options={{ title: "AI or Not" }} />
+      <Tabs.Screen name="info/ai-scams" options={{ headerShown: false, title: "AI Scams" }} />
     </Tabs>
+  );
 }
 
-
 const styles = StyleSheet.create({
-  headerBox: {
-    width: '100%',
-    backgroundColor: 'rgba(10, 26, 38, 0.94)',
-    flexDirection: 'row',
-    alignItems: 'center', 
-
-    paddingHorizontal: 16,
-    height: 70, 
+  tabBar: {
+    backgroundColor: colors.background,
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    height: 72,
+    paddingTop: 8,
   },
-    headerText: {
-    color: "#7be0a2",
-    fontSize: 17,
-    fontWeight: "700",
-    letterSpacing: 1.2,
-    textTransform: "uppercase",
-    textAlign: 'center',
-    marginTop: 8,
-    flex: 1,
+  tabLabel: {
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: fontSize.caption,
   },
-  logout: {
-    color: "#7be0a2",
-    marginLeft: 4,
-    marginTop: 8,
-    textAlign: 'right',
+  header: {
+    backgroundColor: colors.background,
   },
-  logo: {
-    marginTop: 8,
-    width: 55,
-    height: 55,
+  headerTitle: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.header,
+    color: colors.text,
   },
-})
+});

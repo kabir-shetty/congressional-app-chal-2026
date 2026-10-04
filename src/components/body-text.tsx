@@ -1,6 +1,6 @@
 import { StyleSheet, Text, type TextProps } from "react-native";
 
-import { colors, fontSize } from "@/constants/theme";
+import { colors, fontFamily, fontSize } from "@/constants/theme";
 
 // Standard readable paragraph/label text (20pt, high-contrast) used instead
 // of RN's default ~14pt Text throughout the app. `style` still merges in so
@@ -11,6 +11,7 @@ export function BodyText({ style, ...props }: TextProps) {
 
 const styles = StyleSheet.create({
   text: {
+    fontFamily: fontFamily.body,
     fontSize: fontSize.body,
     color: colors.text,
   },

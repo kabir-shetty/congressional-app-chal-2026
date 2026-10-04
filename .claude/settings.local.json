@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.expo.dev)",
+      "Read(//opt/**)",
+      "Bash(find / -maxdepth 6 -iname \"node\" -type f)",
+      "Bash(apt list *)",
+      "Bash(bash -lc \"command -v node; command -v npm\")",
+      "Bash(command -v curl && curl -s https://registry.npmjs.org/@expo-google-fonts/arvo/latest | head -c 300; echo; echo ---; curl -s https://registry.npmjs.org/@expo-google-fonts/public-sans/latest | head -c 300)",
+      "WebFetch(domain:registry.npmjs.org)"
+    ]
+  }
+}

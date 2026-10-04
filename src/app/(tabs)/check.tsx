@@ -4,9 +4,19 @@ import { useCallback, useState } from "react";
 import { Alert, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { AppButton } from "@/components/app-button";
 import { BodyText } from "@/components/body-text";
+import { HeadingText } from "@/components/heading-text";
 import { colors, fontSize, radius, spacing } from "@/constants/theme";
 import { useScamCheck } from "@/hooks/use-scam-check";
-import type { ScamCheckImage } from "@/types/scam-check";
+import type { ScamCheckImage, ScamVerdict } from "@/types/scam-check";
+
+// Plain-language framing for each verdict, and the spine color that marks
+// it — danger for a likely scam, success for likely safe, border for a
+// genuine "can't tell."
+const verdictCopy: Record<ScamVerdict, { label: string; color: string }> = {
+  likely_scam: { label: "This looks like a scam", color: colors.danger },
+  likely_safe: { label: "This looks safe", color: colors.success },
+  uncertain: { label: "Hard to say for sure", color: colors.border },
+};
 
 // Route: /check — linked from the landing page's "Scam Checker" menu item.
 export default function ScamChecker() {
@@ -70,7 +80,13 @@ export default function ScamChecker() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <BodyText>Paste the message or describe what happened</BodyText>
+      <View style={styles.intro}>
+        <HeadingText style={styles.title}>Not sure about something?</HeadingText>
+        <BodyText style={styles.subtitle}>
+          Paste the message or describe what happened.
+        </BodyText>
+      </View>
+
       <TextInput
         style={styles.textInput}
         multiline
@@ -82,11 +98,13 @@ export default function ScamChecker() {
       />
 
       <View style={styles.imageSection}>
-        <AppButton
-          title="Add Screenshot"
-          onPress={pickImage}
-          disabled={status === "loading"}
-        />
+        <View style={styles.startAction}>
+          <AppButton
+            title="Add Screenshot"
+            onPress={pickImage}
+            disabled={status === "loading"}
+          />
+        </View>
 
         {images.length > 0 && (
           <ScrollView horizontal contentContainerStyle={styles.imageList}>
@@ -95,7 +113,7 @@ export default function ScamChecker() {
                 <Image source={{ uri: image.uri }} style={styles.thumbnail} />
                 <AppButton
                   title="Remove"
-                  variant="secondary"
+                  variant="danger"
                   onPress={() => removeImage(image.uri)}
                   disabled={status === "loading"}
                 />
@@ -105,22 +123,35 @@ export default function ScamChecker() {
         )}
       </View>
 
-      <AppButton
-        title="Check for Scam"
-        onPress={handleSubmit}
-        disabled={!canSubmit}
-      />
+      <View style={styles.startAction}>
+        <AppButton
+          title="Check for Scam"
+          onPress={handleSubmit}
+          disabled={!canSubmit}
+        />
+      </View>
 
       {status === "loading" && <BodyText>Checking...</BodyText>}
       {status === "error" && (
         <BodyText style={styles.errorText}>Error: {error}</BodyText>
       )}
       {status === "success" && result && (
-        <View style={styles.result}>
-          <BodyText>Verdict: {result.verdict}</BodyText>
-          <BodyText>Confidence: {result.confidence}</BodyText>
+        <View
+          style={[
+            styles.result,
+            { borderLeftColor: verdictCopy[result.verdict].color },
+          ]}
+        >
+          <HeadingText style={styles.resultTitle}>
+            {verdictCopy[result.verdict].label}
+          </HeadingText>
+          <BodyText style={styles.resultMeta}>
+            {Math.round(result.confidence * 100)}% confident
+          </BodyText>
           <BodyText>{result.explanation}</BodyText>
-          <AppButton title="Check Another" onPress={handleReset} />
+          <View style={styles.startAction}>
+            <AppButton title="Check Another" onPress={handleReset} />
+          </View>
         </View>
       )}
     </ScrollView>
@@ -132,7 +163,20 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: spacing.lg,
     gap: spacing.md,
-    backgroundColor: "#FFB6C1",
+    backgroundColor: colors.background,
+  },
+  intro: {
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  title: {
+    fontSize: fontSize.title,
+  },
+  subtitle: {
+    color: colors.secondary,
+  },
+  startAction: {
+    alignSelf: "flex-start",
   },
   textInput: {
     minHeight: 140,
@@ -162,9 +206,15 @@ const styles = StyleSheet.create({
   },
   result: {
     gap: spacing.sm,
-    backgroundColor: colors.surface,
-    borderRadius: radius,
-    padding: spacing.md,
+    paddingLeft: spacing.md,
+    borderLeftWidth: 4,
+  },
+  resultTitle: {
+    fontSize: fontSize.title,
+  },
+  resultMeta: {
+    fontSize: fontSize.caption,
+    color: colors.secondary,
   },
   errorText: {
     color: colors.danger,
