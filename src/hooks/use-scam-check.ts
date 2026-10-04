@@ -1,7 +1,5 @@
-import { useCallback, useState } from "react";
-
-import { checkForScam } from "@/services/scam-check-service";
 import type { ScamCheckInput, ScamCheckResult } from "@/types/scam-check";
+import { useCallback, useState } from "react";
 
 type ScamCheckStatus = "idle" | "loading" | "success" | "error";
 
@@ -44,4 +42,10 @@ export function useScamCheck() {
   }, []);
 
   return { ...state, submit, reset };
+}
+
+async function checkForScam(
+  _input: ScamCheckInput
+): Promise<ScamCheckResult> {
+  throw new Error("checkForScam is not implemented yet.");
 }

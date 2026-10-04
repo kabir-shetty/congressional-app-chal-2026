@@ -1,7 +1,5 @@
-import { useCallback, useState } from "react";
-
-import { generateQuizItem } from "@/services/quiz-service";
 import type { QuizItem } from "@/types/quiz";
+import { useCallback, useState } from "react";
 
 // idle: nothing loaded yet. loading: fetching a question. ready: question
 // shown, waiting for a guess. answered: guess made, waiting for "Next".
@@ -78,4 +76,8 @@ export function useQuiz() {
   }, []);
 
   return { ...state, loadNext, answer, resetScore };
+}
+
+async function generateQuizItem(): Promise<QuizItem> {
+  throw new Error("generateQuizItem is not implemented yet.");
 }
