@@ -1,16 +1,11 @@
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useCallback, useState } from "react";
-import {
-  Alert,
-  Button,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, ScrollView, StyleSheet, TextInput, View } from "react-native";
 
+import { AppButton } from "@/components/app-button";
+import { BodyText } from "@/components/body-text";
+import { colors, fontSize, radius, spacing } from "@/constants/theme";
 import { useScamCheck } from "@/hooks/use-scam-check";
 import type { ScamCheckImage } from "@/types/scam-check";
 
@@ -76,30 +71,32 @@ export default function ScamChecker() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text>Paste the message or describe what happened</Text>
+      <BodyText>Paste the message or describe what happened</BodyText>
       <TextInput
         style={styles.textInput}
         multiline
         value={text}
         onChangeText={setText}
         placeholder="e.g. a text, email, or DM you received"
+        placeholderTextColor={colors.secondary}
         editable={status !== "loading"}
       />
 
       <View style={styles.imageSection}>
-        <Button
+        <AppButton
           title="Add Screenshot"
           onPress={pickImage}
           disabled={status === "loading"}
         />
 
         {images.length > 0 && (
-          <ScrollView horizontal style={styles.imageList}>
+          <ScrollView horizontal contentContainerStyle={styles.imageList}>
             {images.map((image) => (
               <View key={image.uri} style={styles.imageItem}>
                 <Image source={{ uri: image.uri }} style={styles.thumbnail} />
-                <Button
+                <AppButton
                   title="Remove"
+                  variant="secondary"
                   onPress={() => removeImage(image.uri)}
                   disabled={status === "loading"}
                 />
@@ -109,20 +106,22 @@ export default function ScamChecker() {
         )}
       </View>
 
-      <Button
+      <AppButton
         title="Check for Scam"
         onPress={handleSubmit}
         disabled={!canSubmit}
       />
 
-      {status === "loading" && <Text>Checking...</Text>}
-      {status === "error" && <Text>Error: {error}</Text>}
+      {status === "loading" && <BodyText>Checking...</BodyText>}
+      {status === "error" && (
+        <BodyText style={styles.errorText}>Error: {error}</BodyText>
+      )}
       {status === "success" && result && (
         <View style={styles.result}>
-          <Text>Verdict: {result.verdict}</Text>
-          <Text>Confidence: {result.confidence}</Text>
-          <Text>{result.explanation}</Text>
-          <Button title="Check Another" onPress={handleReset} />
+          <BodyText>Verdict: {result.verdict}</BodyText>
+          <BodyText>Confidence: {result.confidence}</BodyText>
+          <BodyText>{result.explanation}</BodyText>
+          <AppButton title="Check Another" onPress={handleReset} />
         </View>
       )}
     </ScrollView>
@@ -132,28 +131,43 @@ export default function ScamChecker() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 16,
-    gap: 12,
+    padding: spacing.lg,
+    gap: spacing.md,
+    backgroundColor: colors.background,
   },
   textInput: {
-    minHeight: 120,
+    minHeight: 140,
     textAlignVertical: "top",
+    fontSize: fontSize.body,
+    color: colors.text,
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.border,
+    borderRadius: radius,
+    padding: spacing.md,
   },
   imageSection: {
-    gap: 8,
+    gap: spacing.sm,
   },
   imageList: {
-    flexDirection: "row",
+    gap: spacing.sm,
   },
   imageItem: {
-    marginRight: 8,
     alignItems: "center",
+    gap: spacing.sm,
   },
   thumbnail: {
-    width: 100,
-    height: 100,
+    width: 140,
+    height: 140,
+    borderRadius: radius,
   },
   result: {
-    gap: 4,
+    gap: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radius,
+    padding: spacing.md,
+  },
+  errorText: {
+    color: colors.danger,
   },
 });

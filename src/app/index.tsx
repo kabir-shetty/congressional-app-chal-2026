@@ -1,16 +1,18 @@
-import { Link } from "expo-router";
 import { ScrollView, StyleSheet } from "react-native";
 
-// Landing screen: a menu of links out to each info topic, the scam
-// checker, and the quiz. With typedRoutes on, Expo Router checks these
-// hrefs against actual route files at build time, so a typo here is a
-// compile error rather than a dead link.
+import { AppLinkButton } from "@/components/app-link-button";
+import { colors, spacing } from "@/constants/theme";
+
+// Landing screen: a menu of large, clearly-labeled buttons linking out to
+// each info topic, the scam checker, and the quiz. With typedRoutes on,
+// Expo Router checks each AppLinkButton's href against actual route files
+// at build time, so a typo here is a compile error rather than a dead link.
 export default function Index() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Link href="/info/ai-scams">AI Scams</Link>
-      <Link href="/check">Scam Checker</Link>
-      <Link href="/quiz">AI or Not Quiz</Link>
+      <AppLinkButton href="/info/ai-scams" title="AI Scams" />
+      <AppLinkButton href="/check" title="Scam Checker" />
+      <AppLinkButton href="/quiz" title="AI or Not Quiz" />
     </ScrollView>
   );
 }
@@ -18,7 +20,8 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 16,
-    gap: 12,
+    padding: spacing.lg,
+    gap: spacing.md,
+    backgroundColor: colors.background,
   },
 });
