@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
     gap: spacing.lg,
-    backgroundColor: colors.background,
+    backgroundColor: "#FFB6C1",
   },
   score: {
     fontWeight: "700",

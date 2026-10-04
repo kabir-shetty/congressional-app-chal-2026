@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: spacing.lg,
     gap: spacing.md,
-    backgroundColor: colors.background,
+    backgroundColor: "#FFB6C1",
   },
   textInput: {
     minHeight: 140,
