@@ -10,14 +10,7 @@ import { colors, fontSize } from "@/constants/theme";
 // stacks would show a header each.
 export default function RootLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: { backgroundColor: colors.background },
-        headerTitleStyle: { fontSize: fontSize.header, color: colors.text },
-        headerTintColor: colors.primary,
-        contentStyle: { backgroundColor: colors.background },
-      }}
-    >
+    <Stack>
       <Stack.Screen name="index" options={{ title: "Home" }} />
       <Stack.Screen name="check" options={{ title: "Scam Checker" }} />
       <Stack.Screen name="quiz" options={{ title: "AI or Not Quiz" }} />

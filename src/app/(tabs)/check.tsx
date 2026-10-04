@@ -2,7 +2,6 @@ import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useCallback, useState } from "react";
 import { Alert, ScrollView, StyleSheet, TextInput, View } from "react-native";
-
 import { AppButton } from "@/components/app-button";
 import { BodyText } from "@/components/body-text";
 import { colors, fontSize, radius, spacing } from "@/constants/theme";
