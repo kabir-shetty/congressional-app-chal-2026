@@ -19,9 +19,10 @@ export default function TabsLayout() {
         headerShadowVisible: false,
       }}
     >
+      <Tabs.Screen name="index" options={{ title: "Home" }} />
       <Tabs.Screen name="check" options={{ title: "Scam Checker" }} />
       <Tabs.Screen name="quiz" options={{ title: "AI or Not" }} />
-      <Tabs.Screen name="info/ai-scams" options={{ headerShown: false, title: "AI Scams" }} />
+      <Tabs.Screen name="info" options={{ headerShown: false, title: "AI Scams" }} />
     </Tabs>
   );
 }

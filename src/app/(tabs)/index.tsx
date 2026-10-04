@@ -1,5 +1,5 @@
-import { ScrollView, StyleSheet, View } from "react-native";
 import type { Href } from "expo-router";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import { AppLinkButton } from "@/components/app-link-button";
 import { BodyText } from "@/components/body-text";
@@ -17,7 +17,7 @@ type Notice = {
 // the home screen explains what it's offering before asking for a tap.
 const notices: Notice[] = [
   {
-    href: "/info/ai-scams",
+    href: "/ai-scams",
     title: "What AI scams look like",
     body: "Cloned voices, faked photos, and messages written to sound just like someone you trust.",
     action: "Learn the signs",
