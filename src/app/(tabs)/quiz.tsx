@@ -27,11 +27,15 @@ export default function Quiz() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.intro}>
+        <HeadingText style={styles.title}>AI or Not</HeadingText>
+        <BodyText style={styles.subtitle}>
+          Guess whether each one was made by a person or by AI.
+        </BodyText>
+      </View>
+
       {status === "idle" && (
         <View style={styles.block}>
-          <BodyText>
-            Look at each one and guess whether it was made by a person or by AI.
-          </BodyText>
           <View style={styles.startAction}>
             <AppButton title="Start Quiz" onPress={loadNext} />
           </View>
@@ -116,6 +120,16 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.lg,
     backgroundColor: colors.background,
+  },
+  intro: {
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  title: {
+    fontSize: fontSize.title,
+  },
+  subtitle: {
+    color: colors.secondary,
   },
   block: {
     gap: spacing.md,

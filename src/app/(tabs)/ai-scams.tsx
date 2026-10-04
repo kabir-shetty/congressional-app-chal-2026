@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { BodyText } from "@/components/body-text";
 import { HeadingText } from "@/components/heading-text";
 import { InfoPage } from "@/components/info-page";
-import { colors, spacing } from "@/constants/theme";
+import { colors, fontSize, spacing } from "@/constants/theme";
 
 type Topic = {
   title: string;
@@ -29,18 +29,22 @@ const topics: Topic[] = [
   },
 ];
 
-// Route: /info/ai-scams — the landing page's "AI Scams" menu item.
+// Route: /ai-scams — the landing page's "AI Scams" menu item.
 export default function AiScamsInfo() {
   return (
     <InfoPage>
-      <BodyText style={styles.intro}>
-        Here's what's changed about scams lately, and what still gives them
-        away.
-      </BodyText>
+      <View style={styles.intro}>
+        <HeadingText style={styles.title}>
+          What's changed about scams lately
+        </HeadingText>
+        <BodyText style={styles.subtitle}>
+          And what still gives them away.
+        </BodyText>
+      </View>
 
       {topics.map((topic) => (
         <View key={topic.title} style={styles.topic}>
-          <HeadingText style={styles.topicTitle}>{topic.title}</HeadingText>
+          <HeadingText>{topic.title}</HeadingText>
           <BodyText>{topic.body}</BodyText>
         </View>
       ))}
@@ -50,6 +54,13 @@ export default function AiScamsInfo() {
 
 const styles = StyleSheet.create({
   intro: {
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  title: {
+    fontSize: fontSize.title,
+  },
+  subtitle: {
     color: colors.secondary,
   },
   topic: {

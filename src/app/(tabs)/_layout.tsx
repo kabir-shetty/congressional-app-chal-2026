@@ -3,9 +3,7 @@ import { StyleSheet } from "react-native";
 
 import { colors, fontFamily, fontSize } from "@/constants/theme";
 
-// Bottom tab bar + header shared by the three main screens. "info/ai-scams"
-// hides its header here because its own nested layout
-// (src/app/(tabs)/info/_layout.tsx) renders one instead.
+// Bottom tab bar + header shared by all four screens.
 export default function TabsLayout() {
   return (
     <Tabs
@@ -22,7 +20,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="index" options={{ title: "Home" }} />
       <Tabs.Screen name="check" options={{ title: "Scam Checker" }} />
       <Tabs.Screen name="quiz" options={{ title: "AI or Not" }} />
-      <Tabs.Screen name="info" options={{ headerShown: false, title: "AI Scams" }} />
+      <Tabs.Screen name="ai-scams" options={{ title: "AI Scams" }} />
     </Tabs>
   );
 }

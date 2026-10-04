@@ -1,13 +1,13 @@
-import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
-import { useCallback, useState } from "react";
-import { Alert, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { AppButton } from "@/components/app-button";
 import { BodyText } from "@/components/body-text";
 import { HeadingText } from "@/components/heading-text";
 import { colors, fontSize, radius, spacing } from "@/constants/theme";
 import { useScamCheck } from "@/hooks/use-scam-check";
 import type { ScamCheckImage, ScamVerdict } from "@/types/scam-check";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
+import { useCallback, useState } from "react";
+import { Alert, ScrollView, StyleSheet, TextInput, View } from "react-native";
 
 // Plain-language framing for each verdict, and the spine color that marks
 // it — danger for a likely scam, success for likely safe, border for a
