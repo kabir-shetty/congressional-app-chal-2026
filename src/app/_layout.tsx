@@ -11,9 +11,8 @@ import { colors, fontSize } from "@/constants/theme";
 export default function RootLayout() {
   return (
     <Stack>
-      <Stack.Screen name="index" options={{ title: "Home" }} />
-      <Stack.Screen name="check" options={{ title: "Scam Checker" }} />
-      <Stack.Screen name="quiz" options={{ title: "AI or Not Quiz" }} />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="info" options={{ headerShown: false }} />
     </Stack>
   );
