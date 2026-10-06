@@ -1,4 +1,4 @@
-import type { QuizItem } from "@/types/quiz";
+import type { QuizItem, QuizItemContent } from "@/types/quiz";
 import { useCallback, useState } from "react";
 
 // idle: nothing loaded yet. loading: fetching a question. ready: question
@@ -60,7 +60,7 @@ export function useQuiz() {
         return prev;
       }
 
-      const correct = guessIsAi === prev.current.isAiGenerated;
+      const correct = guessIsAi === prev.current.isScam;
       return {
         ...prev,
         status: "answered",
@@ -79,5 +79,28 @@ export function useQuiz() {
 }
 
 async function generateQuizItem(): Promise<QuizItem> {
-  throw new Error("generateQuizItem is not implemented yet.");
+  /*
+    Pseudo code (I'm don't have time to figure this out right now)
+    choose random number to decide if image or text question
+    if image:
+      use image from a manually made set of questions
+      maybe make it stop using image questions when all used
+    if text:
+      api call ai to create a fake or real scam message (we choose w/ random #)
+      either make another api call to generate explanation or do it all in one
+    display question like done below. All the buttons work and example is functional
+
+    we probably don't need the id field, but I'm leaving it bc may be useful later
+  */
+  // filler example
+  const exContent: QuizItemContent = {
+    type: "text",
+    text: "Your computer has a virus, give us money."
+  }
+  return {
+    id: "1",
+    content: exContent,
+    isScam: true,
+    explanation: "They make a request for money and they say your computer has a virus even though that isn't possible."
+  }
 }

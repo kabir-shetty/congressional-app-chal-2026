@@ -6,6 +6,7 @@ export type QuizItemContent =
 
 export type QuizItem = {
   id: string;
-  content: QuizItemContent;
-  isAiGenerated: boolean; // the correct answer to "is this AI?"
+  content: QuizItemContent; // grouped together since there's two possible formats
+  isScam: boolean; // the correct answer to "is this a scam?"
+  explanation: string; // explains why the answer is what it is
 };

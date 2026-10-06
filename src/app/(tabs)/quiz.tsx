@@ -100,8 +100,8 @@ export default function Quiz() {
                 {lastAnswerCorrect ? "Correct." : "Not quite."}
               </BodyText>
               <BodyText>
-                This was{" "}
-                {current.isAiGenerated ? "AI-generated" : "not AI-generated"}.
+                This was {current.isScam ? "AI-generated" : "not AI-generated"}.
+                {"\n"}{current.explanation}
               </BodyText>
               <View style={styles.startAction}>
                 <AppButton title="Next Question" onPress={loadNext} />

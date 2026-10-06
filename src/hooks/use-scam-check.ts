@@ -47,5 +47,24 @@ export function useScamCheck() {
 async function checkForScam(
   _input: ScamCheckInput
 ): Promise<ScamCheckResult> {
-  throw new Error("checkForScam is not implemented yet.");
+  /*
+  Pseudo code (I don't want to actually do it rn)
+
+  if input just text:
+    send to ai to check if scam
+  if input just image:
+    send to ai to read text from image
+    give error message if this fails
+    send text to ai to check if scam
+  if both:
+    idk, maybe just make user select between them
+    or maybe interpret text as explanation what happened in that case.
+  */
+
+  // example result
+  return {
+    verdict: "likely_scam",
+    confidence: 0.7,
+    explanation: "You'll be fine."
+  }
 }
