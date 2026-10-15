@@ -5,11 +5,11 @@ Common container: p lg, bg background. See idioms in [[arch]].
 ScrollView gap lg. Hero: HeadingText "Porch Watch"(display) + subtitle "Know the signs before they reach your door." Then `notices: Notice{href,title,body}[]` (ai-scams, check, quiz) rendered as spine blocks (title+body). href kept but NOT rendered as links (removed 5541d6c). Unused style noticeAction.
 
 ## check.tsx `ScamChecker`
-Local state: text, images:ScamCheckImage[]. Hook useScamCheck → {status,result,error,submit,reset}.
+State local to component: text, images, checkState (status|result|error).
+- ScamCheckStatus = idle|loading|success|error; ScamCheckState {status,result:ScamCheckResult|null,error:string|null}.
 - `verdictCopy: Record<ScamVerdict,{label,color}>` scam→danger, safe→success, uncertain→border.
 - pickImage: requestMediaLibraryPermissionsAsync → Alert if !granted; launchImageLibraryAsync({mediaTypes:["images"], allowsMultipleSelection, quality:1}); appends {uri,width,height}.
-- removeImage(uri) filter. handleSubmit→submit({text,images}). handleReset→reset+clear.
-- canSubmit = (text.trim()||images.length) && status!=="loading". Inputs disabled while loading.
+- removeImage(uri) filter. handleSubmit: async, set loading → await checkForScam({text,images}) → success|error, reset clears all state. canSubmit = (text.trim()||images.length) && status!=="loading".
 - UI: intro "Not sure about something?"; multiline TextInput (surface bg, border 2, minH 140); "Add Screenshot" btn; horizontal thumb list (expo-image 140², "Remove" danger btn each); "Check for Scam"; loading "Checking..."; error danger text; success: left-spine colored by verdict, label, `round(confidence*100)% confident`, explanation, "Check Another".
 
 ## quiz.tsx `Quiz`

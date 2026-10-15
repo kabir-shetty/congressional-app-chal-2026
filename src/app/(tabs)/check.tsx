@@ -2,12 +2,33 @@ import { AppButton } from "@/components/app-button";
 import { BodyText } from "@/components/body-text";
 import { HeadingText } from "@/components/heading-text";
 import { colors, fontSize, radius, spacing } from "@/constants/theme";
-import { useScamCheck } from "@/hooks/use-scam-check";
-import type { ScamCheckImage, ScamVerdict } from "@/types/scam-check";
+import type {
+  ScamCheckImage,
+  ScamCheckInput,
+  ScamCheckResult,
+  ScamVerdict,
+} from "@/types/scam-check";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useCallback, useState } from "react";
 import { Alert, ScrollView, StyleSheet, TextInput, View } from "react-native";
+
+// Tracks one checkForScam() call so the UI can show loading, the verdict,
+// or the error. Kept separate from the input state so "Check Another" can
+// reset both together.
+type ScamCheckStatus = "idle" | "loading" | "success" | "error";
+
+type ScamCheckState = {
+  status: ScamCheckStatus;
+  result: ScamCheckResult | null;
+  error: string | null;
+};
+
+const initialCheckState: ScamCheckState = {
+  status: "idle",
+  result: null,
+  error: null,
+};
 
 // Plain-language framing for each verdict, and the spine color that marks
 // it — danger for a likely scam, success for likely safe, border for a
@@ -18,11 +39,22 @@ const verdictCopy: Record<ScamVerdict, { label: string; color: string }> = {
   uncertain: { label: "Hard to say for sure", color: colors.border },
 };
 
+// Placeholder until the model call is wired up; always throws so the error
+// path is exercised.
+async function checkForScam(
+  _input: ScamCheckInput
+): Promise<ScamCheckResult> {
+  throw new Error("checkForScam is not implemented yet.");
+}
+
 // Route: /check — linked from the landing page's "Scam Checker" menu item.
 export default function ScamChecker() {
   const [text, setText] = useState("");
   const [images, setImages] = useState<ScamCheckImage[]>([]);
-  const { status, result, error, submit, reset } = useScamCheck();
+  const [checkState, setCheckState] = useState<ScamCheckState>(
+    initialCheckState
+  );
+  const { status, result, error } = checkState;
 
   const pickImage = useCallback(async () => {
     // Must request permission before launching the picker, and must check
@@ -64,15 +96,29 @@ export default function ScamChecker() {
     setImages((current) => current.filter((image) => image.uri !== uri));
   }, []);
 
-  const handleSubmit = useCallback(() => {
-    submit({ text, images });
-  }, [submit, text, images]);
+  const handleSubmit = useCallback(async () => {
+    setCheckState({ status: "loading", result: null, error: null });
+
+    try {
+      const checkResult = await checkForScam({ text, images });
+      setCheckState({ status: "success", result: checkResult, error: null });
+    } catch (caught) {
+      // checkForScam throws plain Errors today; the instanceof check is just
+      // a safe fallback in case that ever changes.
+      setCheckState({
+        status: "error",
+        result: null,
+        error:
+          caught instanceof Error ? caught.message : "Something went wrong.",
+      });
+    }
+  }, [text, images]);
 
   const handleReset = useCallback(() => {
-    reset();
+    setCheckState(initialCheckState);
     setText("");
     setImages([]);
-  }, [reset]);
+  }, []);
 
   // Need at least some text or one image to send, and can't resubmit mid-check.
   const canSubmit =
