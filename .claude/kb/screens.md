@@ -13,10 +13,10 @@ Local state: text, images:ScamCheckImage[]. Hook useScamCheck → {status,result
 - UI: intro "Not sure about something?"; multiline TextInput (surface bg, border 2, minH 140); "Add Screenshot" btn; horizontal thumb list (expo-image 140², "Remove" danger btn each); "Check for Scam"; loading "Checking..."; error danger text; success: left-spine colored by verdict, label, `round(confidence*100)% confident`, explanation, "Check Another".
 
 ## quiz.tsx `Quiz`
-Hook useQuiz → {status,current,error,score,totalAnswered,lastAnswerCorrect,loadNext,answer} (resetScore unused by UI). View (not scroll).
-- questionNumber = totalAnswered + (current?1:0).
-- idle: "Start Quiz". loading: "Loading question...". error: msg + "Try Again"(loadNext).
-- ready|answered: "Question N", "{score} right so far", content (text in surface box | expo-image with item width/height). ready: row "AI"(answer(true)) / "Not AI" secondary(answer(false)). answered: left-spine success/danger, "Correct."/"Not quite.", "This was AI-generated/not AI-generated.", "Next Question".
+State local to component. View (not scroll). `useEffect: createQuiz() on mount; cleanup ++latestRun` → quiz built in memory, hidden.
+- preparing: "Getting your quiz ready...". prepared: "Start Quiz"(start). error: msg + "Try Again"(createQuiz). finished: "You got {score} of {totalQuestions} right." + "Play Again"(createQuiz).
+- `current` set (asking|answered): "Question N of T", "{score} right so far", content (text in surface box | expo-image with item width/height). asking: row "AI"(answer(true)) / "Not AI" secondary(answer(false)). answered: left-spine success/danger, "Correct."/"Not quite.", "This was AI-generated/not AI-generated.", btn isLastQuestion?"See My Score":"Next Question"(next).
+- style sectionHeading (fontSize.title) shared by question header + final score.
 
 ## ai-scams.tsx `AiScamsInfo`
 InfoPage. intro "What's changed about scams lately"/"And what still gives them away." + `topics:{title,body}[]` (4: voice cloning, fake photos/videos, fluent AI writing, red flags: urgency/secrecy/gift card/wire/crypto) as spine blocks.
