@@ -2,7 +2,7 @@
 ## types/scam-check.ts
 ScamCheckImage{uri,width,height} · ScamCheckInput{text, images:ScamCheckImage[]} · ScamVerdict "likely_scam"|"likely_safe"|"uncertain" · ScamCheckResult{verdict, confidence:0-1, explanation}
 ## types/quiz.ts
-QuizItemContent = {type:"text",text} | {type:"image",uri,width,height} · QuizItem{id, content, isAiGenerated}
+QuizItemContent = {type:"text",text} | {type:"image",uri,width,height} · QuizItem{id, content, isScam, explanation:string}
 
 ## check.tsx state (was useScamCheck hook, now component-local)
 ScamCheckStatus = idle|loading|success|error; ScamCheckState {status,result,error}.
@@ -12,8 +12,8 @@ ScamCheckStatus = idle|loading|success|error; ScamCheckState {status,result,erro
 ## quiz.tsx state (was useQuiz hook, now component-local)
 QUIZ_LENGTH=5. QuizStatus = preparing|prepared|asking|answered|finished|error; QuizState {status,items,index,error,score,lastAnswerCorrect}.
 - createQuiz: run id `latestRun` ref (++ per call; unmount cleanup also ++) → reset to initial → sequential loop 5× generateQuizItem() (all-or-nothing: fail any = fail all) → prepared|error; stale run result dropped.
-- start: prepared→asking. answer(guessIsAi): no-op unless asking; →answered, score++ if correct. next: no-op unless answered; index+1 → asking, or finished after last.
-`generateQuizItem()` (file-private): isAiGenerated = Math.random()<0.5 (code picks, not model) → callAI({system:QUIZ_ITEM_SYSTEM, prompt: AI-style | human-style instruction}) in local try/catch (console.warn + throw "Couldn't load the quiz. Please try again.") → parseJsonReply → require `text` string (else UNEXPECTED_REPLY_MESSAGE) → {id:String(nextQuizItemId++) module counter, content:{type:"text",text}, isAiGenerated}. Text items only.
+- start: prepared→asking. answer(guessIsScam): no-op unless asking; →answered, score++ if correct. next: no-op unless answered; index+1 → asking, or finished after last.
+`generateQuizItem()` (file-private): isScam = Math.random()<0.5 + random scenario from `QUIZ_SCENARIOS` (7 strings; code picks, not model) → callAI({system:QUIZ_ITEM_SYSTEM, prompt:`Write a ${scam|legitimate} ${scenario}.`}) in local try/catch (console.warn + throw "Couldn't load the quiz. Please try again.") → parseJsonReply → require non-blank `text` + `explanation` strings (else UNEXPECTED_REPLY_MESSAGE) → {id:String(nextQuizItemId++) module counter, content:{type:"text",text}, isScam, explanation}. Text items only.
 
 ## services/ai.ts (global AI entry point)
 - `AIImage{uri}` · `AIRequest{system, prompt, images?:AIImage[]}` (system = fixed instructions, prompt = user content).

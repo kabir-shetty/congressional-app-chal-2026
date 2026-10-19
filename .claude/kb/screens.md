@@ -15,7 +15,8 @@ State local to component: text, images, checkState (status|result|error).
 ## quiz.tsx `Quiz`
 State local to component. View (not scroll). `useEffect: createQuiz() on mount; cleanup ++latestRun` → quiz built in memory, hidden.
 - preparing: "Getting your quiz ready...". prepared: "Start Quiz"(start). error: msg + "Try Again"(createQuiz). finished: "You got {score} of {totalQuestions} right." + "Play Again"(createQuiz).
-- `current` set (asking|answered): "Question N of T", "{score} right so far", content (text in surface box | expo-image with item width/height). asking: row "AI"(answer(true)) / "Not AI" secondary(answer(false)). answered: left-spine success/danger, "Correct."/"Not quite.", "This was AI-generated/not AI-generated.", btn isLastQuestion?"See My Score":"Next Question"(next).
+- intro: "Spot the Scam" / "Read each message and decide if it's a scam."
+- `current` set (asking|answered): "Question N of T", "{score} right so far", content (text in surface box | expo-image with item width/height). asking: row "Scam"(answer(true)) / "Not a Scam" secondary(answer(false)). answered: left-spine success/danger, "Correct."/"Not quite.", "This was a scam/not a scam.", then BodyText explanation, btn isLastQuestion?"See My Score":"Next Question"(next).
 - style sectionHeading (fontSize.title) shared by question header + final score.
 
 ## ai-scams.tsx `AiScamsInfo`

@@ -1,8 +1,9 @@
 # issues (remove entries when fixed)
 ## TODO / unimplemented
 - `callAI` stub (services/ai.ts) throws → both features always error. See [[data]].
-- Quiz "Not AI" items are model-written (human-style prompt) → answer untrue; need real human-written source (TODO in generateQuizItem).
-- Quiz: 5 identical-prompt callAI calls, no context → likely near-duplicate items.
+- Quiz image items: generateQuizItem text-only; plan (teammate) = images from hand-made set (TODO in generateQuizItem).
+- Quiz: 5 independent callAI calls (random scenario, no shared context) → repeats still possible.
+- Merge of origin/main (e2bd199) in progress: src/hooks/use-quiz.ts, use-scam-check.ts conflicted (deleted locally, edited remotely w/ fake test responses).
 - Tabs have no icons (tabIcons pngs exist, unused).
 - Quiz image items not prefetched in createQuiz (only URIs held) → add expo-image `Image.prefetch` once generateQuizItem returns images.
 - Quiz question fetching: sequential loop vs Promise.all vs one batch call (see createQuiz TODO). generateQuizItem now wired; decision still open.

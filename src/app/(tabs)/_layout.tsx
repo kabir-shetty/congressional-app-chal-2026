@@ -19,7 +19,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="index" options={{ title: "Home" }} />
       <Tabs.Screen name="check" options={{ title: "Scam Checker" }} />
-      <Tabs.Screen name="quiz" options={{ title: "AI or Not" }} />
+      <Tabs.Screen name="quiz" options={{ title: "Spot the Scam" }} />
       <Tabs.Screen name="ai-scams" options={{ title: "AI Scams" }} />
     </Tabs>
   );

@@ -44,27 +44,37 @@ const initialState: QuizState = {
   lastAnswerCorrect: null,
 };
 
-const QUIZ_ITEM_SYSTEM = `You write items for an "AI or Not" quiz that teaches older adults to spot AI-written messages.
-Write one short message (1-3 sentences) such as a text, email, or social post, in the style the user asks for.
+const QUIZ_ITEM_SYSTEM = `You write practice items for a "Spot the Scam" quiz that teaches older adults to recognize scams, including AI-powered ones (cloned voices, deepfakes, AI-written phishing).
+Write one realistic short message (1-3 sentences). The user says what kind of message it is and whether it must be a scam or legitimate. Make legitimate messages realistic too, not obviously safe.
+Then explain in one or two short, plain sentences, with no jargon, which signs show it is or isn't a scam. The reader already knows the answer, so don't restate it; only describe the signs.
 Reply with only JSON, no other text:
-{"text": string}`;
+{"text": string, "explanation": string}`;
+
+// Picked in code so the 5 calls don't all return the same kind of message.
+const QUIZ_SCENARIOS = [
+  "text message from a bank",
+  "voicemail transcript from a grandchild",
+  "email about a package delivery",
+  "phone call transcript from a government agency",
+  "social media message from a friend",
+  "email about a computer or account problem",
+  "text message about a prize or refund",
+];
 
 let nextQuizItemId = 0;
 
-// Text items only for now — image items need an image source, not callAI.
+// Text items only for now. TODO: image items from a hand-made set.
 async function generateQuizItem(): Promise<QuizItem> {
   // Decided here, not by the model: models can't pick 50/50 reliably.
-  const isAiGenerated = Math.random() < 0.5;
+  const isScam = Math.random() < 0.5;
+  const scenario =
+    QUIZ_SCENARIOS[Math.floor(Math.random() * QUIZ_SCENARIOS.length)];
 
-  // TODO: human items must come from a real human-written source; a
-  // model imitating a person makes the "Not AI" answer untrue.
   let reply: string;
   try {
     reply = await callAI({
       system: QUIZ_ITEM_SYSTEM,
-      prompt: isAiGenerated
-        ? "Style: the polished, generic tone typical of AI."
-        : "Style: the natural, imperfect tone of a real person.",
+      prompt: `Write a ${isScam ? "scam" : "legitimate"} ${scenario}.`,
     });
   } catch (caught) {
     // Network/model failures carry technical messages; show a plain one.
@@ -72,19 +82,26 @@ async function generateQuizItem(): Promise<QuizItem> {
     throw new Error("Couldn't load the quiz. Please try again.");
   }
 
-  const { text } = parseJsonReply(reply);
-  if (typeof text !== "string") {
+  const { text, explanation } = parseJsonReply(reply);
+  // Blank strings would render an empty question or explanation.
+  if (
+    typeof text !== "string" ||
+    !text.trim() ||
+    typeof explanation !== "string" ||
+    !explanation.trim()
+  ) {
     throw new Error(UNEXPECTED_REPLY_MESSAGE);
   }
   return {
     id: String(nextQuizItemId++),
     content: { type: "text", text },
-    isAiGenerated,
+    isScam,
+    explanation,
   };
 }
 
 // Route: /quiz — true/false game where the player guesses whether each
-// piece of content was AI-generated.
+// piece of content is a scam.
 export default function Quiz() {
   const [state, setState] = useState<QuizState>(initialState);
   const latestRun = useRef(0);
@@ -127,7 +144,7 @@ export default function Quiz() {
     );
   }, []);
 
-  const answer = useCallback((guessIsAi: boolean) => {
+  const answer = useCallback((guessIsScam: boolean) => {
     setState((prev) => {
       // Guard against a stray tap landing while there's no active question
       // (e.g. a delayed press after "Next" was already pressed).
@@ -135,7 +152,7 @@ export default function Quiz() {
         return prev;
       }
 
-      const correct = guessIsAi === prev.items[prev.index].isAiGenerated;
+      const correct = guessIsScam === prev.items[prev.index].isScam;
       return {
         ...prev,
         status: "answered",
@@ -180,9 +197,9 @@ export default function Quiz() {
   return (
     <View style={styles.container}>
       <View style={styles.intro}>
-        <HeadingText style={styles.title}>AI or Not</HeadingText>
+        <HeadingText style={styles.title}>Spot the Scam</HeadingText>
         <BodyText style={styles.subtitle}>
-          Guess whether each one was made by a person or by AI.
+          Read each message and decide if it's a scam.
         </BodyText>
       </View>
 
@@ -241,9 +258,9 @@ export default function Quiz() {
 
           {status === "asking" && (
             <View style={styles.answerRow}>
-              <AppButton title="AI" onPress={() => answer(true)} />
+              <AppButton title="Scam" onPress={() => answer(true)} />
               <AppButton
-                title="Not AI"
+                title="Not a Scam"
                 variant="secondary"
                 onPress={() => answer(false)}
               />
@@ -263,9 +280,9 @@ export default function Quiz() {
                 {lastAnswerCorrect ? "Correct." : "Not quite."}
               </BodyText>
               <BodyText>
-                This was{" "}
-                {current.isAiGenerated ? "AI-generated" : "not AI-generated"}.
+                This was {current.isScam ? "a scam" : "not a scam"}.
               </BodyText>
+              <BodyText>{current.explanation}</BodyText>
               <View style={styles.startAction}>
                 <AppButton
                   title={isLastQuestion ? "See My Score" : "Next Question"}

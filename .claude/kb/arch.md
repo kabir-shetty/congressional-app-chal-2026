@@ -2,7 +2,7 @@
 ## Nav (expo-router, typedRoutes on → Href checked at build)
 - app/_layout.tsx: `<Stack>` w/ Screen "index"(headerShown:false — no such route at root, see [[issues]]) + "(tabs)"(headerShown:false; tabs render own header).
   - `SplashScreen.preventAutoHideAsync()` at module scope; `useFonts({Arvo_700Bold, PublicSans_400Regular, PublicSans_600SemiBold})`; hideAsync when loaded||error; returns null until then.
-- app/(tabs)/_layout.tsx: `<Tabs>` screens in order index"Home", check"Scam Checker", quiz"AI or Not", ai-scams"AI Scams". No tabBarIcon set (labels only). screenOptions: active tint primary, inactive secondary, tabBar bg background/borderTop border 1/h72/pt8, label bodyMedium caption, header bg background, title display font fontSize.header text color, headerShadowVisible false.
+- app/(tabs)/_layout.tsx: `<Tabs>` screens in order index"Home", check"Scam Checker", quiz"Spot the Scam", ai-scams"AI Scams". No tabBarIcon set (labels only). screenOptions: active tint primary, inactive secondary, tabBar bg background/borderTop border 1/h72/pt8, label bodyMedium caption, header bg background, title display font fontSize.header text color, headerShadowVisible false.
 - Routes: `/`, `/check`, `/quiz`, `/ai-scams`.
 
 ## State pattern

@@ -26,8 +26,8 @@ const notices: Notice[] = [
   },
   {
     href: "/quiz",
-    title: "AI or Not",
-    body: "Practice telling real from fake, with honest feedback after every guess.",
+    title: "Spot the Scam",
+    body: "Practice telling scams from real messages, with a plain explanation after every guess.",
   },
 ];
 
