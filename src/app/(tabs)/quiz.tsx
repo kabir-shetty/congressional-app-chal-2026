@@ -6,6 +6,11 @@ import { AppButton } from "@/components/app-button";
 import { BodyText } from "@/components/body-text";
 import { HeadingText } from "@/components/heading-text";
 import { colors, fontSize, radius, spacing } from "@/constants/theme";
+import {
+  callAI,
+  parseJsonReply,
+  UNEXPECTED_REPLY_MESSAGE,
+} from "@/services/ai";
 import type { QuizItem } from "@/types/quiz";
 
 const QUIZ_LENGTH = 5;
@@ -39,9 +44,43 @@ const initialState: QuizState = {
   lastAnswerCorrect: null,
 };
 
-// Generate a single quiz item. Stub is not implemented yet.
+const QUIZ_ITEM_SYSTEM = `You write items for an "AI or Not" quiz that teaches older adults to spot AI-written messages.
+Write one short message (1-3 sentences) such as a text, email, or social post, in the style the user asks for.
+Reply with only JSON, no other text:
+{"text": string}`;
+
+let nextQuizItemId = 0;
+
+// Text items only for now — image items need an image source, not callAI.
 async function generateQuizItem(): Promise<QuizItem> {
-  throw new Error("generateQuizItem is not implemented yet.");
+  // Decided here, not by the model: models can't pick 50/50 reliably.
+  const isAiGenerated = Math.random() < 0.5;
+
+  // TODO: human items must come from a real human-written source; a
+  // model imitating a person makes the "Not AI" answer untrue.
+  let reply: string;
+  try {
+    reply = await callAI({
+      system: QUIZ_ITEM_SYSTEM,
+      prompt: isAiGenerated
+        ? "Style: the polished, generic tone typical of AI."
+        : "Style: the natural, imperfect tone of a real person.",
+    });
+  } catch (caught) {
+    // Network/model failures carry technical messages; show a plain one.
+    console.warn("generateQuizItem: callAI failed", caught);
+    throw new Error("Couldn't load the quiz. Please try again.");
+  }
+
+  const { text } = parseJsonReply(reply);
+  if (typeof text !== "string") {
+    throw new Error(UNEXPECTED_REPLY_MESSAGE);
+  }
+  return {
+    id: String(nextQuizItemId++),
+    content: { type: "text", text },
+    isAiGenerated,
+  };
 }
 
 // Route: /quiz — true/false game where the player guesses whether each

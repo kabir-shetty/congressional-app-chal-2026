@@ -2,6 +2,11 @@ import { AppButton } from "@/components/app-button";
 import { BodyText } from "@/components/body-text";
 import { HeadingText } from "@/components/heading-text";
 import { colors, fontSize, radius, spacing } from "@/constants/theme";
+import {
+  callAI,
+  parseJsonReply,
+  UNEXPECTED_REPLY_MESSAGE,
+} from "@/services/ai";
 import type {
   ScamCheckImage,
   ScamCheckInput,
@@ -39,12 +44,47 @@ const verdictCopy: Record<ScamVerdict, { label: string; color: string }> = {
   uncertain: { label: "Hard to say for sure", color: colors.border },
 };
 
-// Placeholder until the model call is wired up; always throws so the error
-// path is exercised.
+const SCAM_CHECK_SYSTEM = `You help older adults spot scams. The user will share a message they received and/or screenshots of it. Judge whether it is likely a scam.
+Reply with only JSON, no other text:
+{"verdict": "likely_scam" | "likely_safe" | "uncertain", "confidence": number from 0 to 1, "explanation": string}
+Write the explanation in two or three short, plain sentences with no jargon.`;
+
 async function checkForScam(
-  _input: ScamCheckInput
+  input: ScamCheckInput
 ): Promise<ScamCheckResult> {
-  throw new Error("checkForScam is not implemented yet.");
+  let reply: string;
+  try {
+    reply = await callAI({
+      system: SCAM_CHECK_SYSTEM,
+      prompt: input.text.trim() || "(No text — see the attached screenshots.)",
+      images: input.images,
+    });
+  } catch (caught) {
+    // Network/model failures carry technical messages; show a plain one.
+    console.warn("checkForScam: callAI failed", caught);
+    throw new Error("Couldn't reach the checker. Please try again.");
+  }
+  return toScamCheckResult(parseJsonReply(reply));
+}
+
+// The reply drives verdictCopy lookups and the confidence %, so reject
+// anything that doesn't match ScamCheckResult rather than render garbage.
+function toScamCheckResult({
+  verdict,
+  confidence,
+  explanation,
+}: Record<string, unknown>): ScamCheckResult {
+  if (
+    typeof verdict !== "string" ||
+    !Object.hasOwn(verdictCopy, verdict) ||
+    typeof confidence !== "number" ||
+    confidence < 0 ||
+    confidence > 1 ||
+    typeof explanation !== "string"
+  ) {
+    throw new Error(UNEXPECTED_REPLY_MESSAGE);
+  }
+  return { verdict: verdict as ScamVerdict, confidence, explanation };
 }
 
 // Route: /check — linked from the landing page's "Scam Checker" menu item.

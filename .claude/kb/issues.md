@@ -1,9 +1,11 @@
 # issues (remove entries when fixed)
 ## TODO / unimplemented
-- checkForScam, generateQuizItem stubs throw → both features always error. See [[data]].
+- `callAI` stub (services/ai.ts) throws → both features always error. See [[data]].
+- Quiz "Not AI" items are model-written (human-style prompt) → answer untrue; need real human-written source (TODO in generateQuizItem).
+- Quiz: 5 identical-prompt callAI calls, no context → likely near-duplicate items.
 - Tabs have no icons (tabIcons pngs exist, unused).
 - Quiz image items not prefetched in createQuiz (only URIs held) → add expo-image `Image.prefetch` once generateQuizItem returns images.
-- Quiz question fetching: sequential loop vs Promise.all (see quiz.tsx:58 TODO). Deferring decision until generateQuizItem is implemented.
+- Quiz question fetching: sequential loop vs Promise.all vs one batch call (see createQuiz TODO). generateQuizItem now wired; decision still open.
 - ESLint not installed: `npx expo lint` auto-installs eslint + eslint-config-expo into package.json then fails. Don't let it mutate deps unasked; revert package.json/lock if it does.
 ## dead / stale
 - app/_layout.tsx registers Stack.Screen "index" but no src/app/index.tsx (index lives in (tabs)).

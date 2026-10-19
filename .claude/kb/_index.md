@@ -1,8 +1,8 @@
 # KB index (agent-only, terse)
-sync: 13245eb + uncommitted quiz + check hooks→component moves (HEAD when KB last verified vs code; bump on every KB update)
+sync: e9d7b49 + uncommitted services/ai.ts callAI wiring (HEAD when KB last verified vs code; bump on every KB update)
 
 ## App
-"Porch Watch" — Expo SDK57 RN app (pkg name congressional-app-chal-2026, Congressional App Challenge 2026). Audience: seniors. Purpose: AI-scam awareness. 4 tabs: Home, Scam Checker (paste text/screenshots→AI verdict), AI or Not (quiz), AI Scams (static info). AI backend NOT implemented (stubs throw).
+"Porch Watch" — Expo SDK57 RN app (pkg name congressional-app-chal-2026, Congressional App Challenge 2026). Audience: seniors. Purpose: AI-scam awareness. 4 tabs: Home, Scam Checker (paste text/screenshots→AI verdict), AI or Not (quiz), AI Scams (static info). AI backend NOT implemented (global `callAI` stub throws).
 
 ## Notes
 - [[arch]] routing, layouts, fonts/splash, state pattern
@@ -17,8 +17,8 @@ sync: 13245eb + uncommitted quiz + check hooks→component moves (HEAD when KB l
 app/_layout.tsx          Stack root; loads fonts; splash gate
 app/(tabs)/_layout.tsx   Tabs navigator, 4 screens, header styling
 app/(tabs)/index.tsx     Home (hero + 3 notices, no links)
-app/(tabs)/check.tsx     Scam checker (state local; submit + stub checkForScam)
-app/(tabs)/quiz.tsx      AI-or-Not quiz (state local; createQuiz 5 items) + stub generateQuizItem
+app/(tabs)/check.tsx     Scam checker (state local; submit; checkForScam→callAI)
+app/(tabs)/quiz.tsx      AI-or-Not quiz (state local; createQuiz 5 items; generateQuizItem→callAI)
 app/(tabs)/ai-scams.tsx  static info via InfoPage
 components/app-button.tsx       AppButton (primary|secondary|danger)
 components/app-link-button.tsx  AppLinkButton (UNUSED)
@@ -26,7 +26,8 @@ components/body-text.tsx        BodyText
 components/heading-text.tsx     HeadingText
 components/info-page.tsx        InfoPage scroll shell
 constants/theme.ts       colors/spacing/fontSize/fontFamily/radius/minTouchTarget
+services/ai.ts           global callAI (STUB) + parseJsonReply, UNEXPECTED_REPLY_MESSAGE
 types/scam-check.ts      ScamCheckImage/Input/Verdict/Result
 types/quiz.ts            QuizItemContent/QuizItem
 ```
-No tests. No services/ or utils/ dir (hooks+services merged into hooks files, commit f4b8305).
+No tests. No utils/ dir. services/ holds only ai.ts.
