@@ -1,10 +1,11 @@
 import { View } from "react-native";
 
 import { AppText } from "@/components/app-text";
+import { Card } from "@/components/card";
 import { InstructionStrip } from "@/components/instruction-strip";
 import { Screen } from "@/components/screen";
 import { ScreenIntro } from "@/components/screen-intro";
-import { makeStyles, radius, spacing } from "@/constants/theme";
+import { gutter, makeStyles, spacing } from "@/constants/theme";
 
 type Topic = {
   title: string;
@@ -31,7 +32,8 @@ const topics: Topic[] = [
 ];
 
 // Route: /ai-scams — a short read: what's new, then what still gives scams
-// away. Set as one article, not a stack of matching cards.
+// away. One full-width article with edge-to-edge dividers, not a stack of
+// matching cards.
 export default function AiScamsInfo() {
   const styles = useStyles();
   return (
@@ -51,12 +53,14 @@ export default function AiScamsInfo() {
               {topic.title}
             </AppText>
             <AppText>{topic.body}</AppText>
-            <InstructionStrip tone="success">{topic.advice}</InstructionStrip>
+            <InstructionStrip tone="success" bleed>
+              {topic.advice}
+            </InstructionStrip>
           </View>
         ))}
       </View>
 
-      <View style={styles.section}>
+      <Card>
         <AppText variant="title" accessibilityRole="header">
           What still gives it away
         </AppText>
@@ -64,11 +68,11 @@ export default function AiScamsInfo() {
           However real the voice, photo, or writing seems, these are still the
           clearest warning signs:
         </AppText>
-        <InstructionStrip tone="danger" label="Stop if you see">
+        <InstructionStrip tone="danger" label="Stop if you see" bleed>
           Pressure to act right now, a request to keep it secret, or payment
           by gift card, wire transfer, or cryptocurrency.
         </InstructionStrip>
-      </View>
+      </Card>
     </Screen>
   );
 }
@@ -76,13 +80,13 @@ export default function AiScamsInfo() {
 const useStyles = makeStyles((c) => ({
   article: {
     backgroundColor: c.surface,
-    borderWidth: 1,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
     borderColor: c.border,
-    borderRadius: radius.card,
-    paddingHorizontal: spacing.md,
   },
   section: {
     gap: spacing.md,
+    paddingHorizontal: gutter,
     paddingVertical: spacing.lg,
   },
   divided: {

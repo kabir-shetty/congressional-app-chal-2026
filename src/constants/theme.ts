@@ -108,6 +108,10 @@ export const spacing = {
   xl: 32,
 };
 
+// Side margin for content on edge-to-edge screens (sections, Inset, intro);
+// InstructionStrip's `bleed` negates it to reach the screen edges.
+export const gutter = spacing.md;
+
 // System font at senior sizes; sizes are pt, so they scale with the phone's
 // text-size setting. Nothing goes below 16.
 export const typography = {
@@ -127,11 +131,6 @@ export const typography = {
 } satisfies Record<string, TextStyle>;
 
 export type TypographyVariant = keyof typeof typography;
-
-export const radius = {
-  control: 12,
-  card: 16,
-};
 
 // Apple/Android guidance is 44-48pt; sized up further here since small
 // targets are the most common complaint from older users.

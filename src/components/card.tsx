@@ -1,9 +1,10 @@
 import { View, type ViewProps } from "react-native";
 
-import { makeStyles, radius, spacing } from "@/constants/theme";
+import { gutter, makeStyles, spacing } from "@/constants/theme";
 
-// White panel with a hairline border and no shadow — the one container for
-// grouping a heading, its copy, and its actions. Never nest cards.
+// Full-width section: a surface band that touches both screen edges, ruled
+// top and bottom with hairlines, square corners. The one container for
+// grouping a heading, its copy, and its actions. Never nest.
 export function Card({ style, ...props }: ViewProps) {
   const styles = useStyles();
   return <View style={[styles.card, style]} {...props} />;
@@ -12,10 +13,11 @@ export function Card({ style, ...props }: ViewProps) {
 const useStyles = makeStyles((c) => ({
   card: {
     gap: spacing.md,
-    padding: spacing.lg,
+    paddingHorizontal: gutter,
+    paddingVertical: spacing.lg,
     backgroundColor: c.surface,
-    borderWidth: 1,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
     borderColor: c.border,
-    borderRadius: radius.card,
   },
 }));

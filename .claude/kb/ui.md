@@ -1,5 +1,5 @@
 # ui
-Direction "The Pharmacist" (impeccable; contract `.impeccable/surfaces/src-app-tabs-index-tsx.md`, system doc `DESIGN.md`): kind/expert/calm; teal shell, cool white-green ground, white hairline cards (no shadows), system fonts (SF/Roboto, follow OS text size), status hues only in instruction strips/verdicts. Light + dark follow phone. Craft bans: eyebrows/kickers, colored side borders, matching icon-card grids, nested cards.
+Direction "The Pharmacist" (impeccable; contract `.impeccable/surfaces/src-app-tabs-index-tsx.md`, system doc `DESIGN.md`): kind/expert/calm; teal shell, cool white-green ground, full-bleed white sections ruled top/bottom with hairlines (no shadows, NO corner radius anywhere — user request "everything square"; only exception Android tab pill), system fonts (SF/Roboto, follow OS text size), status hues only in instruction strips/verdicts. Light + dark follow phone. Craft bans: eyebrows/kickers, colored side borders, matching icon-card grids, nested cards.
 
 ## constants/theme.ts
 `Palette` keys: background surface surfaceTint text textMuted border(decorative) borderStrong(≥3:1) primary onPrimary header onHeader onHeaderMuted danger dangerTint warning warningTint success successTint onStatus.
@@ -8,16 +8,17 @@ dark: bg #0E1615 surface #17211F tint #1F302D text #E8EEED muted #A9B7B4 border 
 All text pairs ≥4.5:1 both schemes (verified).
 - `ColorScheme` "light"|"dark"; `SchemeContext` (createContext "light"); `useColors()` → Palette via context.
 - `makeStyles(factory(c) => styles)` → hook; both schemes' StyleSheets built at module load, hook picks via context. Pattern: `const useStyles = makeStyles((c) => ({...}))` at file bottom, `const styles = useStyles()` in component.
-- spacing xs4 sm8 md16 lg24 xl32 · `typography` (TextStyle presets, `TypographyVariant`): largeTitle 32/38/800 · title 26/32/700 · headline 22/28/700 · body 20/28/400 · bodyStrong 20/28/600 · callout 18/25 · label 16/20/700 +0.8 uppercase · radius {control 12, card 16} · minTouchTarget 56.
+- spacing xs4 sm8 md16 lg24 xl32 · `gutter` = spacing.md (side margin: Card/Inset/ScreenIntro/article sections px, strip bleed = -gutter, strip inner px) · `typography` (TextStyle presets, `TypographyVariant`): largeTitle 32/38/800 · title 26/32/700 · headline 22/28/700 · body 20/28/400 · bodyStrong 20/28/600 · callout 18/25 · label 16/20/700 +0.8 uppercase · minTouchTarget 56. (No radius token.)
 
 ## components (named exports)
 - `SchemeProvider` (scheme-provider.tsx): provides useColorScheme → SchemeContext; on web holds "light" until mounted (static prerender hydration mismatch), native immediate. Wraps root Stack.
 - `AppText({variant?="body", tone?="text"} & TextProps)` only text component; tones text textMuted primary danger warning success onHeader onHeaderMuted onStatus (precomputed tone styles). Raw Text only inside AppButton.
-- `AppButton({title,onPress,disabled?,variant?="filled"|"tonal",icon?,fullWidth?})` role button+state; minHeight 56, radius control, row gap sm, borderWidth 2 transparent (reserved); hug (flex-start) unless fullWidth; filled bg primary/onPrimary, tonal bg surfaceTint/primary; disabled = transparent bg + borderColor border, textMuted (no opacity); pressed .75. Icon 24.
-- `Card(ViewProps)` gap md p lg surface, border 1 border, radius card. Never nest.
-- `InstructionStrip({tone:"danger"|"warning"|"success", label?="What to do", children:string})` SIGNATURE: solid status band (label variant, onStatus) over tinted body (body text). Export `StatusTone`.
-- `ListGroup({children})` inset grouped list (surface, border, radius card, hairline separators inset md). `ListRow({href,title,detail})` Link asChild Pressable role link; bodyStrong title + callout muted detail + chevron; pressed bg surfaceTint; minHeight 72.
-- `Meter({value 0-1, label})` 8px track surfaceTint, fill primary; role progressbar.
-- `Screen({header?, children})` ScrollView bg background, keyboardShouldPersistTaps handled, web hides scroll indicator; `header` renders full-bleed above inner content View (p md, pb xl, gap lg).
-- `ScreenIntro({title,subtitle})` title variant (role header) + muted body; gap xs.
+- `AppButton({title,onPress,disabled?,variant?="filled"|"tonal",icon?,fullWidth?})` role button+state; square; minHeight 56, row gap sm, borderWidth 2 transparent (reserved); hug (flex-start) unless fullWidth; filled bg primary/onPrimary, tonal bg surfaceTint/primary; disabled = transparent bg + borderColor border, textMuted (no opacity); pressed .75. Icon 24.
+- `Card(ViewProps)` full-width section: gap md, px md, py lg, surface, borderTop/Bottom 1 border (no side borders), square. Never nest.
+- `Inset(ViewProps)` px gutter wrapper for loose content between sections (Screen has no side padding).
+- `InstructionStrip({tone:"danger"|"warning"|"success", label?="What to do", bleed?, children:string})` SIGNATURE: square; solid status band (label variant, onStatus) over tinted body (body text). `bleed` → marginHorizontal -gutter to span full width inside a md-padded section (use whenever inside Card/article section; omit when a direct Screen child). Export `StatusTone`.
+- `ListGroup({children})` full-width grouped list (surface, borderTop/Bottom border, hairline separators inset md). `ListRow({href,title,detail})` Link asChild Pressable role link; bodyStrong title + callout muted detail + chevron; pressed bg surfaceTint; minHeight 72.
+- `Meter({value 0-1, label})` 8px square track surfaceTint, fill primary; role progressbar.
+- `Screen({header?, children})` ScrollView bg background, keyboardShouldPersistTaps handled, web hides scroll indicator; `header` renders full-bleed above inner content View (pt md, pb xl, gap lg, NO side padding).
+- `ScreenIntro({title,subtitle})` Inset w/ title variant (role header) + muted body; gap xs.
 - `Icon({name, color (required), size?=24})` SymbolView map (ios SF / android+web Material), a11y-hidden. Keys: home search quiz sparkles addPhoto check chevron arrow refresh play flag.

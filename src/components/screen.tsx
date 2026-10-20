@@ -4,7 +4,7 @@ import { Platform, ScrollView, View } from "react-native";
 import { makeStyles, spacing } from "@/constants/theme";
 
 type ScreenProps = PropsWithChildren<{
-  // Full-bleed band above the padded content that scrolls with it, so a
+  // Full-bleed band above the content that scrolls with it, so a
   // tall header never squeezes the content at large text sizes.
   header?: ReactNode;
 }>;
@@ -34,8 +34,10 @@ const useStyles = makeStyles((c) => ({
   container: {
     flexGrow: 1,
   },
+  // No side padding: sections (Card, ListGroup) touch both screen edges,
+  // loose content wraps itself in Inset.
   content: {
-    padding: spacing.md,
+    paddingTop: spacing.md,
     paddingBottom: spacing.xl,
     gap: spacing.lg,
   },

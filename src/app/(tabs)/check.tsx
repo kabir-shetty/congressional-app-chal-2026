@@ -13,13 +13,14 @@ import {
 import { AppButton } from "@/components/app-button";
 import { AppText } from "@/components/app-text";
 import { Card } from "@/components/card";
+import { Inset } from "@/components/inset";
 import { InstructionStrip, type StatusTone } from "@/components/instruction-strip";
 import { Screen } from "@/components/screen";
 import { ScreenIntro } from "@/components/screen-intro";
 import {
+  gutter,
   makeStyles,
   minTouchTarget,
-  radius,
   spacing,
   typography,
   useColors,
@@ -235,7 +236,11 @@ export default function ScamChecker() {
         </View>
 
         {images.length > 0 && (
-          <ScrollView horizontal contentContainerStyle={styles.imageList}>
+          <ScrollView
+            horizontal
+            style={styles.imageScroller}
+            contentContainerStyle={styles.imageList}
+          >
             {images.map((image, i) => (
               <View key={image.uri} style={styles.imageItem}>
                 <Image
@@ -264,7 +269,7 @@ export default function ScamChecker() {
         />
       </Card>
 
-      <View style={styles.submit}>
+      <Inset style={styles.submit}>
         <AppButton
           title="Check for Scam"
           icon="search"
@@ -277,13 +282,13 @@ export default function ScamChecker() {
             Paste a message or add a screenshot first.
           </AppText>
         )}
-      </View>
+      </Inset>
 
       {isLoading && (
-        <View style={styles.statusRow}>
+        <Inset style={styles.statusRow}>
           <ActivityIndicator color={colors.primary} />
           <AppText tone="textMuted">Reading your message...</AppText>
-        </View>
+        </Inset>
       )}
 
       {status === "error" && error && (
@@ -303,7 +308,9 @@ export default function ScamChecker() {
             </AppText>
           </View>
           <AppText>{result.explanation}</AppText>
-          <InstructionStrip tone={verdict.tone}>{verdict.advice}</InstructionStrip>
+          <InstructionStrip tone={verdict.tone} bleed>
+            {verdict.advice}
+          </InstructionStrip>
           <AppButton
             title="Check another"
             icon="refresh"
@@ -329,11 +336,15 @@ const useStyles = makeStyles((c) => ({
     backgroundColor: c.background,
     borderWidth: 2,
     borderColor: c.borderStrong,
-    borderRadius: radius.control,
     padding: spacing.md,
+  },
+  // Bleeds past the Card's padding so thumbnails scroll to the screen edge.
+  imageScroller: {
+    marginHorizontal: -gutter,
   },
   imageList: {
     gap: spacing.md,
+    paddingHorizontal: gutter,
   },
   imageItem: {
     width: 140,
@@ -342,7 +353,6 @@ const useStyles = makeStyles((c) => ({
   thumbnail: {
     width: 140,
     height: 140,
-    borderRadius: radius.control,
     borderWidth: 1,
     borderColor: c.border,
   },

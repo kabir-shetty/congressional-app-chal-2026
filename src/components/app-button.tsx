@@ -4,7 +4,6 @@ import { Icon, type IconName } from "@/components/icon";
 import {
   makeStyles,
   minTouchTarget,
-  radius,
   spacing,
   typography,
   useColors,
@@ -67,7 +66,6 @@ export function AppButton({
 const useStyles = makeStyles((c) => ({
   base: {
     minHeight: minTouchTarget,
-    borderRadius: radius.control,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     // Always reserve the border so a button doesn't change width when it

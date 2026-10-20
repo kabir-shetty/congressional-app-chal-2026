@@ -1,13 +1,16 @@
 import { View } from "react-native";
 
 import { AppText } from "@/components/app-text";
-import { makeStyles, radius, spacing } from "@/constants/theme";
+import { gutter, makeStyles, spacing } from "@/constants/theme";
 
 export type StatusTone = "danger" | "warning" | "success";
 
 type InstructionStripProps = {
   tone: StatusTone;
   label?: string;
+  // Inside a Card (or other section padded by `gutter`), stretch past the
+  // section's side padding so the strip spans the full screen width.
+  bleed?: boolean;
   children: string;
 };
 
@@ -18,11 +21,12 @@ type InstructionStripProps = {
 export function InstructionStrip({
   tone,
   label = "What to do",
+  bleed,
   children,
 }: InstructionStripProps) {
   const styles = useStyles();
   return (
-    <View style={[styles.strip, styles[`${tone}Body`]]}>
+    <View style={[styles[`${tone}Body`], bleed && styles.bleed]}>
       <View style={[styles.band, styles[`${tone}Band`]]}>
         <AppText variant="label" tone="onStatus">
           {label}
@@ -34,16 +38,18 @@ export function InstructionStrip({
 }
 
 const useStyles = makeStyles((c) => ({
-  strip: {
-    borderRadius: radius.control,
-    overflow: "hidden",
+  // Negative margin is the full-bleed escape from the parent's padding.
+  bleed: {
+    marginHorizontal: -gutter,
   },
+  // Side padding matches the section's, so bled strip text lines up with
+  // the text above it.
   band: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: gutter,
     paddingVertical: spacing.sm,
   },
   text: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: gutter,
     paddingVertical: spacing.md,
   },
   dangerBand: { backgroundColor: c.danger },

@@ -7,12 +7,12 @@ import { Icon } from "@/components/icon";
 import {
   makeStyles,
   minTouchTarget,
-  radius,
   spacing,
   useColors,
 } from "@/constants/theme";
 
-// Inset grouped list, the native pattern for a short set of destinations.
+// Full-width grouped list, the native pattern for a short set of
+// destinations; ruled like a Card section.
 // Rows are separated by hairlines drawn here so rows stay layout-agnostic.
 export function ListGroup({ children }: PropsWithChildren) {
   const styles = useStyles();
@@ -60,10 +60,9 @@ export function ListRow({ href, title, detail }: ListRowProps) {
 const useStyles = makeStyles((c) => ({
   group: {
     backgroundColor: c.surface,
-    borderWidth: 1,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
     borderColor: c.border,
-    borderRadius: radius.card,
-    overflow: "hidden",
   },
   separator: {
     height: 1,

@@ -77,9 +77,6 @@ typography:
     fontWeight: 700
     lineHeight: "20px"
     letterSpacing: "0.8px"
-rounded:
-  control: "12px"
-  card: "16px"
 spacing:
   xs: "4px"
   sm: "8px"
@@ -91,27 +88,24 @@ components:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
     typography: "{typography.bodyStrong}"
-    rounded: "{rounded.control}"
     padding: "8px 24px"
     height: "56px"
   button-tonal:
     backgroundColor: "{colors.surface-tint}"
     textColor: "{colors.primary}"
     typography: "{typography.bodyStrong}"
-    rounded: "{rounded.control}"
     padding: "8px 24px"
     height: "56px"
   button-disabled:
     backgroundColor: "transparent"
     textColor: "{colors.text-muted}"
     typography: "{typography.bodyStrong}"
-    rounded: "{rounded.control}"
     padding: "8px 24px"
     height: "56px"
   card:
     backgroundColor: "{colors.surface}"
-    rounded: "{rounded.card}"
-    padding: "24px"
+    padding: "24px 16px"
+    width: "100%"
   instruction-strip-band-danger:
     backgroundColor: "{colors.danger}"
     textColor: "{colors.on-status}"
@@ -121,7 +115,6 @@ components:
     backgroundColor: "{colors.danger-tint}"
     textColor: "{colors.text}"
     typography: "{typography.body}"
-    rounded: "{rounded.control}"
     padding: "16px"
   instruction-strip-band-warning:
     backgroundColor: "{colors.warning}"
@@ -139,12 +132,11 @@ components:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
     typography: "{typography.body}"
-    rounded: "{rounded.control}"
     padding: "16px"
     height: "160px"
   list-group:
     backgroundColor: "{colors.surface}"
-    rounded: "{rounded.card}"
+    width: "100%"
   list-row:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.text}"
@@ -171,14 +163,15 @@ components:
 
 **Creative North Star: "The Friendly Neighborhood Pharmacist"**
 
-Kind, expert, calm. The app looks like a well-run pharmacy counter: a deep green-teal shell, a cool white-green ground, and plain white panels with hairline edges. Nothing is decorated; everything is labeled. Every answer ends in a plain instruction, and the instruction is always presented the same way, as a pharmacy-style label with a colored "WHAT TO DO" band over one sentence.
+Kind, expert, calm. The app looks like a well-run pharmacy counter: a deep green-teal shell, a cool white-green ground, and plain white sections that run edge to edge, ruled above and below by hairlines. Every corner is square. Nothing is decorated; everything is labeled. Every answer ends in a plain instruction, and the instruction is always presented the same way, as a pharmacy-style label with a colored "WHAT TO DO" band over one sentence.
 
 Density is low and type is large, because the reader is a senior who may be stressed, may have low vision, and may tap with a tremor. Sizes are in points and scale with the phone's text-size setting; nothing drops below 16. The world follows the phone into light or dark, and both schemes are first-class: every text color clears 4.5:1 on the surfaces it sits on. The visual rejections are confirmed by the direction: not the shield-and-navy security app, and not the cream-and-serif "cozy" app.
 
 The platform is adaptive. Fonts are the platform's own (SF on iOS, Roboto on Android), icons are SF Symbols on iOS and Material Symbols elsewhere, and navigation is the native bottom tab bar with each platform's own selected-state idiom.
 
 **Key Characteristics:**
-- Teal shell, cool white-green ground, white hairline cards, no shadows.
+- Teal shell, cool white-green ground, full-width white sections ruled by hairlines, no shadows.
+- Square everywhere: no corner radius except the Android tab-indicator pill.
 - Senior type scale: body 20, headings 22 to 32 at heavy weights, floor 16.
 - Touch targets at least 56 tall; every control carries a text label.
 - Red, amber, and green speak only inside instruction strips and verdicts.
@@ -200,10 +193,10 @@ A single green-teal voice over cool neutrals, with three status hues held in res
 
 ### Neutral
 - **Cool Ground** (`background`): the screen ground behind everything, also the inset well of the message field and quiz message.
-- **Clean White Panel** (`surface`): cards, grouped lists, the AI Scams article, the tab bar.
+- **Clean White Panel** (`surface`): full-width sections (cards, grouped lists, the AI Scams article), the tab bar.
 - **Mint Wash** (`surface-tint`): tonal-button fill, list-row press, the Android tab indicator pill, the meter track.
 - **Ink** (`text`) and **Slate** (`text-muted`): body and secondary text; muted also marks inactive tabs, placeholders, chevrons, and disabled labels.
-- **Hairline** (`border`): decorative card and list edges, separators, the tab-bar top rule, the disabled-button outline. Decorative only; never the sole boundary of an input.
+- **Hairline** (`border`): the top and bottom rules of sections, separators, the tab-bar top rule, the disabled-button outline. Decorative only; never the sole boundary of an input.
 - **Field Edge** (`border-strong`): the 2px stroke around text inputs; at least 3:1 against its ground.
 
 ### Named Rules
@@ -241,28 +234,42 @@ The tab-bar label is a fixed 16 at weight 600 and does not scale with system tex
 
 ## Layout
 
-A single scrolling column per tab inside `Screen`: the ground fills the view, content is padded 16 on all sides with 32 at the bottom, and blocks stack with a 24 gap. A full-bleed header band (Home's welcome band) may sit above the padded content and scrolls with it, so a tall header never squeezes content at large text sizes.
+A single scrolling column per tab inside `Screen`. The ground fills the view; the content column has no side padding, 16 at the top, 32 at the bottom, and blocks stack with a 24 gap. A full-bleed header band (Home's welcome band) may sit above the content and scrolls with it, so a tall header never squeezes content at large text sizes.
 
-Spacing follows a 4-based scale (`xs` 4, `sm` 8, `md` 16, `lg` 24, `xl` 32). Inside a card, children stack at 16 with 24 padding. A heading and its one-line subtitle sit 4 apart. Answer buttons that a shaky tap could confuse are separated by 24 rather than the usual 8 to 16.
+Sections are full-bleed: a Card, a grouped list, or the AI Scams article touches both screen edges and carries its own 16 side padding inside. Between sections the cool ground shows as a 24 band, so the screen reads as a stack of ruled white sheets rather than floating panels.
 
-Full-width buttons (`fullWidth`) carry the screen's main action and binary answers; hugging buttons sit at the leading edge for secondary in-card actions. The tab bar is 68 plus the bottom safe-area inset.
+Spacing follows a 4-based scale (`xs` 4, `sm` 8, `md` 16, `lg` 24, `xl` 32). Inside a section, children stack at 16 with 24 above and below and 16 at the sides. A heading and its one-line subtitle sit 4 apart. Answer buttons that a shaky tap could confuse are separated by 24 rather than the usual 8 to 16.
+
+Full-width buttons (`fullWidth`) carry the screen's main action and binary answers; hugging buttons sit at the leading edge for secondary in-section actions. The tab bar is 68 plus the bottom safe-area inset.
+
+### Named Rules
+**The Edge-to-Edge Section Rule.** Containers span the full screen width and are ruled by a 1px hairline above and below, never on the sides. Their content keeps the `gutter` side margin (16, `gutter` in theme.ts) from within.
+
+**The Inset Rule.** Anything placed directly in the screen column that is not a section (progress rows, button rows between sections, status lines, notes) is wrapped in `Inset` (`gutter` side padding). `ScreenIntro` renders inside an `Inset`.
+
+**The Strip Bleed Rule.** An instruction strip placed inside a 16-padded section takes `bleed` (a negative `gutter` side margin) so its band and tint run to both screen edges, matching the section's own width; the strip's own side padding is also `gutter`, so its text lines up with the section text above. Horizontal scrollers inside a section (checker thumbnails) bleed the same way.
 
 ## Elevation & Depth
 
-Flat. There are no shadows anywhere, including the app bar (`headerShadowVisible: false`). Depth is tonal: cool ground, white panels separated from it by a 1px hairline, and inset wells (message field, quiz message) that drop back to the ground color inside a white card.
+Flat. There are no shadows anywhere, including the app bar (`headerShadowVisible: false`). Depth is tonal: cool ground, white full-width sections separated from it by 1px hairlines above and below, and inset wells (message field, quiz message) that drop back to the ground color inside a white card.
 
 ### Named Rules
-**The Hairline-Not-Shadow Rule.** A container is distinguished by a 1px `border` and a surface change, never by a shadow or elevation.
+**The Hairline-Not-Shadow Rule.** A container is distinguished by 1px `border` rules and a surface change, never by a shadow or elevation.
 
 ## Shapes
 
-Two radii only: `control` (12) for buttons, inputs, strips, thumbnails, and inset wells; `card` (16) for cards, grouped lists, and the article container. Strips and grouped lists clip their children (`overflow: hidden`) so bands and pressed rows follow the corner. Borders are 1px hairlines on containers, 2px on text inputs and the disabled button outline. No colored side borders.
+Square, everywhere. There is no corner radius and no radius token: sections, buttons, the text input, thumbnails, inset wells, instruction strips, and the meter all have square corners. The modern read comes from full-width rectangles and hairline rules, not from soft edges. Section borders are 1px hairlines on the top and bottom only; the text input takes a 2px stroke on all four sides, thumbnails a 1px hairline, and the disabled button a 2px hairline outline. No colored side borders.
+
+The single exception is the Android-only Material tab indicator, a 64x32 pill (radius 16) behind the active tab icon. It is the platform's own convention and is not a shape to reuse elsewhere.
+
+### Named Rules
+**The Square Corner Rule.** New surfaces and controls take no border radius. The Android tab pill is the only rounded shape and stays inside the tab bar.
 
 ## Components
 
 ### Buttons
 Large, labeled, and unmistakable.
-- **Shape:** gently rounded (12), at least 56 tall, 24 horizontal padding, optional 24 icon leading the label at 8 gap.
+- **Shape:** square corners, at least 56 tall, 24 horizontal padding, optional 24 icon leading the label at 8 gap.
 - **Filled:** primary background, on-primary label in bodyStrong. The one main action on a screen ("Check for Scam", "Start quiz").
 - **Tonal:** mint-wash background, teal label. Everything else, including quiz answers and "Check another".
 - **Pressed:** opacity drops to 0.75.
@@ -270,14 +277,14 @@ Large, labeled, and unmistakable.
 - An icon never appears without its text label.
 
 ### Cards / Containers
-- **Corner Style:** 16.
-- **Background:** surface, with a 1px `border` hairline.
+- **Corner Style:** square; the card is a full-width section touching both screen edges.
+- **Background:** surface, with 1px `border` hairlines on the top and bottom edges only.
 - **Shadow Strategy:** none (see Elevation & Depth).
-- **Internal Padding:** 24, children stacked at 16.
-- Cards group a heading, its copy, and its actions. Cards are never nested. A long-form article (AI Scams) uses the same surface, hairline, and radius with sections divided by 1px top rules.
+- **Internal Padding:** 24 above and below, 16 at the sides; children stacked at 16.
+- Cards group a heading, its copy, and its actions. Cards are never nested. A long-form article (AI Scams) uses the same full-width surface and top/bottom hairlines, its topics each padded 24 by 16 and divided by edge-to-edge 1px top rules; the article's closing section is a Card.
 
 ### Inputs / Fields
-- **Style:** inset to the ground color inside a white card, 2px `border-strong` stroke, radius 12, 16 padding, body type, minimum 160 tall for the message field.
+- **Style:** inset to the ground color inside a white card, 2px `border-strong` stroke, square corners, 16 padding, body type, minimum 160 tall for the message field.
 - **Placeholder / Selection:** placeholder in text-muted; selection and caret in primary.
 - A visible text label ("The message") sits above the field.
 
@@ -286,13 +293,13 @@ Large, labeled, and unmistakable.
 - **Tab bar:** surface background, 1px top hairline, 26 icons with 16/600 labels; active tint primary, inactive text-muted. On Android the active icon sits in a 64x32 mint-wash pill; iOS uses tint alone.
 
 ### Grouped List
-Native inset grouped list for a short set of destinations: surface, 1px hairline, radius 16, clipped. Rows are at least 72 tall (56 + 16) with 16 padding, a bodyStrong title over a callout detail, and a muted trailing chevron. Separators are 1px hairlines inset 16 from the leading edge. Pressed rows fill with mint wash.
+Full-width grouped list for a short set of destinations, ruled like a Card section: surface, square, 1px hairlines on the top and bottom edges only. Rows are at least 72 tall (56 + 16) with 16 padding, a bodyStrong title over a callout detail, and a muted trailing chevron. Separators are 1px hairlines inset 16 from the leading edge. Pressed rows fill with mint wash edge to edge.
 
 ### Meter
-Quiz progress: 8 tall track in mint wash, primary fill, fully rounded. The value is always also written out in nearby text.
+Quiz progress: 8 tall track in mint wash, primary fill, square ends. The value is always also written out in nearby text.
 
 ### Instruction Strip (signature)
-A pharmacy-label panel and the app's one recurring signature. A solid status-colored band carries a short `label` naming the panel ("WHAT TO DO" by default; screens also use labels such as "Stop if you see", "This was a scam", or a connection-error label) in on-status, padded 8 by 16. Below it, the matching tint holds the plain-language content in body type, usually one imperative sentence, padded 16. Radius 12, clipped. Used for verdicts, quiz feedback, red flags, connection errors, and per-topic advice. Tone is `danger`, `warning`, or `success`, chosen by meaning, never by decoration.
+A pharmacy-label panel and the app's one recurring signature. A solid status-colored band carries a short `label` naming the panel ("WHAT TO DO" by default; screens also use labels such as "Stop if you see", "This was a scam", or a connection-error label) in on-status, padded 8 by 16. Below it, the matching tint holds the plain-language content in body type, usually one imperative sentence, padded 16. Square corners. Inside a 16-padded section it takes `bleed` so it spans the full screen width (see the Strip Bleed Rule). Used for verdicts, quiz feedback, red flags, connection errors, and per-topic advice. Tone is `danger`, `warning`, or `success`, chosen by meaning, never by decoration.
 
 ## Do's and Don'ts
 
@@ -301,7 +308,8 @@ A pharmacy-label panel and the app's one recurring signature. A solid status-col
 - **Do** end every answer with an instruction strip holding one plain imperative sentence.
 - **Do** keep controls at least 56 tall (`minTouchTarget`) with a visible text label.
 - **Do** use `AppText` variants for all text; body at 20, nothing below 16.
-- **Do** separate containers with a 1px `border` hairline on `surface`, radius 16.
+- **Do** build containers as full-width `surface` sections ruled by 1px `border` hairlines above and below, with square corners.
+- **Do** wrap loose content between sections in `Inset`, and give a strip inside a padded section `bleed`.
 - **Do** keep one filled button per screen; use tonal for the rest.
 
 ### Don't:
@@ -309,6 +317,8 @@ A pharmacy-label panel and the app's one recurring signature. A solid status-col
 - **Don't** use red, amber, or green outside instruction strips and verdict text.
 - **Don't** put an uppercase label above a heading as an eyebrow or kicker; the `label` style belongs to the strip band.
 - **Don't** add colored side borders to cards or strips.
+- **Don't** round corners on any surface or control; the Android tab pill is the only radius.
+- **Don't** float a section with side margins or side borders; sections touch both screen edges.
 - **Don't** ship an icon-only control.
 - **Don't** nest cards.
 - **Don't** use `border` (the decorative hairline) as the only edge of an input; inputs take `border-strong` at 2px.

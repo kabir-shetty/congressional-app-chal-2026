@@ -5,11 +5,12 @@ import { AccessibilityInfo, ActivityIndicator, View } from "react-native";
 import { AppButton } from "@/components/app-button";
 import { AppText } from "@/components/app-text";
 import { Card } from "@/components/card";
+import { Inset } from "@/components/inset";
 import { InstructionStrip } from "@/components/instruction-strip";
 import { Meter } from "@/components/meter";
 import { Screen } from "@/components/screen";
 import { ScreenIntro } from "@/components/screen-intro";
-import { makeStyles, radius, spacing, useColors } from "@/constants/theme";
+import { makeStyles, spacing, useColors } from "@/constants/theme";
 import {
   callAI,
   parseJsonReply,
@@ -243,7 +244,7 @@ export default function Quiz() {
 
       {status === "error" && error && (
         <Card>
-          <InstructionStrip tone="warning" label="That didn't work">
+          <InstructionStrip tone="warning" label="That didn't work" bleed>
             {error}
           </InstructionStrip>
           <AppButton
@@ -276,7 +277,7 @@ export default function Quiz() {
 
       {current && (
         <>
-          <View style={styles.progress}>
+          <Inset style={styles.progress}>
             <View style={styles.progressText}>
               <AppText variant="bodyStrong">
                 Question {questionNumber} of {totalQuestions}
@@ -289,7 +290,7 @@ export default function Quiz() {
               value={questionNumber / totalQuestions}
               label="Quiz progress"
             />
-          </View>
+          </Inset>
 
           {/* Every item sits in the same fixed frame so messages compare
               fairly; content is either plain text or an image to inspect. */}
@@ -304,7 +305,6 @@ export default function Quiz() {
                   style={{
                     width: "100%",
                     aspectRatio: current.content.width / current.content.height,
-                    borderRadius: radius.control,
                   }}
                 />
               )}
@@ -312,7 +312,7 @@ export default function Quiz() {
           </Card>
 
           {status === "asking" && (
-            <View style={styles.answers}>
+            <Inset style={styles.answers}>
               <AppButton
                 title="It's a scam"
                 icon="flag"
@@ -327,7 +327,7 @@ export default function Quiz() {
                 onPress={() => answer(false)}
                 fullWidth
               />
-            </View>
+            </Inset>
           )}
 
           {status === "answered" && (
@@ -340,6 +340,7 @@ export default function Quiz() {
                 {lastAnswerCorrect ? "Correct." : "Not quite."}
               </AppText>
               <InstructionStrip
+                bleed
                 tone={current.isScam ? "danger" : "success"}
                 label={current.isScam ? "This was a scam" : "This was not a scam"}
               >
@@ -376,7 +377,6 @@ const useStyles = makeStyles((c) => ({
   message: {
     minHeight: 120,
     padding: spacing.md,
-    borderRadius: radius.control,
     backgroundColor: c.background,
   },
   // Separated more than usual so a shaky tap can't land on the other answer.

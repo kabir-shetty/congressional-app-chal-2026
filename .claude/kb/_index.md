@@ -24,7 +24,8 @@ app/(tabs)/quiz.tsx      Spot-the-Scam quiz (state local; createQuiz 5 items; ge
 app/(tabs)/ai-scams.tsx  static article w/ instruction strips
 components/app-button.tsx       AppButton (filled|tonal, icon?, fullWidth?)
 components/app-text.tsx         AppText (variant, tone) — only text component
-components/card.tsx             Card (hairline panel)
+components/card.tsx             Card (full-bleed section, top/bottom hairlines)
+components/inset.tsx            Inset (side padding for loose content)
 components/icon.tsx             Icon (expo-symbols map)
 components/instruction-strip.tsx InstructionStrip (signature "What to do" label)
 components/list-group.tsx       ListGroup/ListRow (grouped links)
@@ -32,7 +33,7 @@ components/meter.tsx            Meter progress bar
 components/scheme-provider.tsx  SchemeProvider (light/dark, web hydration-safe)
 components/screen.tsx           Screen scroll shell (header? slot)
 components/screen-intro.tsx     ScreenIntro title+subtitle
-constants/theme.ts       Palette light/dark, SchemeContext, useColors, makeStyles, spacing, typography, radius, minTouchTarget
+constants/theme.ts       Palette light/dark, SchemeContext, useColors, makeStyles, spacing, typography, minTouchTarget (no radius: all square)
 services/ai.ts           global callAI (STUB) + parseJsonReply, UNEXPECTED_REPLY_MESSAGE
 types/scam-check.ts      ScamCheckImage/Input/Verdict/Result
 types/quiz.ts            QuizItemContent/QuizItem

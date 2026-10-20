@@ -54,15 +54,15 @@ export default function Index() {
           />
         </Card>
 
-        <View style={styles.rule}>
+        <Card>
           <AppText variant="headline" accessibilityRole="header">
             Before you reply to anyone
           </AppText>
-          <InstructionStrip tone="warning">
+          <InstructionStrip tone="warning" bleed>
             Never pay with gift cards, wire transfers, or cryptocurrency.
             Real banks, agencies, and family won't ask you to.
           </InstructionStrip>
-        </View>
+        </Card>
 
         <ListGroup>
           <ListRow
@@ -94,8 +94,5 @@ const useStyles = makeStyles((c) => ({
     paddingTop: spacing.sm,
     paddingBottom: spacing.md,
     backgroundColor: c.header,
-  },
-  rule: {
-    gap: spacing.sm,
   },
 }));

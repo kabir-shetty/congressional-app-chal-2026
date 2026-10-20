@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-20T04:46:01+00:00",
+  "generatedAt": "2026-10-20T04:59:42+00:00",
   "title": "Design System: Porch Watch",
   "extensions": {
     "colorMeta": {
@@ -721,7 +721,7 @@
       "refersTo": "button-filled",
       "description": "The one main action on a screen; full width for primary actions.",
       "html": "<button class=\"ds-btn-filled\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" aria-hidden=\"true\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"M15.5 15.5L21 21\"/></svg>Check for Scam</button>",
-      "css": ".ds-btn-filled{font-family:-apple-system,Roboto,system-ui,sans-serif;min-height:56px;padding:8px 24px;border-radius:12px;display:inline-flex;gap:8px;align-items:center;justify-content:center;font-size:20px;line-height:28px;font-weight:600;border:none;cursor:pointer;transition:opacity .1s;background:#0B6E64;color:#FFFFFF;width:100%;} .ds-btn-filled:active{opacity:.75;} .ds-btn-filled:focus-visible{outline:3px solid #0B6E64;outline-offset:3px;}"
+      "css": ".ds-btn-filled{font-family:-apple-system,Roboto,system-ui,sans-serif;min-height:56px;padding:8px 24px;display:inline-flex;gap:8px;align-items:center;justify-content:center;font-size:20px;line-height:28px;font-weight:600;border:none;cursor:pointer;transition:opacity .1s;background:#0B6E64;color:#FFFFFF;width:100%;} .ds-btn-filled:active{opacity:.75;} .ds-btn-filled:focus-visible{outline:3px solid #0B6E64;outline-offset:3px;}"
     },
     {
       "name": "Tonal Button",
@@ -729,7 +729,7 @@
       "refersTo": "button-tonal",
       "description": "Every non-primary action: quiz answers, Add a screenshot, Check another.",
       "html": "<button class=\"ds-btn-tonal\">Check another</button>",
-      "css": ".ds-btn-tonal{font-family:-apple-system,Roboto,system-ui,sans-serif;min-height:56px;padding:8px 24px;border-radius:12px;display:inline-flex;gap:8px;align-items:center;justify-content:center;font-size:20px;line-height:28px;font-weight:600;border:none;cursor:pointer;transition:opacity .1s;background:#E3F0ED;color:#0B6E64;} .ds-btn-tonal:active{opacity:.75;} .ds-btn-tonal:focus-visible{outline:3px solid #0B6E64;outline-offset:3px;}"
+      "css": ".ds-btn-tonal{font-family:-apple-system,Roboto,system-ui,sans-serif;min-height:56px;padding:8px 24px;display:inline-flex;gap:8px;align-items:center;justify-content:center;font-size:20px;line-height:28px;font-weight:600;border:none;cursor:pointer;transition:opacity .1s;background:#E3F0ED;color:#0B6E64;} .ds-btn-tonal:active{opacity:.75;} .ds-btn-tonal:focus-visible{outline:3px solid #0B6E64;outline-offset:3px;}"
     },
     {
       "name": "Disabled Button",
@@ -737,23 +737,23 @@
       "refersTo": "button-disabled",
       "description": "Outlined and muted so it never reads as available or as a secondary action.",
       "html": "<button class=\"ds-btn-disabled\" disabled>Check for Scam</button>",
-      "css": ".ds-btn-disabled{font-family:-apple-system,Roboto,system-ui,sans-serif;min-height:56px;padding:8px 24px;border-radius:12px;display:inline-flex;gap:8px;align-items:center;justify-content:center;font-size:20px;line-height:28px;font-weight:600;border:none;cursor:pointer;transition:opacity .1s;background:transparent;color:#4F5B66;border:2px solid #D7E4E1;cursor:default;}"
+      "css": ".ds-btn-disabled{font-family:-apple-system,Roboto,system-ui,sans-serif;min-height:56px;padding:8px 24px;display:inline-flex;gap:8px;align-items:center;justify-content:center;font-size:20px;line-height:28px;font-weight:600;border:none;cursor:pointer;transition:opacity .1s;background:transparent;color:#4F5B66;border:2px solid #D7E4E1;cursor:default;}"
     },
     {
       "name": "Card",
       "kind": "card",
       "refersTo": "card",
-      "description": "White hairline panel grouping a heading, its copy, and its actions; never nested, never shadowed.",
+      "description": "Full-width white section ruled top and bottom by hairlines, square corners; groups a heading, its copy, and its actions; never nested, never shadowed.",
       "html": "<div class=\"ds-card\"><h2 class=\"ds-card-title\">Check a message</h2><p class=\"ds-card-body\">Paste it or add a screenshot. We'll explain it plainly.</p></div>",
-      "css": ".ds-card{font-family:-apple-system,Roboto,system-ui,sans-serif;background:#FFFFFF;border:1px solid #D7E4E1;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;} .ds-card-title{margin:0;font-size:26px;line-height:32px;font-weight:700;color:#1F2328;} .ds-card-body{margin:0;font-size:20px;line-height:28px;color:#4F5B66;}"
+      "css": ".ds-card{font-family:-apple-system,Roboto,system-ui,sans-serif;background:#FFFFFF;border-top:1px solid #D7E4E1;border-bottom:1px solid #D7E4E1;padding:24px 16px;display:flex;flex-direction:column;gap:16px;} .ds-card-title{margin:0;font-size:26px;line-height:32px;font-weight:700;color:#1F2328;} .ds-card-body{margin:0;font-size:20px;line-height:28px;color:#4F5B66;}"
     },
     {
       "name": "Instruction Strip",
       "kind": "custom",
       "refersTo": "instruction-strip-band-danger",
-      "description": "Signature pharmacy-label panel: status band naming the panel over a tinted body with one plain sentence.",
+      "description": "Signature pharmacy-label panel: status band naming the panel over a tinted body with one plain sentence; square, and full-bleed via `bleed` inside a padded section.",
       "html": "<div class=\"ds-strip ds-strip-danger\"><div class=\"ds-strip-band\">What to do</div><p class=\"ds-strip-text\">Don't reply, click links, or send money.</p></div><div class=\"ds-strip ds-strip-warning\"><div class=\"ds-strip-band\">What to do</div><p class=\"ds-strip-text\">Never pay with gift cards, wire transfers, or crypto.</p></div><div class=\"ds-strip ds-strip-success\"><div class=\"ds-strip-band\">What to do</div><p class=\"ds-strip-text\">Call the person back on a number you already know.</p></div>",
-      "css": ".ds-strip{font-family:-apple-system,Roboto,system-ui,sans-serif;border-radius:12px;overflow:hidden;margin-bottom:16px;} .ds-strip-band{padding:8px 16px;font-size:16px;line-height:20px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#FFFFFF;} .ds-strip-text{margin:0;padding:16px;font-size:20px;line-height:28px;color:#1F2328;} .ds-strip-danger{background:#FDECEA;} .ds-strip-danger .ds-strip-band{background:#B42318;} .ds-strip-warning{background:#FFF3D6;} .ds-strip-warning .ds-strip-band{background:#8A5300;} .ds-strip-success{background:#E5F3E9;} .ds-strip-success .ds-strip-band{background:#1E6B3A;}"
+      "css": ".ds-strip{font-family:-apple-system,Roboto,system-ui,sans-serif;margin-bottom:16px;} .ds-strip-band{padding:8px 16px;font-size:16px;line-height:20px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#FFFFFF;} .ds-strip-text{margin:0;padding:16px;font-size:20px;line-height:28px;color:#1F2328;} .ds-strip-danger{background:#FDECEA;} .ds-strip-danger .ds-strip-band{background:#B42318;} .ds-strip-warning{background:#FFF3D6;} .ds-strip-warning .ds-strip-band{background:#8A5300;} .ds-strip-success{background:#E5F3E9;} .ds-strip-success .ds-strip-band{background:#1E6B3A;}"
     },
     {
       "name": "Message Field",
@@ -761,15 +761,15 @@
       "refersTo": "input-message",
       "description": "Labeled multiline field inset to the ground color with a 2px field-edge stroke.",
       "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">The message</span><textarea class=\"ds-input\" placeholder=\"e.g. a text, email, or DM you received\"></textarea></label>",
-      "css": ".ds-field{font-family:-apple-system,Roboto,system-ui,sans-serif;display:flex;flex-direction:column;gap:8px;} .ds-field-label{font-size:20px;line-height:28px;font-weight:600;color:#1F2328;} .ds-input{font-family:-apple-system,Roboto,system-ui,sans-serif;min-height:160px;padding:16px;font-size:20px;line-height:28px;color:#1F2328;background:#F4F8F7;border:2px solid #7C8C89;border-radius:12px;caret-color:#0B6E64;resize:vertical;} .ds-input::placeholder{color:#4F5B66;} .ds-input:focus-visible{outline:3px solid #0B6E64;outline-offset:2px;}"
+      "css": ".ds-field{font-family:-apple-system,Roboto,system-ui,sans-serif;display:flex;flex-direction:column;gap:8px;} .ds-field-label{font-size:20px;line-height:28px;font-weight:600;color:#1F2328;} .ds-input{font-family:-apple-system,Roboto,system-ui,sans-serif;min-height:160px;padding:16px;font-size:20px;line-height:28px;color:#1F2328;background:#F4F8F7;border:2px solid #7C8C89;caret-color:#0B6E64;resize:vertical;} .ds-input::placeholder{color:#4F5B66;} .ds-input:focus-visible{outline:3px solid #0B6E64;outline-offset:2px;}"
     },
     {
       "name": "Grouped List",
       "kind": "nav",
       "refersTo": "list-row",
-      "description": "Native inset grouped list of destinations with inset hairline separators and chevrons.",
+      "description": "Full-width grouped list of destinations ruled like a Card section, with inset hairline separators and chevrons.",
       "html": "<div class=\"ds-list\"><a class=\"ds-row\" href=\"#\"><span class=\"ds-row-text\"><span class=\"ds-row-title\">Spot the Scam</span><span class=\"ds-row-detail\">Practice with five messages.</span></span><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#4F5B66\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 5l7 7-7 7\"/></svg></a><div class=\"ds-sep\"></div><a class=\"ds-row\" href=\"#\"><span class=\"ds-row-text\"><span class=\"ds-row-title\">AI Scams</span><span class=\"ds-row-detail\">How AI changed the tricks.</span></span><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#4F5B66\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 5l7 7-7 7\"/></svg></a></div>",
-      "css": ".ds-list{font-family:-apple-system,Roboto,system-ui,sans-serif;background:#FFFFFF;border:1px solid #D7E4E1;border-radius:16px;overflow:hidden;} .ds-row{display:flex;align-items:center;gap:16px;min-height:72px;padding:16px;text-decoration:none;box-sizing:border-box;} .ds-row:hover,.ds-row:active{background:#E3F0ED;} .ds-row:focus-visible{outline:3px solid #0B6E64;outline-offset:-3px;} .ds-row-text{flex:1;display:flex;flex-direction:column;gap:2px;} .ds-row-title{font-size:20px;line-height:28px;font-weight:600;color:#1F2328;} .ds-row-detail{font-size:18px;line-height:25px;color:#4F5B66;} .ds-sep{height:1px;margin-left:16px;background:#D7E4E1;}"
+      "css": ".ds-list{font-family:-apple-system,Roboto,system-ui,sans-serif;background:#FFFFFF;border-top:1px solid #D7E4E1;border-bottom:1px solid #D7E4E1;} .ds-row{display:flex;align-items:center;gap:16px;min-height:72px;padding:16px;text-decoration:none;box-sizing:border-box;} .ds-row:hover,.ds-row:active{background:#E3F0ED;} .ds-row:focus-visible{outline:3px solid #0B6E64;outline-offset:-3px;} .ds-row-text{flex:1;display:flex;flex-direction:column;gap:2px;} .ds-row-title{font-size:20px;line-height:28px;font-weight:600;color:#1F2328;} .ds-row-detail{font-size:18px;line-height:25px;color:#4F5B66;} .ds-sep{height:1px;margin-left:16px;background:#D7E4E1;}"
     },
     {
       "name": "App Bar and Tab Bar",
@@ -783,16 +783,17 @@
       "name": "Meter",
       "kind": "custom",
       "refersTo": "meter",
-      "description": "Quiz progress bar; value always also written in nearby text.",
+      "description": "Square-ended quiz progress bar; value always also written in nearby text.",
       "html": "<div class=\"ds-meter\" role=\"progressbar\" aria-valuenow=\"40\" aria-valuemin=\"0\" aria-valuemax=\"100\"><div class=\"ds-meter-fill\" style=\"width:40%\"></div></div>",
-      "css": ".ds-meter{height:8px;border-radius:4px;background:#E3F0ED;overflow:hidden;} .ds-meter-fill{height:100%;border-radius:4px;background:#0B6E64;}"
+      "css": ".ds-meter{height:8px;background:#E3F0ED;} .ds-meter-fill{height:100%;background:#0B6E64;}"
     }
   ],
   "narrative": {
     "northStar": "The Friendly Neighborhood Pharmacist",
-    "overview": "**Creative North Star: \"The Friendly Neighborhood Pharmacist\"**\n\nKind, expert, calm. The app looks like a well-run pharmacy counter: a deep green-teal shell, a cool white-green ground, and plain white panels with hairline edges. Nothing is decorated; everything is labeled. Every answer ends in a plain instruction, and the instruction is always presented the same way, as a pharmacy-style label with a colored \"WHAT TO DO\" band over one sentence.\n\nDensity is low and type is large, because the reader is a senior who may be stressed, may have low vision, and may tap with a tremor. Sizes are in points and scale with the phone's text-size setting; nothing drops below 16. The world follows the phone into light or dark, and both schemes are first-class: every text color clears 4.5:1 on the surfaces it sits on. The visual rejections are confirmed by the direction: not the shield-and-navy security app, and not the cream-and-serif \"cozy\" app.\n\nThe platform is adaptive. Fonts are the platform's own (SF on iOS, Roboto on Android), icons are SF Symbols on iOS and Material Symbols elsewhere, and navigation is the native bottom tab bar with each platform's own selected-state idiom.",
+    "overview": "**Creative North Star: \"The Friendly Neighborhood Pharmacist\"**\n\nKind, expert, calm. The app looks like a well-run pharmacy counter: a deep green-teal shell, a cool white-green ground, and plain white sections that run edge to edge, ruled above and below by hairlines. Every corner is square. Nothing is decorated; everything is labeled. Every answer ends in a plain instruction, and the instruction is always presented the same way, as a pharmacy-style label with a colored \"WHAT TO DO\" band over one sentence.\n\nDensity is low and type is large, because the reader is a senior who may be stressed, may have low vision, and may tap with a tremor. Sizes are in points and scale with the phone's text-size setting; nothing drops below 16. The world follows the phone into light or dark, and both schemes are first-class: every text color clears 4.5:1 on the surfaces it sits on. The visual rejections are confirmed by the direction: not the shield-and-navy security app, and not the cream-and-serif \"cozy\" app.\n\nThe platform is adaptive. Fonts are the platform's own (SF on iOS, Roboto on Android), icons are SF Symbols on iOS and Material Symbols elsewhere, and navigation is the native bottom tab bar with each platform's own selected-state idiom.",
     "keyCharacteristics": [
-      "Teal shell, cool white-green ground, white hairline cards, no shadows.",
+      "Teal shell, cool white-green ground, full-width white sections ruled by hairlines, no shadows.",
+      "Square everywhere: no corner radius except the Android tab-indicator pill.",
       "Senior type scale: body 20, headings 22 to 32 at heavy weights, floor 16.",
       "Touch targets at least 56 tall; every control carries a text label.",
       "Red, amber, and green speak only inside instruction strips and verdicts.",
@@ -830,9 +831,29 @@
         "section": "typography"
       },
       {
+        "name": "The Edge-to-Edge Section Rule",
+        "body": "Containers span the full screen width and are ruled by a 1px hairline above and below, never on the sides. Their content keeps a 16 side margin from within.",
+        "section": "layout"
+      },
+      {
+        "name": "The Inset Rule",
+        "body": "Anything placed directly in the screen column that is not a section (progress rows, button rows between sections, status lines, notes) is wrapped in `Inset` (16 side padding). `ScreenIntro` carries its own 16 side padding.",
+        "section": "layout"
+      },
+      {
+        "name": "The Strip Bleed Rule",
+        "body": "An instruction strip placed inside a 16-padded section takes `bleed` (a negative 16 side margin) so its band and tint run to both screen edges, matching the section's own width.",
+        "section": "layout"
+      },
+      {
         "name": "The Hairline-Not-Shadow Rule",
-        "body": "A container is distinguished by a 1px `border` and a surface change, never by a shadow or elevation.",
+        "body": "A container is distinguished by 1px `border` rules and a surface change, never by a shadow or elevation.",
         "section": "elevation"
+      },
+      {
+        "name": "The Square Corner Rule",
+        "body": "New surfaces and controls take no border radius. The Android tab pill is the only rounded shape and stays inside the tab bar.",
+        "section": "shapes"
       }
     ],
     "dos": [
@@ -840,7 +861,8 @@
       "**Do** end every answer with an instruction strip holding one plain imperative sentence.",
       "**Do** keep controls at least 56 tall (`minTouchTarget`) with a visible text label.",
       "**Do** use `AppText` variants for all text; body at 20, nothing below 16.",
-      "**Do** separate containers with a 1px `border` hairline on `surface`, radius 16.",
+      "**Do** build containers as full-width `surface` sections ruled by 1px `border` hairlines above and below, with square corners.",
+      "**Do** wrap loose content between sections in `Inset`, and give a strip inside a padded section `bleed`.",
       "**Do** keep one filled button per screen; use tonal for the rest."
     ],
     "donts": [
@@ -848,6 +870,8 @@
       "**Don't** use red, amber, or green outside instruction strips and verdict text.",
       "**Don't** put an uppercase label above a heading as an eyebrow or kicker; the `label` style belongs to the strip band.",
       "**Don't** add colored side borders to cards or strips.",
+      "**Don't** round corners on any surface or control; the Android tab pill is the only radius.",
+      "**Don't** float a section with side margins or side borders; sections touch both screen edges.",
       "**Don't** ship an icon-only control.",
       "**Don't** nest cards.",
       "**Don't** use `border` (the decorative hairline) as the only edge of an input; inputs take `border-strong` at 2px."
