@@ -1,11 +1,15 @@
 import { Image } from "expo-image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { AccessibilityInfo, ActivityIndicator, View } from "react-native";
 
 import { AppButton } from "@/components/app-button";
-import { BodyText } from "@/components/body-text";
-import { HeadingText } from "@/components/heading-text";
-import { colors, fontSize, radius, spacing } from "@/constants/theme";
+import { AppText } from "@/components/app-text";
+import { Card } from "@/components/card";
+import { InstructionStrip } from "@/components/instruction-strip";
+import { Meter } from "@/components/meter";
+import { Screen } from "@/components/screen";
+import { ScreenIntro } from "@/components/screen-intro";
+import { makeStyles, radius, spacing, useColors } from "@/constants/theme";
 import {
   callAI,
   parseJsonReply,
@@ -88,7 +92,7 @@ async function generateQuizItem(scenario: QuizScenario): Promise<QuizItem> {
   } catch (caught) {
     // Network/model failures carry technical messages; show a plain one.
     console.warn("generateQuizItem: callAI failed", caught);
-    throw new Error("Couldn't load the quiz. Please try again.");
+    throw new Error("Check that you're online, then tap Try again.");
   }
 
   const { text, explanation } = parseJsonReply(reply);
@@ -112,6 +116,8 @@ async function generateQuizItem(scenario: QuizScenario): Promise<QuizItem> {
 // Route: /quiz — true/false game where the player guesses whether each
 // piece of content is a scam.
 export default function Quiz() {
+  const styles = useStyles();
+  const colors = useColors();
   const [state, setState] = useState<QuizState>(initialState);
   const latestRun = useRef(0);
 
@@ -190,6 +196,16 @@ export default function Quiz() {
 
   const { status, items, index, error, score, lastAnswerCorrect } = state;
 
+  // Feedback renders below the question; announce it so screen reader
+  // users (iOS has no live regions) hear the result right away.
+  useEffect(() => {
+    if (status === "answered") {
+      AccessibilityInfo.announceForAccessibility(
+        lastAnswerCorrect ? "Correct." : "Not quite."
+      );
+    }
+  }, [status, lastAnswerCorrect]);
+
   // Only expose the current question once the player has started, so the
   // prepared quiz stays hidden until then.
   const isPlaying = status === "asking" || status === "answered";
@@ -199,170 +215,172 @@ export default function Quiz() {
   const isLastQuestion = index === items.length - 1;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.intro}>
-        <HeadingText style={styles.title}>Spot the Scam</HeadingText>
-        <BodyText style={styles.subtitle}>
-          Read each message and decide if it's a scam.
-        </BodyText>
-      </View>
+    <Screen>
+      <ScreenIntro
+        title="Can you tell which ones are scams?"
+        subtitle="Read each message and decide if it's a scam."
+      />
 
-      {status === "preparing" && <BodyText>Getting your quiz ready...</BodyText>}
-
-      {status === "prepared" && (
-        <View style={styles.startAction}>
-          <AppButton title="Start Quiz" onPress={start} />
-        </View>
+      {status === "preparing" && (
+        <Card style={styles.centered}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <AppText tone="textMuted">Getting your quiz ready...</AppText>
+        </Card>
       )}
 
-      {status === "error" && (
-        <View style={styles.block}>
-          <BodyText style={styles.errorText}>Error: {error}</BodyText>
-          <View style={styles.startAction}>
-            <AppButton title="Try Again" onPress={createQuiz} />
-          </View>
-        </View>
+      {status === "prepared" && (
+        <Card>
+          <AppText variant="title" accessibilityRole="header">
+            {totalQuestions} practice messages are ready
+          </AppText>
+          <AppText>
+            Some are scams and some aren't. After each guess, you'll see what
+            gave it away.
+          </AppText>
+          <AppButton title="Start quiz" icon="play" onPress={start} fullWidth />
+        </Card>
+      )}
+
+      {status === "error" && error && (
+        <Card>
+          <InstructionStrip tone="warning" label="That didn't work">
+            {error}
+          </InstructionStrip>
+          <AppButton
+            title="Try again"
+            icon="refresh"
+            onPress={createQuiz}
+            fullWidth
+          />
+        </Card>
       )}
 
       {status === "finished" && (
-        <View style={styles.block}>
-          <HeadingText style={styles.sectionHeading}>
+        <Card>
+          <AppText variant="title" accessibilityRole="header">
             You got {score} of {totalQuestions} right.
-          </HeadingText>
-          <View style={styles.startAction}>
-            <AppButton title="Play Again" onPress={createQuiz} />
-          </View>
-        </View>
+          </AppText>
+          <AppText>
+            {score === totalQuestions
+              ? "A perfect score. You know what to look for."
+              : "Every round makes the warning signs easier to spot."}
+          </AppText>
+          <AppButton
+            title="Play again"
+            icon="refresh"
+            onPress={createQuiz}
+            fullWidth
+          />
+        </Card>
       )}
 
       {current && (
-        <View style={styles.block}>
-          <View style={styles.meta}>
-            <HeadingText style={styles.sectionHeading}>
-              Question {questionNumber} of {totalQuestions}
-            </HeadingText>
-            <BodyText style={styles.scoreCaption}>
-              {score} right so far
-            </BodyText>
+        <>
+          <View style={styles.progress}>
+            <View style={styles.progressText}>
+              <AppText variant="bodyStrong">
+                Question {questionNumber} of {totalQuestions}
+              </AppText>
+              <AppText variant="callout" tone="textMuted">
+                {score} right so far
+              </AppText>
+            </View>
+            <Meter
+              value={questionNumber / totalQuestions}
+              label="Quiz progress"
+            />
           </View>
 
-          {/* Content is either plain text or an image to inspect. */}
-          {current.content.type === "text" ? (
-            <BodyText style={styles.content}>{current.content.text}</BodyText>
-          ) : (
-            <Image
-              source={{ uri: current.content.uri }}
-              style={{
-                width: current.content.width,
-                height: current.content.height,
-                borderRadius: radius,
-              }}
-            />
-          )}
+          {/* Every item sits in the same fixed frame so messages compare
+              fairly; content is either plain text or an image to inspect. */}
+          <Card>
+            <AppText variant="bodyStrong">The message</AppText>
+            <View style={styles.message}>
+              {current.content.type === "text" ? (
+                <AppText>{current.content.text}</AppText>
+              ) : (
+                <Image
+                  source={{ uri: current.content.uri }}
+                  style={{
+                    width: "100%",
+                    aspectRatio: current.content.width / current.content.height,
+                    borderRadius: radius.control,
+                  }}
+                />
+              )}
+            </View>
+          </Card>
 
           {status === "asking" && (
-            <View style={styles.answerRow}>
-              <AppButton title="Scam" onPress={() => answer(true)} />
+            <View style={styles.answers}>
               <AppButton
-                title="Not a Scam"
-                variant="secondary"
+                title="It's a scam"
+                icon="flag"
+                variant="tonal"
+                onPress={() => answer(true)}
+                fullWidth
+              />
+              <AppButton
+                title="It's not a scam"
+                icon="check"
+                variant="tonal"
                 onPress={() => answer(false)}
+                fullWidth
               />
             </View>
           )}
 
           {status === "answered" && (
-            <View
-              style={[
-                styles.resultBlock,
-                lastAnswerCorrect ? styles.resultCorrect : styles.resultIncorrect,
-              ]}
-            >
-              <BodyText
-                style={lastAnswerCorrect ? styles.correctText : styles.incorrectText}
+            <Card>
+              <AppText
+                variant="title"
+                tone={lastAnswerCorrect ? "success" : "danger"}
+                accessibilityRole="header"
               >
                 {lastAnswerCorrect ? "Correct." : "Not quite."}
-              </BodyText>
-              <BodyText>
-                This was {current.isScam ? "a scam" : "not a scam"}.
-              </BodyText>
-              <BodyText>{current.explanation}</BodyText>
-              <View style={styles.startAction}>
-                <AppButton
-                  title={isLastQuestion ? "See My Score" : "Next Question"}
-                  onPress={next}
-                />
-              </View>
-            </View>
+              </AppText>
+              <InstructionStrip
+                tone={current.isScam ? "danger" : "success"}
+                label={current.isScam ? "This was a scam" : "This was not a scam"}
+              >
+                {current.explanation}
+              </InstructionStrip>
+              <AppButton
+                title={isLastQuestion ? "See my score" : "Next question"}
+                icon="arrow"
+                onPress={next}
+                fullWidth
+              />
+            </Card>
           )}
-        </View>
+        </>
       )}
-    </View>
+    </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: spacing.lg,
-    gap: spacing.lg,
-    backgroundColor: colors.background,
+const useStyles = makeStyles((c) => ({
+  centered: {
+    alignItems: "center",
   },
-  intro: {
+  progress: {
     gap: spacing.sm,
-    marginBottom: spacing.sm,
   },
-  title: {
-    fontSize: fontSize.title,
-  },
-  subtitle: {
-    color: colors.secondary,
-  },
-  block: {
-    gap: spacing.md,
-  },
-  startAction: {
-    alignSelf: "flex-start",
-  },
-  meta: {
-    gap: 2,
-  },
-  sectionHeading: {
-    fontSize: fontSize.title,
-  },
-  scoreCaption: {
-    fontSize: fontSize.caption,
-    color: colors.secondary,
-  },
-  content: {
-    backgroundColor: colors.surface,
-    borderRadius: radius,
-    padding: spacing.md,
-  },
-  answerRow: {
+  progressText: {
     flexDirection: "row",
-    gap: spacing.md,
-  },
-  resultBlock: {
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    alignItems: "baseline",
     gap: spacing.sm,
-    paddingLeft: spacing.md,
-    borderLeftWidth: 4,
   },
-  resultCorrect: {
-    borderLeftColor: colors.success,
+  message: {
+    minHeight: 120,
+    padding: spacing.md,
+    borderRadius: radius.control,
+    backgroundColor: c.background,
   },
-  resultIncorrect: {
-    borderLeftColor: colors.danger,
+  // Separated more than usual so a shaky tap can't land on the other answer.
+  answers: {
+    gap: spacing.lg,
   },
-  errorText: {
-    color: colors.danger,
-  },
-  correctText: {
-    fontWeight: "700",
-    color: colors.success,
-  },
-  incorrectText: {
-    fontWeight: "700",
-    color: colors.danger,
-  },
-});
+}));

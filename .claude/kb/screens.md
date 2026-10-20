@@ -1,23 +1,19 @@
 # screens (all default exports in app/(tabs)/)
-Common container: p lg, bg background. See idioms in [[arch]].
+Every tab: `Screen` + (except Home) `ScreenIntro`; styles via `makeStyles`. Components: [[ui]]. Logic: [[data]].
 
 ## index.tsx `Index`
-ScrollView gap lg. Hero: HeadingText "Porch Watch"(display) + subtitle "Know the signs before they reach your door." Then `notices: Notice{href,title,body}[]` (ai-scams, check, quiz) rendered as spine blocks (title+body). href kept but NOT rendered as links (removed 5541d6c). Unused style noticeAction.
+Tabs header hidden. Root View: pinned status inset View (height useSafeAreaInsets().top, bg header; keeps light status icons on teal while content scrolls) + `Screen header=` teal band View (bg header, px md, pt sm, pb md, gap sm): largeTitle onHeader "Hello. How can we help today?" (role header) + callout onHeaderMuted "Porch Watch · Know the signs before they reach your door." Content: Card{title "Check a message", muted "Paste it or add a screenshot. We'll explain it plainly.", filled fullWidth "Start a check"(search) → `router.navigate("/check")`} → View(gap sm){headline "Before you reply to anyone" + InstructionStrip warning gift-card/wire/crypto rule} (no Card) → ListGroup{ListRow /quiz "Spot the Scam"/"Practice with 5 messages", /ai-scams "What AI scams look like"/"Cloned voices, fake photos, and more"}.
 
 ## check.tsx `ScamChecker`
-State local to component: text, images, checkState (status|result|error).
-- ScamCheckStatus = idle|loading|success|error; ScamCheckState {status,result:ScamCheckResult|null,error:string|null}.
-- `verdictCopy: Record<ScamVerdict,{label,color}>` scam→danger, safe→success, uncertain→border.
-- pickImage: requestMediaLibraryPermissionsAsync → Alert if !granted; launchImageLibraryAsync({mediaTypes:["images"], allowsMultipleSelection, quality:1}); appends {uri,width,height}.
-- removeImage(uri) filter. handleSubmit: async, set loading → await checkForScam({text,images}) → success|error, reset clears all state. canSubmit = (text.trim()||images.length) && status!=="loading".
-- UI: intro "Not sure about something?"; multiline TextInput (surface bg, border 2, minH 140); "Add Screenshot" btn; horizontal thumb list (expo-image 140², "Remove" danger btn each); "Check for Scam"; loading "Checking..."; error danger text; success: left-spine colored by verdict, label, `round(confidence*100)% confident`, explanation, "Check Another".
+State local: text, images, checkState(status|result|error). `verdictCopy: Record<ScamVerdict,{label,advice,tone:StatusTone}>` likely_scam "This looks like a scam"/danger, likely_safe "This looks safe"/success, uncertain "Hard to say for sure"/warning.
+- isLoading; hasInput = text.trim()||images.length; canSubmit = hasInput && !isLoading. useEffect announces verdict label / error (AccessibilityInfo).
+- UI: ScreenIntro "Not sure about something?"/"Paste the message or add a screenshot, and we'll take a look." → Card{field(gap sm): bodyStrong "The message" + TextInput (typography.body, bg background, border 2 borderStrong, radius control, minH 160, placeholder textMuted, selection primary); horizontal thumbs 140² + tonal fullWidth "Remove"; tonal "Add a screenshot"(addPhoto)} → View{filled fullWidth "Check for Scam"(search); if !hasInput callout muted centered "Paste a message or add a screenshot first."} → loading row ActivityIndicator + "Reading your message..." → error: InstructionStrip warning label "That didn't work" {error} → success Card{title verdict label (role header) + callout "How sure we are: N%", explanation, InstructionStrip verdict.tone {advice}, tonal "Check another"(refresh) reset}.
 
 ## quiz.tsx `Quiz`
-State local to component. View (not scroll). `useEffect: createQuiz() on mount; cleanup ++latestRun` → quiz built in memory, hidden.
-- preparing: "Getting your quiz ready...". prepared: "Start Quiz"(start). error: msg + "Try Again"(createQuiz). finished: "You got {score} of {totalQuestions} right." + "Play Again"(createQuiz).
-- intro: "Spot the Scam" / "Read each message and decide if it's a scam."
-- `current` set (asking|answered): "Question N of T", "{score} right so far", content (text in surface box | expo-image with item width/height). asking: row "Scam"(answer(true)) / "Not a Scam" secondary(answer(false)). answered: left-spine success/danger, "Correct."/"Not quite.", "This was a scam/not a scam.", then BodyText explanation, btn isLastQuestion?"See My Score":"Next Question"(next).
-- style sectionHeading (fontSize.title) shared by question header + final score.
+State local (logic [[data]]). useEffect createQuiz on mount; announces "Correct."/"Not quite." when answered.
+- ScreenIntro "Can you tell which ones are scams?"/"Read each message and decide if it's a scam." (header title is "Spot the Scam").
+- preparing: centered Card ActivityIndicator large + muted "Getting your quiz ready...". prepared: Card title "{T} practice messages are ready" + blurb + filled "Start quiz"(play). error: Card{InstructionStrip warning "That didn't work" {error} (generateQuizItem network msg "Check that you're online, then tap Try again.") + filled "Try again"(refresh)}. finished: Card title "You got {score} of {T} right." + perfect/encouraging line + "Play again"(refresh).
+- current: progress row bodyStrong "Question N of T" / callout muted "{score} right so far" + Meter(N/T). Card{bodyStrong "The message" + fixed frame View(minH 120, p md, radius control, bg background) with text | expo-image width 100% aspectRatio}. asking: View gap lg (wide separation for tremor) tonal fullWidth "It's a scam"(flag) / "It's not a scam"(check). answered: Card{title "Correct."(success)/"Not quite."(danger), InstructionStrip tone isScam?danger:success label "This was a scam"/"This was not a scam" {explanation}, filled "See my score"/"Next question"(arrow)}.
 
 ## ai-scams.tsx `AiScamsInfo`
-InfoPage. intro "What's changed about scams lately"/"And what still gives them away." + `topics:{title,body}[]` (4: voice cloning, fake photos/videos, fluent AI writing, red flags: urgency/secrecy/gift card/wire/crypto) as spine blocks.
+Screen + ScreenIntro "What's changed about scams lately"/"And what still gives them away." → article View (surface, border, radius card, px md) of `topics:{title,body,advice}[]` (voice cloning, fake photos/videos, fluent AI writing) as sections (headline + body + InstructionStrip success advice; hairline between) → section title "What still gives it away" + body + InstructionStrip danger label "Stop if you see" (urgency/secrecy/gift card/wire/crypto).

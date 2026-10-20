@@ -1,7 +1,29 @@
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
+import { useCallback, useEffect, useState } from "react";
+import {
+  AccessibilityInfo,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  TextInput,
+  View,
+} from "react-native";
+
 import { AppButton } from "@/components/app-button";
-import { BodyText } from "@/components/body-text";
-import { HeadingText } from "@/components/heading-text";
-import { colors, fontSize, radius, spacing } from "@/constants/theme";
+import { AppText } from "@/components/app-text";
+import { Card } from "@/components/card";
+import { InstructionStrip, type StatusTone } from "@/components/instruction-strip";
+import { Screen } from "@/components/screen";
+import { ScreenIntro } from "@/components/screen-intro";
+import {
+  makeStyles,
+  minTouchTarget,
+  radius,
+  spacing,
+  typography,
+  useColors,
+} from "@/constants/theme";
 import {
   callAI,
   parseJsonReply,
@@ -13,13 +35,9 @@ import type {
   ScamCheckResult,
   ScamVerdict,
 } from "@/types/scam-check";
-import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
-import { useCallback, useState } from "react";
-import { Alert, ScrollView, StyleSheet, TextInput, View } from "react-native";
 
 // Tracks one checkForScam() call so the UI can show loading, the verdict,
-// or the error. Kept separate from the input state so "Check Another" can
+// or the error. Kept separate from the input state so "Check another" can
 // reset both together.
 type ScamCheckStatus = "idle" | "loading" | "success" | "error";
 
@@ -35,13 +53,28 @@ const initialCheckState: ScamCheckState = {
   error: null,
 };
 
-// Plain-language framing for each verdict, and the spine color that marks
-// it — danger for a likely scam, success for likely safe, border for a
-// genuine "can't tell."
-const verdictCopy: Record<ScamVerdict, { label: string; color: string }> = {
-  likely_scam: { label: "This looks like a scam", color: colors.danger },
-  likely_safe: { label: "This looks safe", color: colors.success },
-  uncertain: { label: "Hard to say for sure", color: colors.border },
+// Plain-language framing for each verdict and the instruction-strip tone
+// that carries its advice: danger for a likely scam, success for likely
+// safe, warning for a genuine "can't tell."
+const verdictCopy: Record<
+  ScamVerdict,
+  { label: string; advice: string; tone: StatusTone }
+> = {
+  likely_scam: {
+    label: "This looks like a scam",
+    advice: "Don't reply, click links, or send money.",
+    tone: "danger",
+  },
+  likely_safe: {
+    label: "This looks safe",
+    advice: "Still, never share passwords or codes you didn't ask for.",
+    tone: "success",
+  },
+  uncertain: {
+    label: "Hard to say for sure",
+    advice: "Contact the sender using a number or website you already trust.",
+    tone: "warning",
+  },
 };
 
 const SCAM_CHECK_SYSTEM = `You help older adults spot scams. The user will share a message they received and/or screenshots of it. Judge whether it is likely a scam.
@@ -87,8 +120,10 @@ function toScamCheckResult({
   return { verdict: verdict as ScamVerdict, confidence, explanation };
 }
 
-// Route: /check — linked from the landing page's "Scam Checker" menu item.
+// Route: /check — the "Scam Checker" tab.
 export default function ScamChecker() {
+  const styles = useStyles();
+  const colors = useColors();
   const [text, setText] = useState("");
   const [images, setImages] = useState<ScamCheckImage[]>([]);
   const [checkState, setCheckState] = useState<ScamCheckState>(
@@ -121,7 +156,7 @@ export default function ScamChecker() {
     }
 
     // Append rather than replace, since allowsMultipleSelection + repeated
-    // taps on "Add Screenshot" should build up one batch of evidence.
+    // taps on "Add a screenshot" should build up one batch of evidence.
     setImages((current) => [
       ...current,
       ...pickerResult.assets.map((asset) => ({
@@ -161,148 +196,170 @@ export default function ScamChecker() {
   }, []);
 
   // Need at least some text or one image to send, and can't resubmit mid-check.
-  const canSubmit =
-    (text.trim().length > 0 || images.length > 0) && status !== "loading";
+  const isLoading = status === "loading";
+  const hasInput = text.trim().length > 0 || images.length > 0;
+  const canSubmit = hasInput && !isLoading;
+  const verdict = result ? verdictCopy[result.verdict] : null;
+
+  // Results appear below the fold of a long form; announce them so screen
+  // reader users (iOS has no live regions) know the check finished.
+  useEffect(() => {
+    if (status === "success" && verdict) {
+      AccessibilityInfo.announceForAccessibility(verdict.label);
+    } else if (status === "error" && error) {
+      AccessibilityInfo.announceForAccessibility(error);
+    }
+  }, [status, verdict, error]);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.intro}>
-        <HeadingText style={styles.title}>Not sure about something?</HeadingText>
-        <BodyText style={styles.subtitle}>
-          Paste the message or describe what happened.
-        </BodyText>
-      </View>
-
-      <TextInput
-        style={styles.textInput}
-        multiline
-        value={text}
-        onChangeText={setText}
-        placeholder="e.g. a text, email, or DM you received"
-        placeholderTextColor={colors.secondary}
-        editable={status !== "loading"}
+    <Screen>
+      <ScreenIntro
+        title="Not sure about something?"
+        subtitle="Paste the message or add a screenshot, and we'll take a look."
       />
 
-      <View style={styles.imageSection}>
-        <View style={styles.startAction}>
-          <AppButton
-            title="Add Screenshot"
-            onPress={pickImage}
-            disabled={status === "loading"}
+      <Card>
+        <View style={styles.field}>
+          <AppText variant="bodyStrong">The message</AppText>
+          <TextInput
+            style={styles.textInput}
+            multiline
+            value={text}
+            onChangeText={setText}
+            placeholder="e.g. a text, email, or DM you received"
+            placeholderTextColor={colors.textMuted}
+            selectionColor={colors.primary}
+            editable={!isLoading}
+            accessibilityLabel="The message"
           />
         </View>
 
         {images.length > 0 && (
           <ScrollView horizontal contentContainerStyle={styles.imageList}>
-            {images.map((image) => (
+            {images.map((image, i) => (
               <View key={image.uri} style={styles.imageItem}>
-                <Image source={{ uri: image.uri }} style={styles.thumbnail} />
+                <Image
+                  source={{ uri: image.uri }}
+                  style={styles.thumbnail}
+                  accessibilityLabel={`Screenshot ${i + 1}`}
+                />
                 <AppButton
                   title="Remove"
-                  variant="danger"
+                  variant="tonal"
                   onPress={() => removeImage(image.uri)}
-                  disabled={status === "loading"}
+                  disabled={isLoading}
+                  fullWidth
                 />
               </View>
             ))}
           </ScrollView>
         )}
-      </View>
 
-      <View style={styles.startAction}>
+        <AppButton
+          title="Add a screenshot"
+          icon="addPhoto"
+          variant="tonal"
+          onPress={pickImage}
+          disabled={isLoading}
+        />
+      </Card>
+
+      <View style={styles.submit}>
         <AppButton
           title="Check for Scam"
+          icon="search"
           onPress={handleSubmit}
           disabled={!canSubmit}
+          fullWidth
         />
+        {!hasInput && (
+          <AppText variant="callout" tone="textMuted" style={styles.helper}>
+            Paste a message or add a screenshot first.
+          </AppText>
+        )}
       </View>
 
-      {status === "loading" && <BodyText>Checking...</BodyText>}
-      {status === "error" && (
-        <BodyText style={styles.errorText}>Error: {error}</BodyText>
-      )}
-      {status === "success" && result && (
-        <View
-          style={[
-            styles.result,
-            { borderLeftColor: verdictCopy[result.verdict].color },
-          ]}
-        >
-          <HeadingText style={styles.resultTitle}>
-            {verdictCopy[result.verdict].label}
-          </HeadingText>
-          <BodyText style={styles.resultMeta}>
-            {Math.round(result.confidence * 100)}% confident
-          </BodyText>
-          <BodyText>{result.explanation}</BodyText>
-          <View style={styles.startAction}>
-            <AppButton title="Check Another" onPress={handleReset} />
-          </View>
+      {isLoading && (
+        <View style={styles.statusRow}>
+          <ActivityIndicator color={colors.primary} />
+          <AppText tone="textMuted">Reading your message...</AppText>
         </View>
       )}
-    </ScrollView>
+
+      {status === "error" && error && (
+        <InstructionStrip tone="warning" label="That didn't work">
+          {error}
+        </InstructionStrip>
+      )}
+
+      {status === "success" && result && verdict && (
+        <Card>
+          <View style={styles.verdictHead}>
+            <AppText variant="title" accessibilityRole="header">
+              {verdict.label}
+            </AppText>
+            <AppText variant="callout" tone="textMuted">
+              How sure we are: {Math.round(result.confidence * 100)}%
+            </AppText>
+          </View>
+          <AppText>{result.explanation}</AppText>
+          <InstructionStrip tone={verdict.tone}>{verdict.advice}</InstructionStrip>
+          <AppButton
+            title="Check another"
+            icon="refresh"
+            variant="tonal"
+            onPress={handleReset}
+            fullWidth
+          />
+        </Card>
+      )}
+    </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: spacing.lg,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  intro: {
+const useStyles = makeStyles((c) => ({
+  field: {
     gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  title: {
-    fontSize: fontSize.title,
-  },
-  subtitle: {
-    color: colors.secondary,
-  },
-  startAction: {
-    alignSelf: "flex-start",
   },
   textInput: {
-    minHeight: 140,
+    ...typography.body,
+    minHeight: 160,
     textAlignVertical: "top",
-    fontSize: fontSize.body,
-    color: colors.text,
-    backgroundColor: colors.surface,
+    color: c.text,
+    backgroundColor: c.background,
     borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: radius,
+    borderColor: c.borderStrong,
+    borderRadius: radius.control,
     padding: spacing.md,
   },
-  imageSection: {
-    gap: spacing.sm,
-  },
   imageList: {
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   imageItem: {
-    alignItems: "center",
+    width: 140,
     gap: spacing.sm,
   },
   thumbnail: {
     width: 140,
     height: 140,
-    borderRadius: radius,
+    borderRadius: radius.control,
+    borderWidth: 1,
+    borderColor: c.border,
   },
-  result: {
+  statusRow: {
+    minHeight: minTouchTarget,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: spacing.sm,
-    paddingLeft: spacing.md,
-    borderLeftWidth: 4,
   },
-  resultTitle: {
-    fontSize: fontSize.title,
+  submit: {
+    gap: spacing.sm,
   },
-  resultMeta: {
-    fontSize: fontSize.caption,
-    color: colors.secondary,
+  helper: {
+    textAlign: "center",
   },
-  errorText: {
-    color: colors.danger,
+  verdictHead: {
+    gap: spacing.xs,
   },
-});
+}));

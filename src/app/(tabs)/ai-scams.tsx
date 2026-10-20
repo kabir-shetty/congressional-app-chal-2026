@@ -1,72 +1,92 @@
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 
-import { BodyText } from "@/components/body-text";
-import { HeadingText } from "@/components/heading-text";
-import { InfoPage } from "@/components/info-page";
-import { colors, fontSize, spacing } from "@/constants/theme";
+import { AppText } from "@/components/app-text";
+import { InstructionStrip } from "@/components/instruction-strip";
+import { Screen } from "@/components/screen";
+import { ScreenIntro } from "@/components/screen-intro";
+import { makeStyles, radius, spacing } from "@/constants/theme";
 
 type Topic = {
   title: string;
   body: string;
+  advice: string;
 };
 
 const topics: Topic[] = [
   {
     title: "A voice that sounds exactly like family",
-    body: "A few seconds of audio from a video or voicemail is enough to clone a voice today. If a call from a grandchild or relative asks for money urgently, hang up and call that person back on a number you already have.",
+    body: "A few seconds of audio from a video or voicemail is enough to clone a voice today.",
+    advice: "If a relative calls asking for money urgently, hang up and call them back on a number you already have.",
   },
   {
     title: "Photos and videos that never happened",
-    body: "AI can generate a photo of an accident, a hospital bed, or a face on a video call, all from scratch. A photo isn't proof by itself anymore, especially if it's paired with a request to send money fast.",
+    body: "AI can generate a photo of an accident, a hospital bed, or a face on a video call, all from scratch. A photo isn't proof by itself anymore.",
+    advice: "Don't send money because of a photo or video alone, especially when you're told to hurry.",
   },
   {
     title: "Messages written to sound just right",
-    body: "The clumsy, misspelled scam email is mostly gone. AI now writes messages in fluent, personal-sounding English, so good writing is no longer a sign that a message is genuine.",
-  },
-  {
-    title: "What still gives it away",
-    body: "Urgency, secrecy, and a request to pay by gift card, wire transfer, or cryptocurrency are still the clearest warning signs, no matter how convincing the voice, photo, or writing is.",
+    body: "The clumsy, misspelled scam email is mostly gone. AI now writes messages in fluent, personal-sounding English.",
+    advice: "Don't trust a message because it's well written. Check who really sent it.",
   },
 ];
 
-// Route: /ai-scams — the landing page's "AI Scams" menu item.
+// Route: /ai-scams — a short read: what's new, then what still gives scams
+// away. Set as one article, not a stack of matching cards.
 export default function AiScamsInfo() {
+  const styles = useStyles();
   return (
-    <InfoPage>
-      <View style={styles.intro}>
-        <HeadingText style={styles.title}>
-          What's changed about scams lately
-        </HeadingText>
-        <BodyText style={styles.subtitle}>
-          And what still gives them away.
-        </BodyText>
+    <Screen>
+      <ScreenIntro
+        title="What's changed about scams lately"
+        subtitle="And what still gives them away."
+      />
+
+      <View style={styles.article}>
+        {topics.map((topic, i) => (
+          <View
+            key={topic.title}
+            style={[styles.section, i > 0 && styles.divided]}
+          >
+            <AppText variant="headline" accessibilityRole="header">
+              {topic.title}
+            </AppText>
+            <AppText>{topic.body}</AppText>
+            <InstructionStrip tone="success">{topic.advice}</InstructionStrip>
+          </View>
+        ))}
       </View>
 
-      {topics.map((topic) => (
-        <View key={topic.title} style={styles.topic}>
-          <HeadingText>{topic.title}</HeadingText>
-          <BodyText>{topic.body}</BodyText>
-        </View>
-      ))}
-    </InfoPage>
+      <View style={styles.section}>
+        <AppText variant="title" accessibilityRole="header">
+          What still gives it away
+        </AppText>
+        <AppText>
+          However real the voice, photo, or writing seems, these are still the
+          clearest warning signs:
+        </AppText>
+        <InstructionStrip tone="danger" label="Stop if you see">
+          Pressure to act right now, a request to keep it secret, or payment
+          by gift card, wire transfer, or cryptocurrency.
+        </InstructionStrip>
+      </View>
+    </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  intro: {
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
+const useStyles = makeStyles((c) => ({
+  article: {
+    backgroundColor: c.surface,
+    borderWidth: 1,
+    borderColor: c.border,
+    borderRadius: radius.card,
+    paddingHorizontal: spacing.md,
   },
-  title: {
-    fontSize: fontSize.title,
+  section: {
+    gap: spacing.md,
+    paddingVertical: spacing.lg,
   },
-  subtitle: {
-    color: colors.secondary,
+  divided: {
+    borderTopWidth: 1,
+    borderTopColor: c.border,
   },
-  topic: {
-    gap: spacing.sm,
-    paddingTop: spacing.lg,
-    borderTopWidth: 2,
-    borderTopColor: colors.primary,
-  },
-});
+}));

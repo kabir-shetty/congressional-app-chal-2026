@@ -1,0 +1,49 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:390px;height:844px;overflow:hidden;background:#F4F3EF;color:#161616;font:20px/1.4 -apple-system,"SF Pro Text",Roboto,system-ui,sans-serif}
+.status{height:47px}
+.mast{background:#161616;color:#F4F3EF;padding:14px 20px 16px}
+.mast .date{font-size:15px;letter-spacing:.06em;text-transform:uppercase;opacity:.8;font-weight:600}
+.mast h1{font:900 38px/1.05 "Libre Franklin",sans-serif;letter-spacing:-.01em;margin-top:4px}
+.mast p{font-size:17px;opacity:.85;margin-top:4px}
+.rule{height:4px;background:#161616;margin:0 20px}
+.rule.thin{height:1px;margin-top:3px}
+main{padding:18px 20px;display:flex;flex-direction:column;gap:18px}
+.label{font:800 15px "Libre Franklin";letter-spacing:.08em;text-transform:uppercase;color:#1E4FA3}
+.panel{border:2px solid #161616;background:#fff;padding:18px}
+.panel h2{font:800 26px/1.15 "Libre Franklin";margin:6px 0 8px}
+.btn{display:block;margin-top:14px;background:#1E4FA3;color:#fff;font-weight:600;text-align:center;padding:16px;border-radius:10px}
+.puzzle h2{font:800 24px/1.15 "Libre Franklin";margin:6px 0 10px}
+.grid{display:flex;gap:6px;margin:6px 0 10px}
+.cell{width:52px;height:52px;border:2px solid #161616;background:#fff;position:relative;display:flex;align-items:center;justify-content:center;font:800 22px "Libre Franklin"}
+.cell small{position:absolute;top:2px;left:4px;font:600 11px system-ui}
+.cell.done{background:#161616;color:#F4F3EF}
+.tip{border-top:2px solid #161616;padding-top:12px}
+.tip b{font:800 18px "Libre Franklin";text-transform:uppercase;letter-spacing:.05em}
+.tabs{position:absolute;bottom:0;left:0;right:0;height:88px;background:#fff;border-top:1px solid #C9C7C0;display:flex;justify-content:space-around;padding-top:10px;font-size:14px;font-weight:600}
+.tabs span{display:flex;flex-direction:column;align-items:center;gap:4px;color:#555}
+.tabs span i{width:26px;height:26px;border-radius:6px;background:#9A988F}
+.tabs .on{color:#1E4FA3}.tabs .on i{background:#1E4FA3}
+</style></head><body>
+<div class="mast"><div class="status"></div><div class="date">Sunday, October 19</div><h1>Porch Watch</h1><p>Know the signs before they reach your door.</p></div>
+<div class="rule" style="margin-top:0"></div><div class="rule thin"></div>
+<main>
+<section class="panel">
+<div class="label">Got a strange message?</div>
+<h2>Check it before you answer</h2>
+<p>Paste the text or add a screenshot. You'll get a plain answer.</p>
+<div class="btn">Check a message</div>
+</section>
+<section class="puzzle">
+<div class="label">Today's puzzle</div>
+<h2>Spot the Scam: 5 messages</h2>
+<div class="grid"><div class="cell done"><small>1</small>✓</div><div class="cell done"><small>2</small>✓</div><div class="cell"><small>3</small></div><div class="cell"><small>4</small></div><div class="cell"><small>5</small></div></div>
+<p style="font-size:17px;color:#444">2 of 5 solved · pick up where you left off</p>
+</section>
+<section class="tip"><b>Rule of thumb</b><p>Real banks and family never ask for gift cards, wire transfers, or crypto.</p></section>
+</main>
+<nav class="tabs"><span class="on"><i></i>Home</span><span><i></i>Check</span><span><i></i>Puzzle</span><span><i></i>Learn</span></nav>
+</body></html>

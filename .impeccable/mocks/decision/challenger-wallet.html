@@ -1,0 +1,35 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Archivo+Narrow:wght@700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:390px;height:844px;overflow:hidden;background:#EEF0F4;color:#14285A;font:20px/1.35 -apple-system,"SF Pro Text",Roboto,system-ui,sans-serif}
+.wallet{background:#14285A;color:#fff;padding:58px 20px 22px;position:relative}
+.wallet .stripe{position:absolute;left:0;right:0;bottom:0;height:6px;background:#C8202F}
+.wallet small{font:700 14px "Archivo Narrow";letter-spacing:.14em;opacity:.8}
+.wallet h1{font:800 34px/1.05 "Archivo";margin-top:4px}
+.wallet p{font-size:17px;opacity:.9;margin-top:4px}
+main{padding:18px 16px;display:flex;flex-direction:column;gap:14px}
+.coupon{background:#fff;border-radius:6px;position:relative;box-shadow:0 1px 0 #C9CEDA}
+.head{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:2px dashed #C9CEDA;font:700 14px "Archivo Narrow";letter-spacing:.12em;color:#5B647A}
+.inner{padding:14px}
+.inner h2{font:800 24px/1.15 "Archivo";color:#14285A}
+.inner p{font-size:17px;color:#2E3A55;margin-top:4px}
+.btn{margin-top:14px;background:#C8202F;color:#fff;font:800 19px "Archivo";text-align:center;padding:16px;border-radius:8px}
+.legs{display:flex;gap:6px;margin-top:10px}
+.leg{flex:1;border:2px solid #14285A;border-radius:4px;text-align:center;font:800 16px "Archivo";padding:6px 0;color:#5B3A8E}
+.leg.used{background:#14285A;color:#fff;position:relative}
+.stamp{position:absolute;right:14px;top:44px;transform:rotate(-8deg);border:3px solid #1E7A45;color:#1E7A45;font:800 16px "Archivo";letter-spacing:.08em;padding:4px 8px;border-radius:4px}
+.tabs{position:absolute;bottom:0;left:0;right:0;height:88px;background:#fff;border-top:1px solid #C9CEDA;display:flex;justify-content:space-around;padding-top:10px;font-size:14px;font-weight:600}
+.tabs span{display:flex;flex-direction:column;align-items:center;gap:4px;color:#5B647A}
+.tabs span i{width:26px;height:26px;border-radius:6px;background:#A7AEBE}
+.tabs .on{color:#14285A}.tabs .on i{background:#14285A}
+</style></head><body>
+<header class="wallet"><small>YOUR SCAM-CHECK WALLET</small><h1>Porch Watch</h1><p>Know the signs before they reach your door.</p><div class="stripe"></div></header>
+<main>
+<section class="coupon"><div class="head"><span>COUPON 1 · CHECK</span><span>READY</span></div><div class="inner"><h2>Check a message</h2><p>Paste the text or add a screenshot. We stamp a plain answer on it.</p><div class="btn">Start a check</div></div></section>
+<section class="coupon"><div class="head"><span>COUPON 2 · PRACTICE</span><span>3 LEGS LEFT</span></div><div class="inner"><h2>Spot the Scam</h2><div class="legs"><div class="leg used">1</div><div class="leg used">2</div><div class="leg">3</div><div class="leg">4</div><div class="leg">5</div></div></div></section>
+<section class="coupon"><div class="head"><span>LAST CHECK</span><span>OCT 18</span></div><div class="inner"><p style="margin:0;padding-right:110px">"Your package is held. Pay $1.99 to release…"</p><div class="stamp">SCAM · DON'T PAY</div></div></section>
+</main>
+<nav class="tabs"><span class="on"><i></i>Home</span><span><i></i>Check</span><span><i></i>Practice</span><span><i></i>Learn</span></nav>
+</body></html>
