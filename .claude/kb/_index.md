@@ -1,8 +1,8 @@
 # KB index (agent-only, terse)
-sync: e9d7b49 + uncommitted services/ai.ts callAI wiring (HEAD when KB last verified vs code; bump on every KB update)
+sync: e9d7b49 + uncommitted services/ai.ts callAI wiring, quiz unique scenario sampling/concurrent generation, Docker Gemini API server (HEAD when KB last verified vs code; bump on every KB update)
 
 ## App
-"Porch Watch" — Expo SDK57 RN app (pkg name congressional-app-chal-2026, Congressional App Challenge 2026). Audience: seniors. Purpose: AI-scam awareness. 4 tabs: Home, Scam Checker (paste text/screenshots→AI verdict), Spot the Scam (quiz: scam vs legit + explanation), AI Scams (static info). AI backend NOT implemented (global `callAI` stub throws).
+"Porch Watch" — Expo SDK57 RN app (pkg name congressional-app-chal-2026, Congressional App Challenge 2026). Audience: seniors. Purpose: AI-scam awareness. 4 tabs: Home, Scam Checker (paste text/screenshots→AI verdict), Spot the Scam (quiz: scam vs legit + explanation), AI Scams (static info). Docker Gemini API server in `server/`; Expo `callAI` remains stub/unconnected.
 
 ## Notes
 - [[arch]] routing, layouts, fonts/splash, state pattern
@@ -30,4 +30,7 @@ services/ai.ts           global callAI (STUB) + parseJsonReply, UNEXPECTED_REPLY
 types/scam-check.ts      ScamCheckImage/Input/Verdict/Result
 types/quiz.ts            QuizItemContent/QuizItem
 ```
-No tests. No utils/ dir. services/ holds only ai.ts.
+No app tests. `server/` has Node tests. No utils/ dir. services/ holds only ai.ts.
+
+## Standalone service
+`server/` — Dockerized Node API; Gemini key server-only; bearer-token guard; `GET /healthz`, `POST /v1/ai`; JSON/base64 image contract. See [[data]].

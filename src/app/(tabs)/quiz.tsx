@@ -59,16 +59,25 @@ const QUIZ_SCENARIOS = [
   "social media message from a friend",
   "email about a computer or account problem",
   "text message about a prize or refund",
-];
+] as const;
+
+type QuizScenario = (typeof QUIZ_SCENARIOS)[number];
+
+function selectQuizScenarios(): QuizScenario[] {
+  const scenarios = [...QUIZ_SCENARIOS];
+  for (let i = scenarios.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [scenarios[i], scenarios[j]] = [scenarios[j], scenarios[i]];
+  }
+  return scenarios.slice(0, QUIZ_LENGTH);
+}
 
 let nextQuizItemId = 0;
 
 // Text items only for now. TODO: image items from a hand-made set.
-async function generateQuizItem(): Promise<QuizItem> {
+async function generateQuizItem(scenario: QuizScenario): Promise<QuizItem> {
   // Decided here, not by the model: models can't pick 50/50 reliably.
   const isScam = Math.random() < 0.5;
-  const scenario =
-    QUIZ_SCENARIOS[Math.floor(Math.random() * QUIZ_SCENARIOS.length)];
 
   let reply: string;
   try {
@@ -111,15 +120,10 @@ export default function Quiz() {
     setState(initialState);
 
     try {
-      // Generate questions one at a time. If any fails, the whole quiz fails
-      // and "Try Again" rebuilds from scratch. TODO: if generateQuizItem
-      // calls are independent, use Promise.all (~5× faster); keep sequential
-      // only for rate limits or dedup, and say so here.
-      const items: QuizItem[] = [];
-      for (let i = 0; i < QUIZ_LENGTH; i++) {
-        const item = await generateQuizItem();
-        items.push(item);
-      }
+      // Assign distinct scenarios before making the independent requests.
+      const items = await Promise.all(
+        selectQuizScenarios().map((scenario) => generateQuizItem(scenario))
+      );
       // A newer run (double tap, StrictMode re-mount) or an unmount
       // superseded this one — applying it would wipe the player's progress.
       if (run !== latestRun.current) {

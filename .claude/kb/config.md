@@ -18,3 +18,6 @@ extends expo/tsconfig.base, strict, paths @/*→src/*, @/assets/*→assets/*.
 images/: icon, splash-icon, favicon, android-icon-*; template leftovers unused: expo-badge*, expo-logo, logo-glow, react-logo*, tutorial-web, tabIcons/{home,explore}(@2x,@3x). expo.icon/ (iOS icon composer).
 ## other
 ios/ android/ gitignored (CNG). .claude/settings.json enables expo plugin. .vscode: fixAll/organizeImports/sortMembers on save. README = stock create-expo-app.
+
+## server/
+Independent Docker build context for Gemini API (`docker build -t porch-watch-ai ./server`). Node 22 Alpine, port 8080, non-root. Secrets via runtime env/`--env-file`; `.env` ignored.
