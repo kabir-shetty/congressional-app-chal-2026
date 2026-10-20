@@ -211,7 +211,6 @@ export default function ScamChecker() {
 
       <Card>
         <View style={styles.field}>
-          <AppText variant="bodyStrong">The message</AppText>
           <TextInput
             style={styles.textInput}
             multiline
