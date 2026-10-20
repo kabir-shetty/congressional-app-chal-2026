@@ -63,7 +63,7 @@ export default function Index() {
             title="Start a check"
             icon="search"
             onPress={() => router.navigate("/check")}
-            fullWidth
+            align="stretch"
           />
         </Card>
 

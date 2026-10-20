@@ -22,7 +22,7 @@ app/(tabs)/index.tsx     Home (teal greeting band, check card, rule strip, group
 app/(tabs)/check.tsx     Scam checker (state local; submit; checkForScam→callAI)
 app/(tabs)/quiz.tsx      Spot-the-Scam quiz (state local; createQuiz 5 items; generateQuizItem→callAI)
 app/(tabs)/ai-scams.tsx  static article w/ instruction strips
-components/app-button.tsx       AppButton (filled|tonal, icon?, fullWidth?)
+components/app-button.tsx       AppButton (filled|tonal, icon?, align?, rounded?)
 components/app-text.tsx         AppText (variant, tone) — only text component
 components/card.tsx             Card (full-bleed section, top/bottom hairlines)
 components/inset.tsx            Inset (side padding for loose content)

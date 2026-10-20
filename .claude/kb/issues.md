@@ -10,6 +10,7 @@
 - Web: SymbolView loads Material Symbols font async → icons blank briefly on first paint.
 - Native chrome never visually verified (no simulator/emulator on dev machine): iOS/Android captures, Dynamic Type/font-scale large sizes, Android tab pill. Evidence so far = web build only (.impeccable/review/).
 - ai-scams.tsx `article` style repeats Card's surface/top-bottom border inline (needs per-section padding + full-width dividers, so not a Card).
+- AppButton ICON_GLYPH_INSET=3 measured on web (Material Symbols) only; SF Symbols on iOS unverified (may need 0 via Platform.OS). Final 21pt leading padding derived, not re-captured (check.tsx was mid-edit).
 - Splash/adaptive-icon art (assets/images) predates "The Pharmacist" redesign; splash bg has no dark variant.
 - package.json: reset-project script target missing; junk deps "all", "google-fonts", "ionicons".
 - README stock template.

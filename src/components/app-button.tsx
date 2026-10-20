@@ -9,6 +9,11 @@ import {
   useColors,
 } from "@/constants/theme";
 
+const ICON_SIZE = 24;
+// Material Symbols (Android/web) draw ~3pt inside a 24pt box (measured on
+// web); unverified for SF Symbols on iOS. See withIcon.
+const ICON_GLYPH_INSET = 3;
+
 // filled: the one main action on a screen. tonal: everything else.
 type AppButtonVariant = "filled" | "tonal";
 
@@ -18,8 +23,12 @@ type AppButtonProps = {
   disabled?: boolean;
   variant?: AppButtonVariant;
   icon?: IconName;
-  // Stretch to the container's width instead of hugging the label.
-  fullWidth?: boolean;
+  // start: hug the label at the leading edge. center: hug, centered.
+  // stretch: the container's full width.
+  align?: "start" | "center" | "stretch";
+  // Squircle corners. Opt-in exception to the Square Corner Rule
+  // (DESIGN.md); don't use by default.
+  rounded?: boolean;
 };
 
 // Large, text-labeled button used everywhere instead of RN's default
@@ -31,7 +40,8 @@ export function AppButton({
   disabled,
   variant = "filled",
   icon,
-  fullWidth,
+  align = "start",
+  rounded,
 }: AppButtonProps) {
   const styles = useStyles();
   const colors = useColors();
@@ -49,11 +59,13 @@ export function AppButton({
       style={({ pressed }) => [
         styles.base,
         disabled ? styles.disabled : styles[variant],
-        fullWidth ? styles.fullWidth : styles.hug,
+        styles[align],
+        icon && styles.withIcon,
+        rounded && styles.rounded,
         pressed && !disabled && styles.pressed,
       ]}
     >
-      {icon && <Icon name={icon} color={foreground} size={24} />}
+      {icon && <Icon name={icon} color={foreground} size={ICON_SIZE} />}
       <Text
         style={[styles.text, disabled ? styles.disabledText : styles[`${variant}Text`]]}
       >
@@ -89,11 +101,25 @@ const useStyles = makeStyles((c) => ({
   tonalText: {
     color: c.primary,
   },
-  hug: {
+  // The glyph's own whitespace adds to the leading padding; subtracting it
+  // makes the gap before the icon equal the gap after the label.
+  withIcon: {
+    paddingStart: spacing.lg - ICON_GLYPH_INSET,
+  },
+  start: {
     alignSelf: "flex-start",
   },
-  fullWidth: {
+  center: {
+    alignSelf: "center",
+  },
+  stretch: {
     alignSelf: "stretch",
+  },
+  // borderCurve "continuous" draws a true squircle on iOS; Android falls
+  // back to a plain rounded rectangle. 16 matches the Android tab pill.
+  rounded: {
+    borderRadius: 16,
+    borderCurve: "continuous",
   },
   text: {
     ...typography.bodyStrong,

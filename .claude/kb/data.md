@@ -5,9 +5,9 @@ ScamCheckImage{uri,width,height} · ScamCheckInput{text, images:ScamCheckImage[]
 QuizItemContent = {type:"text",text} | {type:"image",uri,width,height} · QuizItem{id, content, isScam, explanation:string}
 
 ## check.tsx state (was useScamCheck hook, now component-local)
-ScamCheckStatus = idle|loading|success|error; ScamCheckState {status,result,error}.
-- handleSubmit: async, set loading → await checkForScam({text,images}) → success|error. Reset clears checkState + text + images.
-`checkForScam(input)` (file-private): callAI({system:SCAM_CHECK_SYSTEM, prompt:text.trim()||"(No text — see the attached screenshots.)", images}) in local try/catch (console.warn + throw "Couldn't reach the checker. Please try again.") → parseJsonReply → `toScamCheckResult` (verdict ∈ verdictCopy keys, confidence number in [0,1], explanation string; else throw UNEXPECTED_REPLY_MESSAGE).
+ScamCheckStatus = idle|loading|success; ScamCheckState {status,result} (no error state).
+- handleSubmit: async, set loading → await checkForScam({text,images}) → success; on throw `console.error("Scam check failed:", caught)` (whole error) + `Alert.alert("Couldn't check that", "Please check your internet connection, then try again.")` + reset to initialCheckState (no in-screen error UI, user request). Reset clears checkState + text + images.
+`checkForScam(input)` (file-private): callAI({system:SCAM_CHECK_SYSTEM, prompt:text.trim()||"(No text — see the attached screenshots.)", images}) (no try/catch; errors propagate to handleSubmit) → parseJsonReply → `toScamCheckResult` (verdict ∈ verdictCopy keys, confidence number in [0,1], explanation string; else throw UNEXPECTED_REPLY_MESSAGE).
 
 ## quiz.tsx state (was useQuiz hook, now component-local)
 QUIZ_LENGTH=5. QuizStatus = preparing|prepared|asking|answered|finished|error; QuizState {status,items,index,error,score,lastAnswerCorrect}.

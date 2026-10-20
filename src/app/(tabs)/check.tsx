@@ -37,21 +37,19 @@ import type {
   ScamVerdict,
 } from "@/types/scam-check";
 
-// Tracks one checkForScam() call so the UI can show loading, the verdict,
-// or the error. Kept separate from the input state so "Check another" can
-// reset both together.
-type ScamCheckStatus = "idle" | "loading" | "success" | "error";
+// Tracks one checkForScam() call so the UI can show loading or the
+// verdict. Kept separate from the input state so "Check another" can reset
+// both together. Failures have no UI state; they log + show a native alert.
+type ScamCheckStatus = "idle" | "loading" | "success";
 
 type ScamCheckState = {
   status: ScamCheckStatus;
   result: ScamCheckResult | null;
-  error: string | null;
 };
 
 const initialCheckState: ScamCheckState = {
   status: "idle",
   result: null,
-  error: null,
 };
 
 // Plain-language framing for each verdict and the instruction-strip tone
@@ -86,18 +84,11 @@ Write the explanation in two or three short, plain sentences with no jargon.`;
 async function checkForScam(
   input: ScamCheckInput
 ): Promise<ScamCheckResult> {
-  let reply: string;
-  try {
-    reply = await callAI({
-      system: SCAM_CHECK_SYSTEM,
-      prompt: input.text.trim() || "(No text — see the attached screenshots.)",
-      images: input.images,
-    });
-  } catch (caught) {
-    // Network/model failures carry technical messages; show a plain one.
-    console.warn("checkForScam: callAI failed", caught);
-    Alert.alert("Couldn't reach the checker. Please try again.");
-  }
+  const reply = await callAI({
+    system: SCAM_CHECK_SYSTEM,
+    prompt: input.text.trim() || "(No text — see the attached screenshots.)",
+    images: input.images,
+  });
   return toScamCheckResult(parseJsonReply(reply));
 }
 
@@ -130,7 +121,7 @@ export default function ScamChecker() {
   const [checkState, setCheckState] = useState<ScamCheckState>(
     initialCheckState
   );
-  const { status, result, error } = checkState;
+  const { status, result } = checkState;
 
   const pickImage = useCallback(async () => {
     // Must request permission before launching the picker, and must check
@@ -173,20 +164,21 @@ export default function ScamChecker() {
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    setCheckState({ status: "loading", result: null, error: null });
+    setCheckState({ status: "loading", result: null });
 
     try {
       const checkResult = await checkForScam({ text, images });
-      setCheckState({ status: "success", result: checkResult, error: null });
+      setCheckState({ status: "success", result: checkResult });
     } catch (caught) {
-      // checkForScam throws plain Errors today; the instanceof check is just
-      // a safe fallback in case that ever changes.
-      setCheckState({
-        status: "error",
-        result: null,
-        error:
-          caught instanceof Error ? caught.message : "Something went wrong.",
-      });
+      // Full detail goes to the console (logged whole so the stack and cause
+      // survive); the user gets one plain native alert, and the form stays
+      // filled in so they can just tap "Check for Scam" again.
+      console.error("Scam check failed:", caught);
+      Alert.alert(
+        "Couldn't check that",
+        "Please check your internet connection, then try again."
+      );
+      setCheckState(initialCheckState);
     }
   }, [text, images]);
 
@@ -207,10 +199,8 @@ export default function ScamChecker() {
   useEffect(() => {
     if (status === "success" && verdict) {
       AccessibilityInfo.announceForAccessibility(verdict.label);
-    } else if (status === "error" && error) {
-      AccessibilityInfo.announceForAccessibility(error);
     }
-  }, [status, verdict, error]);
+  }, [status, verdict]);
 
   return (
     <Screen>
@@ -253,7 +243,7 @@ export default function ScamChecker() {
                   variant="tonal"
                   onPress={() => removeImage(image.uri)}
                   disabled={isLoading}
-                  fullWidth
+                  align="stretch"
                 />
               </View>
             ))}
@@ -266,6 +256,8 @@ export default function ScamChecker() {
           variant="tonal"
           onPress={pickImage}
           disabled={isLoading}
+          align="center"
+          rounded
         />
       </Card>
 
@@ -275,7 +267,7 @@ export default function ScamChecker() {
           icon="search"
           onPress={handleSubmit}
           disabled={!canSubmit}
-          fullWidth
+          align="stretch"
         />
         {!hasInput && (
           <AppText variant="callout" tone="textMuted" style={styles.helper}>
@@ -289,12 +281,6 @@ export default function ScamChecker() {
           <ActivityIndicator color={colors.primary} />
           <AppText tone="textMuted">Reading your message...</AppText>
         </Inset>
-      )}
-
-      {status === "error" && error && (
-        <InstructionStrip tone="warning" label="That didn't work">
-          {error}
-        </InstructionStrip>
       )}
 
       {status === "success" && result && verdict && (
@@ -316,7 +302,7 @@ export default function ScamChecker() {
             icon="refresh"
             variant="tonal"
             onPress={handleReset}
-            fullWidth
+            align="stretch"
           />
         </Card>
       )}

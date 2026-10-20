@@ -187,7 +187,7 @@ A single green-teal voice over cool neutrals, with three status hues held in res
 
 ### Tertiary (status, reserved)
 - **Prescription Red** (`danger` / `danger-tint`): "likely scam" verdict strip and the "Stop if you see" red-flag strip.
-- **Caution Amber** (`warning` / `warning-tint`): "hard to say" verdicts, connection errors, and the Home "Before you reply" rule.
+- **Caution Amber** (`warning` / `warning-tint`): "hard to say" verdicts, quiz load errors, and the Home "Before you reply" rule.
 - **Safe Green** (`success` / `success-tint`): "likely safe" verdicts and the per-topic advice strips on AI Scams.
 - **On-status** (`on-status`): the label text on a solid status band (white in light, near-black in dark against the lighter dark-scheme bands).
 
@@ -240,7 +240,7 @@ Sections are full-bleed: a Card, a grouped list, or the AI Scams article touches
 
 Spacing follows a 4-based scale (`xs` 4, `sm` 8, `md` 16, `lg` 24, `xl` 32). Inside a section, children stack at 16 with 24 above and below and 16 at the sides. A heading and its one-line subtitle sit 4 apart. Answer buttons that a shaky tap could confuse are separated by 24 rather than the usual 8 to 16.
 
-Full-width buttons (`fullWidth`) carry the screen's main action and binary answers; hugging buttons sit at the leading edge for secondary in-section actions. The tab bar is 68 plus the bottom safe-area inset.
+Full-width buttons (`align="stretch"`) carry the screen's main action and binary answers; hugging buttons sit at the leading edge (`align="start"`, default) for secondary in-section actions, or centered (`align="center"`) where the user asked (the checker's "Add a screenshot"). The tab bar is 68 plus the bottom safe-area inset.
 
 ### Named Rules
 **The Edge-to-Edge Section Rule.** Containers span the full screen width and are ruled by a 1px hairline above and below, never on the sides. Their content keeps the `gutter` side margin (16, `gutter` in theme.ts) from within.
@@ -263,13 +263,13 @@ Square, everywhere. There is no corner radius and no radius token: sections, but
 The single exception is the Android-only Material tab indicator, a 64x32 pill (radius 16) behind the active tab icon. It is the platform's own convention and is not a shape to reuse elsewhere.
 
 ### Named Rules
-**The Square Corner Rule.** New surfaces and controls take no border radius. The Android tab pill is the only rounded shape and stays inside the tab bar.
+**The Square Corner Rule.** New surfaces and controls take no border radius. Two exceptions only: the Android tab pill (inside the tab bar), and the checker's "Add a screenshot" tonal button, a squircle by user request (`rounded`: radius 16 with iOS `borderCurve: "continuous"`; plain rounded on Android). Don't extend `rounded` to other controls without a request.
 
 ## Components
 
 ### Buttons
 Large, labeled, and unmistakable.
-- **Shape:** square corners, at least 56 tall, 24 horizontal padding, optional 24 icon leading the label at 8 gap.
+- **Shape:** square corners (except the `rounded` squircle; see the Square Corner Rule), at least 56 tall, 24 horizontal padding, optional 24 icon leading the label at 8 gap. With an icon the leading padding drops to 21 (24 minus the ~3 of whitespace a glyph carries inside its 24 box, measured), so the gap before the icon equals the gap after the label.
 - **Filled:** primary background, on-primary label in bodyStrong. The one main action on a screen ("Check for Scam", "Start quiz").
 - **Tonal:** mint-wash background, teal label. Everything else, including quiz answers and "Check another".
 - **Pressed:** opacity drops to 0.75.
@@ -317,7 +317,7 @@ A pharmacy-label panel and the app's one recurring signature. A solid status-col
 - **Don't** use red, amber, or green outside instruction strips and verdict text.
 - **Don't** put an uppercase label above a heading as an eyebrow or kicker; the `label` style belongs to the strip band.
 - **Don't** add colored side borders to cards or strips.
-- **Don't** round corners on any surface or control; the Android tab pill is the only radius.
+- **Don't** round corners on any surface or control; the Android tab pill and the "Add a screenshot" squircle are the only radii.
 - **Don't** float a section with side margins or side borders; sections touch both screen edges.
 - **Don't** ship an icon-only control.
 - **Don't** nest cards.

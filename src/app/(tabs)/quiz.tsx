@@ -238,7 +238,12 @@ export default function Quiz() {
             Some are scams and some aren't. After each guess, you'll see what
             gave it away.
           </AppText>
-          <AppButton title="Start quiz" icon="play" onPress={start} fullWidth />
+          <AppButton
+            title="Start quiz"
+            icon="play"
+            onPress={start}
+            align="stretch"
+          />
         </Card>
       )}
 
@@ -251,7 +256,7 @@ export default function Quiz() {
             title="Try again"
             icon="refresh"
             onPress={createQuiz}
-            fullWidth
+            align="stretch"
           />
         </Card>
       )}
@@ -270,7 +275,7 @@ export default function Quiz() {
             title="Play again"
             icon="refresh"
             onPress={createQuiz}
-            fullWidth
+            align="stretch"
           />
         </Card>
       )}
@@ -318,14 +323,14 @@ export default function Quiz() {
                 icon="flag"
                 variant="tonal"
                 onPress={() => answer(true)}
-                fullWidth
+                align="stretch"
               />
               <AppButton
                 title="It's not a scam"
                 icon="check"
                 variant="tonal"
                 onPress={() => answer(false)}
-                fullWidth
+                align="stretch"
               />
             </Inset>
           )}
@@ -350,7 +355,7 @@ export default function Quiz() {
                 title={isLastQuestion ? "See my score" : "Next question"}
                 icon="arrow"
                 onPress={next}
-                fullWidth
+                align="stretch"
               />
             </Card>
           )}
