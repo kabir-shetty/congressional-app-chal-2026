@@ -16,6 +16,8 @@ const icons = {
   refresh: { ios: "arrow.clockwise", android: "refresh", web: "refresh" },
   play: { ios: "play.fill", android: "play_arrow", web: "play_arrow" },
   flag: { ios: "flag.fill", android: "flag", web: "flag" },
+  moon: { ios: "moon.fill", android: "dark_mode", web: "dark_mode" },
+  sun: { ios: "sun.max.fill", android: "light_mode", web: "light_mode" },
 } satisfies Record<string, SymbolViewProps["name"]>;
 
 export type IconName = keyof typeof icons;
@@ -26,8 +28,9 @@ type IconProps = {
   size?: number;
 };
 
-// Icons are decorative: every one sits next to a text label, so they're
-// hidden from screen readers to avoid announcing them twice.
+// Icons are decorative: each sits beside a text label or inside a control
+// that carries its own accessibilityLabel, so they're hidden from screen
+// readers to avoid announcing them twice.
 export function Icon({ name, color, size = 24 }: IconProps) {
   return (
     <View

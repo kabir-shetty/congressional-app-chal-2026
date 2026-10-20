@@ -1,5 +1,5 @@
 # KB index (agent-only, terse)
-sync: e9d7b49 + uncommitted services/ai.ts callAI wiring, quiz unique scenario sampling/concurrent generation, Docker Gemini API server, + uncommitted "The Pharmacist" design-system refactor (theme/makeStyles/SchemeProvider/AppText/InstructionStrip, light+dark) on 5b97167 (HEAD when KB last verified vs code; bump on every KB update)
+sync: e9d7b49 + uncommitted services/ai.ts callAI wiring, quiz unique scenario sampling/concurrent generation, Docker Gemini API server, + uncommitted dark/light toggle (scheme-provider override, scheme-toggle) + uncommitted "The Pharmacist" design-system refactor (theme/makeStyles/SchemeProvider/AppText/InstructionStrip, light+dark) on 5b97167 (HEAD when KB last verified vs code; bump on every KB update)
 
 ## App
 "Porch Watch" — Expo SDK57 RN app (pkg name congressional-app-chal-2026, Congressional App Challenge 2026). Audience: seniors. Purpose: AI-scam awareness. 4 tabs: Home, Scam Checker (paste text/screenshots→AI verdict), Spot the Scam (quiz: scam vs legit + explanation), AI Scams (static info). Docker Gemini API server in `server/`; Expo `callAI` remains stub/unconnected.
@@ -30,7 +30,8 @@ components/icon.tsx             Icon (expo-symbols map)
 components/instruction-strip.tsx InstructionStrip (signature "What to do" label)
 components/list-group.tsx       ListGroup/ListRow (grouped links)
 components/meter.tsx            Meter progress bar
-components/scheme-provider.tsx  SchemeProvider (light/dark, web hydration-safe)
+components/scheme-provider.tsx  SchemeProvider (light/dark, session override, web hydration-safe) + useSchemeControl
+components/scheme-toggle.tsx    SchemeToggle (moon/sun icon button; tabs headerRight + Home band)
 components/screen.tsx           Screen scroll shell (header? slot)
 components/screen-intro.tsx     ScreenIntro title+subtitle
 constants/theme.ts       Palette light/dark, SchemeContext, useColors, makeStyles, spacing, typography, minTouchTarget (no radius: all square)

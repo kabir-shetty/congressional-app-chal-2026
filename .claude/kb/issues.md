@@ -14,3 +14,4 @@
 - Splash/adaptive-icon art (assets/images) predates "The Pharmacist" redesign; splash bg has no dark variant.
 - package.json: reset-project script target missing; junk deps "all", "google-fonts", "ionicons".
 - README stock template.
+- dark/light choice not persisted (no storage dep); resets per launch

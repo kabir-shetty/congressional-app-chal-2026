@@ -3,6 +3,7 @@ import { Platform, View, type ColorValue } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Icon, type IconName } from "@/components/icon";
+import { SchemeToggle } from "@/components/scheme-toggle";
 import { makeStyles, spacing, typography, useColors } from "@/constants/theme";
 
 // Icon 26 (in a 32 pill on Android) + 16pt label + paddingTop spacing.sm,
@@ -55,6 +56,9 @@ export default function TabsLayout() {
         headerTintColor: colors.onHeader,
         headerTitleStyle: styles.headerTitle,
         headerShadowVisible: false,
+        headerRight: () => <SchemeToggle />,
+        // The toggle already carries its own side space.
+        headerRightContainerStyle: { paddingEnd: 0 },
         sceneStyle: styles.scene,
       }}
     >

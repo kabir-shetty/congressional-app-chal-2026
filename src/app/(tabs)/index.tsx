@@ -8,6 +8,7 @@ import { Card } from "@/components/card";
 import { InstructionStrip } from "@/components/instruction-strip";
 import { ListGroup, ListRow } from "@/components/list-group";
 import { Screen } from "@/components/screen";
+import { SchemeToggle } from "@/components/scheme-toggle";
 import { makeStyles, spacing } from "@/constants/theme";
 
 // Landing screen: a welcoming teal band with the rule that stops most
@@ -27,6 +28,9 @@ export default function Index() {
         header={
           <>
             <View style={styles.band}>
+              <View style={styles.toggleRow}>
+                <SchemeToggle />
+              </View>
               <AppText
                 variant="largeTitle"
                 tone="onHeader"
@@ -97,6 +101,11 @@ const useStyles = makeStyles((c) => ({
   // Screen's top padding + this = lg, matching the gap between sections.
   firstSection: {
     marginTop: spacing.lg - spacing.md,
+  },
+  // Pulls the toggle's touch padding into the band's side gutter.
+  toggleRow: {
+    alignItems: "flex-end",
+    marginEnd: -spacing.md,
   },
   band: {
     gap: spacing.sm,
