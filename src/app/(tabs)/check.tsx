@@ -96,7 +96,7 @@ async function checkForScam(
   } catch (caught) {
     // Network/model failures carry technical messages; show a plain one.
     console.warn("checkForScam: callAI failed", caught);
-    throw new Error("Couldn't reach the checker. Please try again.");
+    Alert.alert("Couldn't reach the checker. Please try again.");
   }
   return toScamCheckResult(parseJsonReply(reply));
 }

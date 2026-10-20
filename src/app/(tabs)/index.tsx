@@ -52,7 +52,7 @@ export default function Index() {
           </>
         }
       >
-        <Card>
+        <Card style={styles.firstSection}>
           <AppText variant="title" accessibilityRole="header">
             Check a message
           </AppText>
@@ -93,6 +93,10 @@ const useStyles = makeStyles((c) => ({
   },
   attached: {
     borderTopWidth: 0,
+  },
+  // Screen's top padding + this = lg, matching the gap between sections.
+  firstSection: {
+    marginTop: spacing.lg - spacing.md,
   },
   band: {
     gap: spacing.sm,
