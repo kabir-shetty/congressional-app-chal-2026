@@ -10,10 +10,10 @@ import { ListGroup, ListRow } from "@/components/list-group";
 import { Screen } from "@/components/screen";
 import { makeStyles, spacing } from "@/constants/theme";
 
-// Landing screen: a welcoming teal band, the one main action (check a
-// message), the rule that stops most scams, then the other two tabs as a
-// native grouped list. With typedRoutes on, a typo in an href is a compile
-// error, not a dead link.
+// Landing screen: a welcoming teal band with the rule that stops most
+// scams attached beneath it, then the one main action (check a message),
+// then the other two tabs as a native grouped list. With typedRoutes on,
+// a typo in an href is a compile error, not a dead link.
 export default function Index() {
   const styles = useStyles();
   const { top } = useSafeAreaInsets();
@@ -25,18 +25,31 @@ export default function Index() {
       <View style={[styles.statusInset, { height: top }]} />
       <Screen
         header={
-          <View style={styles.band}>
-            <AppText
-              variant="largeTitle"
-              tone="onHeader"
-              accessibilityRole="header"
-            >
-              Hello. How can we help today?
-            </AppText>
-            <AppText variant="callout" tone="onHeaderMuted">
-              Porch Watch · Know the signs before they reach your door.
-            </AppText>
-          </View>
+          <>
+            <View style={styles.band}>
+              <AppText
+                variant="largeTitle"
+                tone="onHeader"
+                accessibilityRole="header"
+              >
+                Hello. How can we help today?
+              </AppText>
+              <AppText variant="callout" tone="onHeaderMuted">
+                Porch Watch · Know the signs before they reach your door.
+              </AppText>
+            </View>
+            {/* Attached directly under the greeting, no gap, so the rule
+                reads as part of the welcome rather than one more section. */}
+            <Card style={styles.attached}>
+              <AppText variant="headline" accessibilityRole="header">
+                Before you reply to anyone
+              </AppText>
+              <InstructionStrip tone="warning" bleed>
+                Never pay with gift cards, wire transfers, or cryptocurrency.
+                Real banks, agencies, and family won't ask you to.
+              </InstructionStrip>
+            </Card>
+          </>
         }
       >
         <Card>
@@ -52,16 +65,6 @@ export default function Index() {
             onPress={() => router.navigate("/check")}
             fullWidth
           />
-        </Card>
-
-        <Card>
-          <AppText variant="headline" accessibilityRole="header">
-            Before you reply to anyone
-          </AppText>
-          <InstructionStrip tone="warning" bleed>
-            Never pay with gift cards, wire transfers, or cryptocurrency.
-            Real banks, agencies, and family won't ask you to.
-          </InstructionStrip>
         </Card>
 
         <ListGroup>
@@ -87,6 +90,9 @@ const useStyles = makeStyles((c) => ({
   },
   statusInset: {
     backgroundColor: c.header,
+  },
+  attached: {
+    borderTopWidth: 0,
   },
   band: {
     gap: spacing.sm,
