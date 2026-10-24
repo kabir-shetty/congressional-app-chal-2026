@@ -41,10 +41,9 @@ Success response: `{ "text": "<Gemini response text>" }`. Errors use
 `{ "error": { "message": "..." } }`. Gemini keys are never returned to clients
 or included in request URLs.
 
-The current Expo client sends local image URIs and does not yet call this
-endpoint. Client networking, image encoding, and deployment URL configuration
-remain separate integration work. Do not embed a production `API_TOKEN` in a
-mobile app; deploy behind caller authentication and rate limits before public
-use.
+The Expo client calls this endpoint from `src/services/ai.ts`, configured by
+`EXPO_PUBLIC_AI_API_URL` and `EXPO_PUBLIC_AI_API_TOKEN` (see root
+`.env.example`). Do not embed a production `API_TOKEN` in a mobile app; deploy
+behind caller authentication and rate limits before public use.
 
 Run service tests with `npm test` from this directory.

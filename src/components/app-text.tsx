@@ -9,15 +9,7 @@ import {
 
 type TextTone = Extract<
   keyof Palette,
-  | "text"
-  | "textMuted"
-  | "primary"
-  | "danger"
-  | "warning"
-  | "success"
-  | "onHeader"
-  | "onHeaderMuted"
-  | "onStatus"
+  "text" | "textMuted" | "primary" | "danger" | "warning" | "success"
 >;
 
 type AppTextProps = TextProps & {
@@ -29,16 +21,45 @@ type AppTextProps = TextProps & {
 // from the active scheme. `style` merges last for layout tweaks.
 export function AppText({
   variant = "body",
-  tone = "text",
+  tone,
   style,
   ...props
 }: AppTextProps) {
   const toneStyles = useToneStyles();
+  // Body copy reads in the softer muted tone; headings in full-strength text.
+  const defaultTone =
+    variant === "body" || variant === "callout" ? "textMuted" : "text";
   return (
     <Text
-      style={[typeStyles[variant], toneStyles[tone], style]}
+      style={[typeStyles[variant], toneStyles[tone ?? defaultTone], style]}
       {...props}
     />
+  );
+}
+
+type HeadlineProps = TextProps & {
+  variant?: "largeTitle" | "title";
+  // Plain lead-in, then the key words in the accent blue.
+  lead: string;
+  accent: string;
+};
+
+export function Headline({
+  variant = "title",
+  lead,
+  accent,
+  style,
+  ...props
+}: HeadlineProps) {
+  const toneStyles = useToneStyles();
+  return (
+    <Text
+      accessibilityRole="header"
+      style={[typeStyles[variant], toneStyles.text, style]}
+      {...props}
+    >
+      {lead} <Text style={toneStyles.primary}>{accent}</Text>
+    </Text>
   );
 }
 
@@ -53,7 +74,4 @@ const useToneStyles = makeStyles((c) => ({
   danger: { color: c.danger },
   warning: { color: c.warning },
   success: { color: c.success },
-  onHeader: { color: c.onHeader },
-  onHeaderMuted: { color: c.onHeaderMuted },
-  onStatus: { color: c.onStatus },
 }));

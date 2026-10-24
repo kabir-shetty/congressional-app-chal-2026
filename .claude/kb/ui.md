@@ -1,25 +1,26 @@
 # ui
-Direction "The Pharmacist" (impeccable; contract `.impeccable/surfaces/src-app-tabs-index-tsx.md`, system doc `DESIGN.md`): kind/expert/calm; teal shell, cool white-green ground, full-bleed white sections ruled top/bottom with hairlines (no shadows, NO corner radius anywhere — user request "everything square"; exceptions: Android tab pill, checker "Add a screenshot" squircle), system fonts (SF/Roboto, follow OS text size), status hues only in instruction strips/verdicts. Light + dark follow phone. Craft bans: eyebrows/kickers, colored side borders, matching icon-card grids, nested cards.
+Direction "Calm blue": minimal, professional, trust. White + pale blue surfaces, one trust blue for everything interactive/key, navy text, hairline-bordered cards, flat buttons, no shadows/shape art/glow; Atkinson Hyperlegible only. Two minimal charts (one color). Dark = same blue on deep navy. Supersedes Porch geometry / Dark Luxury (`claude-design/`, root DESIGN.md, `.impeccable/` stale).
+Seniors/a11y (PRODUCT.md): body 20, min 16, touch 56, text ≥4.5:1 (verified both schemes), icons beside text, charts always described in text.
 
 ## constants/theme.ts
-`Palette` keys: background surface surfaceTint text textMuted border(decorative) borderStrong(≥3:1) primary onPrimary header onHeader onHeaderMuted danger dangerTint warning warningTint success successTint onStatus.
-light: bg #F4F8F7 surface #FFF tint #E3F0ED text #1F2328 muted #4F5B66 border #D7E4E1 borderStrong #7C8C89 primary/header #0B6E64 onPrimary/onHeader #FFF onHeaderMuted #D3ECE8 danger #B42318/#FDECEA warning #8A5300/#FFF3D6 success #1E6B3A/#E5F3E9 onStatus #FFF.
-dark: bg #0E1615 surface #17211F tint #1F302D text #E8EEED muted #A9B7B4 border #2A3835 borderStrong #71837F primary #5CC4B6 onPrimary #062320 header #0B4F48 onHeader #FFF onHeaderMuted #BFE0DB danger #FF8A7A/#3A1714 warning #F2C14E/#33280C success #6FD58F/#12301D onStatus #121212.
-All text pairs ≥4.5:1 both schemes (verified).
-- `ColorScheme` "light"|"dark"; `SchemeContext` (createContext "light"); `useColors()` → Palette via context.
-- `makeStyles(factory(c) => styles)` → hook; both schemes' StyleSheets built at module load, hook picks via context. Pattern: `const useStyles = makeStyles((c) => ({...}))` at file bottom, `const styles = useStyles()` in component.
-- spacing xs4 sm8 md16 lg24 xl32 · `gutter` = spacing.md (side margin: Card/Inset/ScreenIntro/article sections px, strip bleed = -gutter, strip inner px) · `typography` (TextStyle presets, `TypographyVariant`): largeTitle 32/38/800 · title 26/32/700 · headline 22/28/700 · body 20/28/400 · bodyStrong 20/28/600 · callout 18/25 · label 16/20/700 +0.8 uppercase · minTouchTarget 56. (No radius token.)
+`Palette`: background surface card text textMuted border borderStrong(≥3:1 on card) primary onPrimary primaryTint track danger/dangerTint warning/warningTint success/successTint.
+light: bg #FFF surface #F3F8FD card #FFF text #0F2744 muted #475A73 border #DCE7F3 borderStrong #7B93B0 primary #1D5FB8 onPrimary #FFF primaryTint #E3EEFB track #DCE7F3 danger #B42318/#FDECEA warning #8A5300/#FFF4DC success #1B7048/#E6F4EC.
+dark: bg #0B1626 surface #10203A card #12233C text #EAF1FA muted #A9BBD2 border #223A59 borderStrong #6F89AB primary #74B2F5 onPrimary #08203F primaryTint #1B3556 track #27415F danger #FF8D7B/#3A1D1B warning #F5C25B/#33290F success #5ED69A/#143325.
+- `SchemeContext` default "light"; `useColors()`; `makeStyles(c=>styles)` both-scheme sheets at load.
+- spacing xs4 sm8 md16 lg24 xl32 xxl48 · `gutter`24 · `radius` sm8 md12 lg16 pill999 · `minTouchTarget`56.
+- `fonts` regular AtkinsonHyperlegible_400Regular, bold _700Bold (loaded in app/_layout). `typography`: largeTitle 38/44 bold · title 28/34 · headline 22/28 · body 20/30 · bodyStrong 20/28 bold · callout 18/26 · label 16/20 bold +1 uppercase.
 
 ## components (named exports)
-- `SchemeProvider` (scheme-provider.tsx): scheme = override ?? useColorScheme (override null until toggle; in-memory, session only, NOT persisted; pinned thereafter) → SchemeContext + SchemeControlContext; `useSchemeControl()` → {scheme, toggle}. on web holds "light" until mounted (static prerender hydration mismatch), native immediate. Wraps root Stack.
-- `AppText({variant?="body", tone?="text"} & TextProps)` only text component; tones text textMuted primary danger warning success onHeader onHeaderMuted onStatus (precomputed tone styles). Raw Text only inside AppButton.
-- `AppButton({title,onPress,disabled?,variant?="filled"|"tonal",icon?,align?="start"|"center"|"stretch",rounded?})` role button+state; square; minHeight 56, row gap sm, px lg (with icon: paddingStart lg - ICON_GLYPH_INSET(3) = 21; measured glyph whitespace → equal side gaps), borderWidth 2 transparent (reserved); align → styles[align] (start flex-start / center / stretch); rounded → borderRadius 16 + borderCurve continuous (iOS squircle; ONLY on checker "Add a screenshot", user request); filled bg primary/onPrimary, tonal bg surfaceTint/primary; disabled = transparent bg + borderColor border, textMuted (no opacity); pressed .75. Icon 24.
-- `Card(ViewProps)` full-width section: gap md, px md, py lg, surface, borderTop/Bottom 1 border (no side borders), square. Never nest.
-- `Inset(ViewProps)` px gutter wrapper for loose content between sections (Screen has no side padding).
-- `InstructionStrip({tone:"danger"|"warning"|"success", label?="What to do", bleed?, children:string})` SIGNATURE: square; solid status band (label variant, onStatus) over tinted body (body text). `bleed` → marginHorizontal -gutter to span full width inside a md-padded section (use whenever inside Card/article section; omit when a direct Screen child). Export `StatusTone`.
-- `ListGroup({children})` full-width grouped list (surface, borderTop/Bottom border, hairline separators inset md). `ListRow({href,title,detail})` Link asChild Pressable role link; bodyStrong title + callout muted detail + chevron; pressed bg surfaceTint; minHeight 72.
-- `Meter({value 0-1, label})` 8px square track surfaceTint, fill primary; role progressbar.
-- `Screen({header?, children})` ScrollView bg background, keyboardShouldPersistTaps handled, web hides scroll indicator; `header` renders full-bleed above inner content View (pt md, pb xl, gap lg, NO side padding).
-- `ScreenIntro({title,subtitle})` Inset w/ title variant (role header) + muted body; gap xs.
-- `Icon({name, color (required), size?=24})` SymbolView map (ios SF / android+web Material), a11y-hidden. Keys: home search quiz sparkles addPhoto check chevron arrow refresh play flag moon sun.
-- `SchemeToggle()` Pressable role button, label "Switch to dark/light mode", Icon 28 onHeader (sun in dark, moon in light), minWidth 56 × height 44 (native header height) + hitSlop 6; used in tabs `headerRight` (headerRightContainerStyle paddingEnd 0) and Home band (toggleRow, marginEnd -md).
+- `SchemeProvider`/`useSchemeControl()` {scheme,toggle}: scheme = override ?? system (in-memory, NOT persisted); web holds "light" until mounted.
+- `SchemeToggle`: pill (primaryTint bg, height 40 + hitSlop→56) Icon sun/moon + callout "Light"/"Dark" (scale cap 1.3); a11y "Switch to light/dark mode".
+- `AppText({variant?="body", tone?})` default tone body/callout→textMuted else text; tones text textMuted primary danger warning success. `Headline({variant?="title"|"largeTitle", lead, accent})` role header; accent in primary. Note: pass tone="text" for primary content text (message, explanation).
+- `SectionLabel({children})` label variant primary.
+- `AppButton({title,onPress,disabled?,variant?="primary"|"secondary",icon?,align?})` Pressable role button; radius 12, minH 56, border 1.5; primary solid primary/onPrimary; secondary card bg + borderStrong border + primary text; disabled surface bg/border, textMuted; pressed opacity .8; align on the Pressable.
+- `Card({index?=0}&ViewProps)` FadeInDown 400ms delay index*80; margin gutter, padding 24, gap 16, radius 16, 1px border, card bg, no shadow. Never nest.
+- `FeatureCard({href,icon,title,detail,index?})` Card padding0; link row: 52 primaryTint chip + Icon 26, headline + callout, chevron; pressed bg surface; a11y label "title. detail".
+- `Inset` px gutter. `InstructionStrip({tone,label?="What to do",children})` SIGNATURE: tinted panel radius 12, uppercase label in tone color + sentence (text tone). `StatusTone`.
+- `ConfidenceBar({value 0-1,label})` (charts.tsx): "{label}: N%" + 12px pill track/fill primary + "Not sure"/"Very sure" ends; accessible label "{label}: N%".
+- `StepChart({results:boolean[],total,current:number|null})`: one column per question, height encodes: unanswered 16 (surface, borderStrong outline) < missed 28 (primary outline) < right 48 (solid primary) < current 56 (primaryTint, only while asking); text summary "{right} right[, {missed} missed]" + "{total} questions"; a11y label summary.
+- `Screen({children})` bg background: fixed top bar (safe-area top; Icon shield + "Porch Watch" headline (1 line, scale cap 1.15) left, SchemeToggle right; hairline when scrolled >8) above ScrollView (content pt md, pb xxl, gap lg; no side padding).
+- `ScreenIntro({label,lead,accent,subtitle})` SectionLabel + Headline + body.
+- `Icon({name,color,size?=24})` SymbolView map. Keys: home search quiz sparkles addPhoto check chevron shield arrow refresh play flag moon sun.

@@ -13,20 +13,22 @@ import {
 import { AppButton } from "@/components/app-button";
 import { AppText } from "@/components/app-text";
 import { Card } from "@/components/card";
+import { ConfidenceBar } from "@/components/charts";
 import { Inset } from "@/components/inset";
 import { InstructionStrip, type StatusTone } from "@/components/instruction-strip";
 import { Screen } from "@/components/screen";
 import { ScreenIntro } from "@/components/screen-intro";
 import {
-  gutter,
   makeStyles,
   minTouchTarget,
+  radius,
   spacing,
   typography,
   useColors,
 } from "@/constants/theme";
 import {
   callAI,
+  MAX_AI_IMAGES,
   parseJsonReply,
   UNEXPECTED_REPLY_MESSAGE,
 } from "@/services/ai";
@@ -117,6 +119,7 @@ export default function ScamChecker() {
   const styles = useStyles();
   const colors = useColors();
   const [text, setText] = useState("");
+  const [focused, setFocused] = useState(false);
   const [images, setImages] = useState<ScamCheckImage[]>([]);
   const [checkState, setCheckState] = useState<ScamCheckState>(
     initialCheckState
@@ -140,6 +143,7 @@ export default function ScamChecker() {
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsMultipleSelection: true,
+      selectionLimit: MAX_AI_IMAGES - images.length,
       quality: 1,
     });
 
@@ -149,15 +153,18 @@ export default function ScamChecker() {
 
     // Append rather than replace, since allowsMultipleSelection + repeated
     // taps on "Add a screenshot" should build up one batch of evidence.
-    setImages((current) => [
-      ...current,
-      ...pickerResult.assets.map((asset) => ({
-        uri: asset.uri,
-        width: asset.width,
-        height: asset.height,
-      })),
-    ]);
-  }, []);
+    // Sliced too, since not every platform honors selectionLimit.
+    setImages((current) =>
+      [
+        ...current,
+        ...pickerResult.assets.map((asset) => ({
+          uri: asset.uri,
+          width: asset.width,
+          height: asset.height,
+        })),
+      ].slice(0, MAX_AI_IMAGES)
+    );
+  }, [images.length]);
 
   const removeImage = useCallback((uri: string) => {
     setImages((current) => current.filter((image) => image.uri !== uri));
@@ -205,14 +212,18 @@ export default function ScamChecker() {
   return (
     <Screen>
       <ScreenIntro
-        title="Not sure about something?"
-        subtitle="Paste the message or add a screenshot, and we'll take a look."
+        label="Scam Checker"
+        lead="Not sure about something?"
+        accent="Let's take a look."
+        subtitle="Paste the message or add a screenshot, and we'll explain it."
       />
 
-      <Card>
+      <Card index={1}>
         <View style={styles.field}>
           <TextInput
-            style={styles.textInput}
+            style={[styles.textInput, focused && styles.textInputFocused]}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             multiline
             value={text}
             onChangeText={setText}
@@ -239,7 +250,7 @@ export default function ScamChecker() {
                 />
                 <AppButton
                   title="Remove"
-                  variant="tonal"
+                  variant="secondary"
                   onPress={() => removeImage(image.uri)}
                   disabled={isLoading}
                   align="stretch"
@@ -252,11 +263,10 @@ export default function ScamChecker() {
         <AppButton
           title="Add a screenshot"
           icon="addPhoto"
-          variant="tonal"
+          variant="secondary"
           onPress={pickImage}
-          disabled={isLoading}
+          disabled={isLoading || images.length >= MAX_AI_IMAGES}
           align="center"
-          rounded
         />
       </Card>
 
@@ -285,21 +295,23 @@ export default function ScamChecker() {
       {status === "success" && result && verdict && (
         <Card>
           <View style={styles.verdictHead}>
-            <AppText variant="title" accessibilityRole="header">
+            <AppText
+              variant="title"
+              tone={verdict.tone}
+              accessibilityRole="header"
+            >
               {verdict.label}
             </AppText>
-            <AppText variant="callout" tone="textMuted">
-              How sure we are: {Math.round(result.confidence * 100)}%
-            </AppText>
           </View>
-          <AppText>{result.explanation}</AppText>
-          <InstructionStrip tone={verdict.tone} bleed>
+          <ConfidenceBar value={result.confidence} label="How sure we are" />
+          <AppText tone="text">{result.explanation}</AppText>
+          <InstructionStrip tone={verdict.tone}>
             {verdict.advice}
           </InstructionStrip>
           <AppButton
             title="Check another"
             icon="refresh"
-            variant="tonal"
+            variant="secondary"
             onPress={handleReset}
             align="stretch"
           />
@@ -318,18 +330,22 @@ const useStyles = makeStyles((c) => ({
     minHeight: 160,
     textAlignVertical: "top",
     color: c.text,
-    backgroundColor: c.background,
-    borderWidth: 2,
+    backgroundColor: c.surface,
+    borderWidth: 1.5,
     borderColor: c.borderStrong,
+    borderRadius: radius.md,
     padding: spacing.md,
   },
-  // Bleeds past the Card's padding so thumbnails scroll to the screen edge.
+  textInputFocused: {
+    borderColor: c.primary,
+  },
+  // Bleeds to the Card's inner edges so thumbnails scroll edge to edge.
   imageScroller: {
-    marginHorizontal: -gutter,
+    marginHorizontal: -spacing.lg,
   },
   imageList: {
     gap: spacing.md,
-    paddingHorizontal: gutter,
+    paddingHorizontal: spacing.lg,
   },
   imageItem: {
     width: 140,
@@ -338,6 +354,7 @@ const useStyles = makeStyles((c) => ({
   thumbnail: {
     width: 140,
     height: 140,
+    borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: c.border,
   },

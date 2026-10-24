@@ -1,23 +1,34 @@
-import { View, type ViewProps } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import type { ViewProps } from "react-native";
 
-import { gutter, makeStyles, spacing } from "@/constants/theme";
+import { gutter, makeStyles, radius, spacing } from "@/constants/theme";
 
-// Full-width section: a surface band that touches both screen edges, ruled
-// top and bottom with hairlines, square corners. The one container for
-// grouping a heading, its copy, and its actions. Never nest.
-export function Card({ style, ...props }: ViewProps) {
+type CardProps = ViewProps & {
+  // Position in a stack of cards; staggers the entrance by 80ms each.
+  index?: number;
+};
+
+// The one container: white panel, hairline border, soft corners, no shadow.
+// Fades in from slightly below (reduced-motion users get none). Never nest.
+export function Card({ style, index = 0, ...props }: CardProps) {
   const styles = useStyles();
-  return <View style={[styles.card, style]} {...props} />;
+  return (
+    <Animated.View
+      entering={FadeInDown.duration(400).delay(index * 80)}
+      style={[styles.card, style]}
+      {...props}
+    />
+  );
 }
 
 const useStyles = makeStyles((c) => ({
   card: {
     gap: spacing.md,
-    paddingHorizontal: gutter,
-    paddingVertical: spacing.lg,
-    backgroundColor: c.surface,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
+    marginHorizontal: gutter,
+    padding: spacing.lg,
+    borderRadius: radius.lg,
+    borderWidth: 1,
     borderColor: c.border,
+    backgroundColor: c.card,
   },
 }));

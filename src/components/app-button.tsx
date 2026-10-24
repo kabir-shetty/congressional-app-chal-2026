@@ -4,18 +4,17 @@ import { Icon, type IconName } from "@/components/icon";
 import {
   makeStyles,
   minTouchTarget,
+  radius,
   spacing,
   typography,
   useColors,
 } from "@/constants/theme";
 
 const ICON_SIZE = 24;
-// Material Symbols (Android/web) draw ~3pt inside a 24pt box (measured on
-// web); unverified for SF Symbols on iOS. See withIcon.
-const ICON_GLYPH_INSET = 3;
 
-// filled: the one main action on a screen. tonal: everything else.
-type AppButtonVariant = "filled" | "tonal";
+// primary: the one main action on a screen, solid blue. secondary: everything
+// else, outlined. Flat, no shadow; pressing dims them.
+type AppButtonVariant = "primary" | "secondary";
 
 type AppButtonProps = {
   title: string;
@@ -26,9 +25,6 @@ type AppButtonProps = {
   // start: hug the label at the leading edge. center: hug, centered.
   // stretch: the container's full width.
   align?: "start" | "center" | "stretch";
-  // Squircle corners. Opt-in exception to the Square Corner Rule
-  // (DESIGN.md); don't use by default.
-  rounded?: boolean;
 };
 
 // Large, text-labeled button used everywhere instead of RN's default
@@ -38,40 +34,35 @@ export function AppButton({
   title,
   onPress,
   disabled,
-  variant = "filled",
+  variant = "primary",
   icon,
   align = "start",
-  rounded,
 }: AppButtonProps) {
   const styles = useStyles();
   const colors = useColors();
+  const isPrimary = variant === "primary";
   const foreground = disabled
     ? colors.textMuted
-    : variant === "filled"
+    : isPrimary
       ? colors.onPrimary
       : colors.primary;
   return (
     <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      accessibilityState={{ disabled: !!disabled }}
-      style={({ pressed }) => [
-        styles.base,
-        disabled ? styles.disabled : styles[variant],
-        styles[align],
-        icon && styles.withIcon,
-        rounded && styles.rounded,
-        pressed && !disabled && styles.pressed,
-      ]}
-    >
-      {icon && <Icon name={icon} color={foreground} size={ICON_SIZE} />}
-      <Text
-        style={[styles.text, disabled ? styles.disabledText : styles[`${variant}Text`]]}
+        onPress={onPress}
+        disabled={disabled}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !!disabled }}
+        style={({ pressed }) => [
+          styles.base,
+          styles[align],
+          isPrimary ? styles.primary : styles.secondary,
+          disabled && styles.disabled,
+          pressed && !disabled && styles.pressed,
+        ]}
       >
-        {title}
-      </Text>
-    </Pressable>
+        {icon && <Icon name={icon} color={foreground} size={ICON_SIZE} />}
+        <Text style={[styles.text, { color: foreground }]}>{title}</Text>
+      </Pressable>
   );
 }
 
@@ -80,31 +71,28 @@ const useStyles = makeStyles((c) => ({
     minHeight: minTouchTarget,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
-    // Always reserve the border so a button doesn't change width when it
-    // switches to the outlined disabled look.
-    borderWidth: 2,
-    borderColor: "transparent",
+    borderRadius: radius.md,
+    borderWidth: 1.5,
     flexDirection: "row",
     gap: spacing.sm,
     justifyContent: "center",
     alignItems: "center",
   },
-  filled: {
+  primary: {
     backgroundColor: c.primary,
+    borderColor: c.primary,
   },
-  tonal: {
-    backgroundColor: c.surfaceTint,
+  secondary: {
+    backgroundColor: c.card,
+    borderColor: c.borderStrong,
   },
-  filledText: {
-    color: c.onPrimary,
+  // Flat and pale: reads as unavailable without relying on faded text.
+  disabled: {
+    backgroundColor: c.surface,
+    borderColor: c.border,
   },
-  tonalText: {
-    color: c.primary,
-  },
-  // The glyph's own whitespace adds to the leading padding; subtracting it
-  // makes the gap before the icon equal the gap after the label.
-  withIcon: {
-    paddingStart: spacing.lg - ICON_GLYPH_INSET,
+  pressed: {
+    opacity: 0.8,
   },
   start: {
     alignSelf: "flex-start",
@@ -115,28 +103,9 @@ const useStyles = makeStyles((c) => ({
   stretch: {
     alignSelf: "stretch",
   },
-  // borderCurve "continuous" draws a true squircle on iOS; Android falls
-  // back to a plain rounded rectangle. 16 matches the Android tab pill.
-  rounded: {
-    borderRadius: 16,
-    borderCurve: "continuous",
-  },
   text: {
     ...typography.bodyStrong,
     flexShrink: 1,
     textAlign: "center",
-  },
-  // Its own outlined, muted look rather than a faded copy (which in dark
-  // mode still read as available) or the tonal fill (which reads as a
-  // secondary action).
-  disabled: {
-    backgroundColor: "transparent",
-    borderColor: c.border,
-  },
-  disabledText: {
-    color: c.textMuted,
-  },
-  pressed: {
-    opacity: 0.75,
   },
 }));

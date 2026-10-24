@@ -5,12 +5,12 @@ import { AccessibilityInfo, ActivityIndicator, View } from "react-native";
 import { AppButton } from "@/components/app-button";
 import { AppText } from "@/components/app-text";
 import { Card } from "@/components/card";
+import { StepChart } from "@/components/charts";
 import { Inset } from "@/components/inset";
 import { InstructionStrip } from "@/components/instruction-strip";
-import { Meter } from "@/components/meter";
 import { Screen } from "@/components/screen";
 import { ScreenIntro } from "@/components/screen-intro";
-import { makeStyles, spacing, useColors } from "@/constants/theme";
+import { makeStyles, radius, spacing, useColors } from "@/constants/theme";
 import {
   callAI,
   parseJsonReply,
@@ -37,6 +37,8 @@ type QuizState = {
   index: number;
   error: string | null;
   score: number;
+  // One entry per answered question, in order; drives the step chart.
+  results: boolean[];
   lastAnswerCorrect: boolean | null;
 };
 
@@ -46,6 +48,7 @@ const initialState: QuizState = {
   index: 0,
   error: null,
   score: 0,
+  results: [],
   lastAnswerCorrect: null,
 };
 
@@ -169,6 +172,7 @@ export default function Quiz() {
         status: "answered",
         lastAnswerCorrect: correct,
         score: prev.score + (correct ? 1 : 0),
+        results: [...prev.results, correct],
       };
     });
   }, []);
@@ -195,7 +199,8 @@ export default function Quiz() {
     };
   }, [createQuiz]);
 
-  const { status, items, index, error, score, lastAnswerCorrect } = state;
+  const { status, items, index, error, score, results, lastAnswerCorrect } =
+    state;
 
   // Feedback renders below the question; announce it so screen reader
   // users (iOS has no live regions) hear the result right away.
@@ -218,7 +223,9 @@ export default function Quiz() {
   return (
     <Screen>
       <ScreenIntro
-        title="Can you tell which ones are scams?"
+        label="Spot the Scam"
+        lead="Can you tell"
+        accent="which ones are scams?"
         subtitle="Read each message and decide if it's a scam."
       />
 
@@ -235,8 +242,8 @@ export default function Quiz() {
             {totalQuestions} practice messages are ready
           </AppText>
           <AppText>
-            Some are scams and some aren't. After each guess, you'll see what
-            gave it away.
+            Some are scams and some aren&apos;t. After each guess, you&apos;ll
+            see what gave it away.
           </AppText>
           <AppButton
             title="Start quiz"
@@ -249,7 +256,7 @@ export default function Quiz() {
 
       {status === "error" && error && (
         <Card>
-          <InstructionStrip tone="warning" label="That didn't work" bleed>
+          <InstructionStrip tone="warning" label="That didn't work">
             {error}
           </InstructionStrip>
           <AppButton
@@ -266,6 +273,11 @@ export default function Quiz() {
           <AppText variant="title" accessibilityRole="header">
             You got {score} of {totalQuestions} right.
           </AppText>
+          <StepChart
+            results={results}
+            total={totalQuestions}
+            current={null}
+          />
           <AppText>
             {score === totalQuestions
               ? "A perfect score. You know what to look for."
@@ -287,13 +299,11 @@ export default function Quiz() {
               <AppText variant="bodyStrong">
                 Question {questionNumber} of {totalQuestions}
               </AppText>
-              <AppText variant="callout" tone="textMuted">
-                {score} right so far
-              </AppText>
             </View>
-            <Meter
-              value={questionNumber / totalQuestions}
-              label="Quiz progress"
+            <StepChart
+              results={results}
+              total={totalQuestions}
+              current={status === "asking" ? index : null}
             />
           </Inset>
 
@@ -303,7 +313,7 @@ export default function Quiz() {
             <AppText variant="bodyStrong">The message</AppText>
             <View style={styles.message}>
               {current.content.type === "text" ? (
-                <AppText>{current.content.text}</AppText>
+                <AppText tone="text">{current.content.text}</AppText>
               ) : (
                 <Image
                   source={{ uri: current.content.uri }}
@@ -321,14 +331,14 @@ export default function Quiz() {
               <AppButton
                 title="It's a scam"
                 icon="flag"
-                variant="tonal"
+                variant="secondary"
                 onPress={() => answer(true)}
                 align="stretch"
               />
               <AppButton
                 title="It's not a scam"
                 icon="check"
-                variant="tonal"
+                variant="secondary"
                 onPress={() => answer(false)}
                 align="stretch"
               />
@@ -345,7 +355,6 @@ export default function Quiz() {
                 {lastAnswerCorrect ? "Correct." : "Not quite."}
               </AppText>
               <InstructionStrip
-                bleed
                 tone={current.isScam ? "danger" : "success"}
                 label={current.isScam ? "This was a scam" : "This was not a scam"}
               >
@@ -382,7 +391,8 @@ const useStyles = makeStyles((c) => ({
   message: {
     minHeight: 120,
     padding: spacing.md,
-    backgroundColor: c.background,
+    borderRadius: radius.md,
+    backgroundColor: c.surface,
   },
   // Separated more than usual so a shaky tap can't land on the other answer.
   answers: {

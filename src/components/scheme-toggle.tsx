@@ -1,40 +1,54 @@
-import { Pressable, StyleSheet } from "react-native";
+import { Pressable } from "react-native";
 
+import { AppText } from "@/components/app-text";
 import { Icon } from "@/components/icon";
 import { useSchemeControl } from "@/components/scheme-provider";
-import { minTouchTarget, useColors } from "@/constants/theme";
+import {
+  makeStyles,
+  minTouchTarget,
+  radius,
+  spacing,
+  useColors,
+} from "@/constants/theme";
 
-// Default native header bar height; a taller box would spill outside the
-// header and only the part inside it is tappable, so hitSlop makes up the rest.
-const HEADER_HEIGHT = 44;
+// Visible height; hitSlop makes up the rest of the 56pt target.
+const PILL_HEIGHT = 40;
 
-// Sits on the teal band/header, so it's drawn in the on-header color. Shows
-// the scheme it will switch to (moon in light, sun in dark).
+// Icon + word, since icons never stand alone for this audience. Names the
+// mode it will switch to.
 export function SchemeToggle() {
   const { scheme, toggle } = useSchemeControl();
   const colors = useColors();
+  const styles = useStyles();
   const isDark = scheme === "dark";
   return (
     <Pressable
       onPress={toggle}
       accessibilityRole="button"
       accessibilityLabel={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      hitSlop={(minTouchTarget - HEADER_HEIGHT) / 2}
+      hitSlop={(minTouchTarget - PILL_HEIGHT) / 2}
       style={({ pressed }) => [styles.button, pressed && styles.pressed]}
     >
-      <Icon name={isDark ? "sun" : "moon"} color={colors.onHeader} size={28} />
+      <Icon name={isDark ? "sun" : "moon"} color={colors.primary} size={22} />
+      <AppText variant="callout" tone="primary" maxFontSizeMultiplier={1.3}>
+        {isDark ? "Light" : "Dark"}
+      </AppText>
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   button: {
-    minWidth: minTouchTarget,
-    height: HEADER_HEIGHT,
+    minHeight: PILL_HEIGHT,
+    flexShrink: 0,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.pill,
+    backgroundColor: c.primaryTint,
   },
   pressed: {
     opacity: 0.75,
   },
-});
+}));

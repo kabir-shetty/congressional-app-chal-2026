@@ -12,6 +12,7 @@ const icons = {
   addPhoto: { ios: "photo.badge.plus", android: "add_photo_alternate", web: "add_photo_alternate" },
   check: { ios: "checkmark.circle.fill", android: "check_circle", web: "check_circle" },
   chevron: { ios: "chevron.right", android: "chevron_right", web: "chevron_right" },
+  shield: { ios: "checkmark.shield.fill", android: "verified_user", web: "verified_user" },
   arrow: { ios: "arrow.right", android: "arrow_forward", web: "arrow_forward" },
   refresh: { ios: "arrow.clockwise", android: "refresh", web: "refresh" },
   play: { ios: "play.fill", android: "play_arrow", web: "play_arrow" },

@@ -1,79 +1,71 @@
 import { createContext, useContext } from "react";
 import { StyleSheet, type TextStyle } from "react-native";
 
-// Centralized design tokens. The audience is seniors, so defaults favor
-// large type, high contrast, and generous touch targets.
-//
-// Direction: "the friendly neighborhood pharmacist" — kind, expert, calm.
-// A deep green-teal shell over a cool white-green ground, white cards with
-// hairline borders, and system fonts (SF / Roboto) so text follows the
-// phone's own size setting. Red/amber/green appear only where they carry a
-// verdict. Every text color is ≥4.5:1 on the surfaces it's used on, in both
-// schemes; `border` is decorative only, `borderStrong` is ≥3:1 for inputs.
+// Centralized design tokens. Direction: calm, professional, minimal — white
+// and pale blue surfaces, one trustworthy blue for everything interactive,
+// navy for text. Few shapes, thin lines, no decoration beyond the data
+// graphs, so a worried person has one thing to look at at a time. Atkinson
+// Hyperlegible (designed for low vision) is the only typeface. The audience
+// is seniors: large type, and every text pair is ≥4.5:1 in both schemes.
+// Dark mode keeps the same blue on deep navy.
 export type Palette = {
   background: string; // screen ground
-  surface: string; // cards, inputs, tab bar
-  surfaceTint: string; // tonal buttons, grouped-list press, quiet panels
-  text: string;
-  textMuted: string;
-  border: string;
-  borderStrong: string;
-  primary: string; // filled buttons, active tab, links
+  surface: string; // pale blue panels, inputs, tab bar
+  card: string; // cards
+  text: string; // navy
+  textMuted: string; // body copy
+  border: string; // card/input hairlines (decorative)
+  borderStrong: string; // inputs and outlined buttons (≥3:1)
+  primary: string; // trust blue: actions, key words, chart fills
   onPrimary: string;
-  header: string; // app-bar band
-  onHeader: string;
-  onHeaderMuted: string;
-  danger: string; // scam / wrong — strip band + verdict text
+  primaryTint: string; // pale blue wash: icon chips, quiet fills
+  track: string; // empty part of a chart
+  danger: string;
   dangerTint: string;
-  warning: string; // uncertain / caution
+  warning: string;
   warningTint: string;
-  success: string; // safe / correct
+  success: string;
   successTint: string;
-  onStatus: string; // text on a solid status band
 };
 
 const light: Palette = {
-  background: "#F4F8F7",
-  surface: "#FFFFFF",
-  surfaceTint: "#E3F0ED",
-  text: "#1F2328",
-  textMuted: "#4F5B66",
-  border: "#D7E4E1",
-  borderStrong: "#7C8C89",
-  primary: "#0B6E64",
+  background: "#FFFFFF",
+  surface: "#F3F8FD",
+  card: "#FFFFFF",
+  text: "#0F2744",
+  textMuted: "#475A73",
+  border: "#DCE7F3",
+  borderStrong: "#7B93B0",
+  primary: "#1D5FB8",
   onPrimary: "#FFFFFF",
-  header: "#0B6E64",
-  onHeader: "#FFFFFF",
-  onHeaderMuted: "#D3ECE8",
+  primaryTint: "#E3EEFB",
+  track: "#DCE7F3",
   danger: "#B42318",
   dangerTint: "#FDECEA",
   warning: "#8A5300",
-  warningTint: "#FFF3D6",
-  success: "#1E6B3A",
-  successTint: "#E5F3E9",
-  onStatus: "#FFFFFF",
+  warningTint: "#FFF4DC",
+  success: "#1B7048",
+  successTint: "#E6F4EC",
 };
 
 const dark: Palette = {
-  background: "#0E1615",
-  surface: "#17211F",
-  surfaceTint: "#1F302D",
-  text: "#E8EEED",
-  textMuted: "#A9B7B4",
-  border: "#2A3835",
-  borderStrong: "#71837F",
-  primary: "#5CC4B6",
-  onPrimary: "#062320",
-  header: "#0B4F48",
-  onHeader: "#FFFFFF",
-  onHeaderMuted: "#BFE0DB",
-  danger: "#FF8A7A",
-  dangerTint: "#3A1714",
-  warning: "#F2C14E",
-  warningTint: "#33280C",
-  success: "#6FD58F",
-  successTint: "#12301D",
-  onStatus: "#121212",
+  background: "#0B1626",
+  surface: "#10203A",
+  card: "#12233C",
+  text: "#EAF1FA",
+  textMuted: "#A9BBD2",
+  border: "#223A59",
+  borderStrong: "#6F89AB",
+  primary: "#74B2F5",
+  onPrimary: "#08203F",
+  primaryTint: "#1B3556",
+  track: "#27415F",
+  danger: "#FF8D7B",
+  dangerTint: "#3A1D1B",
+  warning: "#F5C25B",
+  warningTint: "#33290F",
+  success: "#5ED69A",
+  successTint: "#143325",
 };
 
 export type ColorScheme = "light" | "dark";
@@ -106,26 +98,40 @@ export const spacing = {
   md: 16,
   lg: 24,
   xl: 32,
+  xxl: 48,
 };
 
-// Side margin for content on edge-to-edge screens (sections, Inset, intro);
-// InstructionStrip's `bleed` negates it to reach the screen edges.
-export const gutter = spacing.md;
+// Side margin for content; cards and loose content both sit inside it.
+export const gutter = spacing.lg;
 
-// System font at senior sizes; sizes are pt, so they scale with the phone's
-// text-size setting. Nothing goes below 16.
+export const radius = { sm: 8, md: 12, lg: 16, pill: 999 };
+
+// Atkinson Hyperlegible comes in regular and bold only (loaded in the root
+// layout; custom fonts need one family per weight). Sizes are pt, so they
+// follow the phone's text size. Body stays 20; nothing goes below 16.
+export const fonts = {
+  regular: "AtkinsonHyperlegible_400Regular",
+  bold: "AtkinsonHyperlegible_700Bold",
+};
+
 export const typography = {
-  largeTitle: { fontSize: 32, lineHeight: 38, fontWeight: "800" },
-  title: { fontSize: 26, lineHeight: 32, fontWeight: "700" },
-  headline: { fontSize: 22, lineHeight: 28, fontWeight: "700" },
-  body: { fontSize: 20, lineHeight: 28, fontWeight: "400" },
-  bodyStrong: { fontSize: 20, lineHeight: 28, fontWeight: "600" },
-  callout: { fontSize: 18, lineHeight: 25, fontWeight: "400" },
+  largeTitle: {
+    fontFamily: fonts.bold,
+    fontSize: 38,
+    lineHeight: 44,
+    letterSpacing: -0.5,
+  },
+  title: { fontFamily: fonts.bold, fontSize: 28, lineHeight: 34 },
+  headline: { fontFamily: fonts.bold, fontSize: 22, lineHeight: 28 },
+  body: { fontFamily: fonts.regular, fontSize: 20, lineHeight: 30 },
+  bodyStrong: { fontFamily: fonts.bold, fontSize: 20, lineHeight: 28 },
+  callout: { fontFamily: fonts.regular, fontSize: 18, lineHeight: 26 },
+  // Small uppercase tag (section labels, strip labels).
   label: {
+    fontFamily: fonts.bold,
     fontSize: 16,
     lineHeight: 20,
-    fontWeight: "700",
-    letterSpacing: 0.8,
+    letterSpacing: 1,
     textTransform: "uppercase",
   },
 } satisfies Record<string, TextStyle>;

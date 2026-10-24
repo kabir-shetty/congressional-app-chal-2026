@@ -1,11 +1,9 @@
-import { View } from "react-native";
-
 import { AppText } from "@/components/app-text";
 import { Card } from "@/components/card";
 import { InstructionStrip } from "@/components/instruction-strip";
 import { Screen } from "@/components/screen";
 import { ScreenIntro } from "@/components/screen-intro";
-import { gutter, makeStyles, spacing } from "@/constants/theme";
+import { SectionLabel } from "@/components/section-label";
 
 type Topic = {
   title: string;
@@ -31,36 +29,30 @@ const topics: Topic[] = [
   },
 ];
 
-// Route: /ai-scams — a short read: what's new, then what still gives scams
-// away. One full-width article with edge-to-edge dividers, not a stack of
-// matching cards.
+// Route: /ai-scams — a short read: what's new, one raised card per topic,
+// then what still gives scams away.
 export default function AiScamsInfo() {
-  const styles = useStyles();
   return (
     <Screen>
       <ScreenIntro
-        title="What's changed about scams lately"
+        label="AI Scams"
+        lead="What's changed"
+        accent="about scams lately."
         subtitle="And what still gives them away."
       />
 
-      <View style={styles.article}>
-        {topics.map((topic, i) => (
-          <View
-            key={topic.title}
-            style={[styles.section, i > 0 && styles.divided]}
-          >
-            <AppText variant="headline" accessibilityRole="header">
-              {topic.title}
-            </AppText>
-            <AppText>{topic.body}</AppText>
-            <InstructionStrip tone="success" bleed>
-              {topic.advice}
-            </InstructionStrip>
-          </View>
-        ))}
-      </View>
+      {topics.map((topic, i) => (
+        <Card key={topic.title} index={i + 1}>
+          <AppText variant="headline" accessibilityRole="header">
+            {topic.title}
+          </AppText>
+          <AppText>{topic.body}</AppText>
+          <InstructionStrip tone="success">{topic.advice}</InstructionStrip>
+        </Card>
+      ))}
 
-      <Card>
+      <Card index={topics.length + 1}>
+        <SectionLabel>The signs</SectionLabel>
         <AppText variant="title" accessibilityRole="header">
           What still gives it away
         </AppText>
@@ -68,7 +60,7 @@ export default function AiScamsInfo() {
           However real the voice, photo, or writing seems, these are still the
           clearest warning signs:
         </AppText>
-        <InstructionStrip tone="danger" label="Stop if you see" bleed>
+        <InstructionStrip tone="danger" label="Stop if you see">
           Pressure to act right now, a request to keep it secret, or payment
           by gift card, wire transfer, or cryptocurrency.
         </InstructionStrip>
@@ -76,21 +68,3 @@ export default function AiScamsInfo() {
     </Screen>
   );
 }
-
-const useStyles = makeStyles((c) => ({
-  article: {
-    backgroundColor: c.surface,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: c.border,
-  },
-  section: {
-    gap: spacing.md,
-    paddingHorizontal: gutter,
-    paddingVertical: spacing.lg,
-  },
-  divided: {
-    borderTopWidth: 1,
-    borderTopColor: c.border,
-  },
-}));

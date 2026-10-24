@@ -1,17 +1,18 @@
 # issues (remove entries when fixed)
 ## TODO / unimplemented
-- `callAI` stub (services/ai.ts) still throws; `server/` Gemini API exists but Expo networking/image encoding are not connected. See [[data]].
+- `EXPO_PUBLIC_AI_API_TOKEN` shipped in app bundle (extractable); server needs real caller auth + rate limits before public release. See [[data]].
+- callAI end-to-end untested on device (no app tests); check.tsx Alert always says "check your internet connection" even for server/size/config errors.
 - Quiz image items: generateQuizItem text-only; user will provide hand-made/licensed image set (TODO in generateQuizItem).
 - Merge of origin/main (e2bd199) in progress: src/hooks/use-quiz.ts, use-scam-check.ts conflicted (deleted locally, edited remotely w/ fake test responses).
 - Quiz image items not prefetched in createQuiz (only URIs held) → add expo-image `Image.prefetch` once generateQuizItem returns images.
-- ESLint not installed: `npx expo lint` auto-installs eslint + eslint-config-expo into package.json then fails. Don't let it mutate deps unasked; revert package.json/lock if it does.
+- Pre-existing lint: quiz.tsx setState-in-effect (createQuiz on mount) + ref-cleanup warning; scheme-provider.tsx setHydrated-in-effect.
 ## dead / stale
 - assets/images/tabIcons/* unused (tabs use expo-symbols Icon).
 - Web: SymbolView loads Material Symbols font async → icons blank briefly on first paint.
 - Native chrome never visually verified (no simulator/emulator on dev machine): iOS/Android captures, Dynamic Type/font-scale large sizes, Android tab pill. Evidence so far = web build only (.impeccable/review/).
-- ai-scams.tsx `article` style repeats Card's surface/top-bottom border inline (needs per-section padding + full-width dividers, so not a Card).
-- AppButton ICON_GLYPH_INSET=3 measured on web (Material Symbols) only; SF Symbols on iOS unverified (may need 0 via Platform.OS). Final 21pt leading padding derived, not re-captured (check.tsx was mid-edit).
-- Splash/adaptive-icon art (assets/images) predates "The Pharmacist" redesign; splash bg has no dark variant.
+- Splash/adaptive-icon art (assets/images) predates redesign (colors updated in app.json, images not).
+- Redesign unverified on device/simulator: Atkinson metrics at large font scale, top bar fit at 360pt + large text, chart rendering, dark palette by eye. Fonts load at runtime (failure → system font).
+- Root DESIGN.md, .impeccable/, claude-design/ are stale vs [[ui]].
 - package.json: reset-project script target missing; junk deps "all", "google-fonts", "ionicons".
 - README stock template.
 - dark/light choice not persisted (no storage dep); resets per launch
