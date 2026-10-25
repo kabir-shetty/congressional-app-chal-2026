@@ -84,7 +84,7 @@ export default function Index() {
                 <View style={styles.logoDot} />
               </View>
               <AppText variant="wordmark" tone="onBand" maxFontSizeMultiplier={1.3}>
-                Porch Watch
+                Verisafe
               </AppText>
             </View>
             <ThemeButton />
@@ -159,9 +159,6 @@ export default function Index() {
             detail="Cloned voices, fake photos, perfect-sounding messages."
             cta="Read about AI Scams"
           />
-          <AppText variant="callout" tone="muted">
-            Free. No sign-in. Nothing to set up.
-          </AppText>
         </View>
       </FadeIn>
     </Screen>

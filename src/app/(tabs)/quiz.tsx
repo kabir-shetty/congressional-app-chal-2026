@@ -213,12 +213,12 @@ function startBuild(exclude?: ReadonlySet<QuizImage>): PendingBuild {
 
 function scoreLine(score: number, total: number) {
   if (score === total) {
-    return "You caught every one. Those signs will help you when a real one arrives.";
+    return "Great job! You caught every one. Recognizing those signs will help you when a real one arrives.";
   }
   if (score >= total * 0.6) {
-    return "Nicely done. Each round makes the signs easier to see.";
+    return "Nicely done. Each round makes the signs easier to catch.";
   }
-  return "Scams are built to fool people. Each round you practice makes the next one easier to spot.";
+  return "Scams are built to fool people. Each round you practice makes the next scam easier to spot.";
 }
 
 // Route: /quiz — guess whether each message is a scam, then see the sign

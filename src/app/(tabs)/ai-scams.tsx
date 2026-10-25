@@ -42,7 +42,7 @@ export default function AiScamsInfo() {
       <FadeIn style={layout.stage}>
         <ScreenHeader
           title="AI Scams"
-          subtitle="AI makes scams look and sound more real. The warning signs stay the same."
+          subtitle="AI can make scams look and sound more real. Nonetheless, the warning signs stay the same."
         />
 
         {AI_SCAM_TOPICS.map((t) => {

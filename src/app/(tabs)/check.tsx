@@ -240,7 +240,7 @@ export default function ScamChecker() {
         <FadeIn style={layout.stage}>
           <ScreenHeader
             title="Scam Checker"
-            subtitle="Take your time. Paste the message or add a screenshot of it."
+            subtitle="Paste the message or add a screenshot of it."
           />
 
           <View style={layout.field}>
@@ -341,7 +341,7 @@ export default function ScamChecker() {
             accessibilityRole="header"
             style={layout.center}
           >
-            Reading the message…
+            Processing the message…
           </AppText>
           <AppText tone="muted" style={layout.center}>
             While you wait: you don&apos;t have to reply to anyone right now.
