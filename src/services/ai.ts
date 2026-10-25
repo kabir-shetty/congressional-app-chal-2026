@@ -19,7 +19,7 @@ export type AIRequest = {
 export const UNEXPECTED_REPLY_MESSAGE =
   "Got an unexpected answer. Please try again.";
 
-// Set in .env.local (see .env.example). EXPO_PUBLIC_ values are inlined into
+// Set in .env (see .env.example). EXPO_PUBLIC_ values are inlined into
 // the app bundle, so the token is not a secret; it only keeps out casual callers.
 const API_URL = process.env.EXPO_PUBLIC_AI_API_URL;
 const API_TOKEN = process.env.EXPO_PUBLIC_AI_API_TOKEN;

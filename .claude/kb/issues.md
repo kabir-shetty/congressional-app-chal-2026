@@ -1,9 +1,10 @@
 # issues (remove entries when fixed)
 ## TODO / unimplemented
 - `EXPO_PUBLIC_AI_API_TOKEN` shipped in app bundle (extractable); server needs real caller auth + rate limits before public release. See [[data]].
+- EAS builds: root `.env` gitignored → not available to EAS Build; set EXPO_PUBLIC_AI_API_URL/TOKEN as EAS env vars before first `eas build`, e.g. `eas env:set --name EXPO_PUBLIC_AI_API_URL --value <url> --environment production --visibility plaintext` (client vars plaintext or sensitive, not secret). No eas.json yet. See [[config]].
+- Server env file on dev machine is `server/.env.local`, but README/KB say `--env-file server/.env` (user's file; not renamed).
 - callAI end-to-end untested on device (no app tests); check.tsx Alert always says "check your internet connection" even for server/size/config errors.
-- Quiz image items: generateQuizItem text-only; user will provide hand-made/licensed image set (TODO in generateQuizItem).
-- Quiz image items not prefetched in createQuiz (only URIs held) → add expo-image `Image.prefetch` once generateQuizItem returns images.
+- Quiz image questions wired but `QUIZ_IMAGES` empty; user to add hand-made/licensed images to assets/images/quiz/ + entries in constants/quiz-images.ts. First real require() via `@/assets/*` alias untested.
 - Lint: quiz.tsx setState-in-effect (createQuiz on mount) + ref-cleanup warning.
 ## dead / stale
 - assets/images/tabIcons/* unused (tabs use expo-symbols Icon).

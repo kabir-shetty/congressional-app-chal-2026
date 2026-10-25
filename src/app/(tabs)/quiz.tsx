@@ -1,3 +1,4 @@
+import { Asset } from "expo-asset";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -9,6 +10,7 @@ import { FadeIn, PulseDots } from "@/components/motion";
 import { PillButton } from "@/components/pill-button";
 import { Screen } from "@/components/screen";
 import { ScreenHeader } from "@/components/screen-header";
+import { QUIZ_IMAGES, type QuizImage } from "@/constants/quiz-images";
 import {
   callAI,
   parseJsonReply,
@@ -19,6 +21,13 @@ import { pill } from "@/theme/shape";
 import type { QuizItem } from "@/types/quiz";
 
 const QUIZ_LENGTH = 5;
+// Chance that each question is a hand-made image instead of an AI message.
+const IMAGE_QUESTION_CHANCE = 0.3;
+// Tall screenshots are capped to this height (shrunk, centered) so the
+// answer buttons stay near.
+const MAX_IMAGE_HEIGHT = 480;
+// Phone-screenshot shape, used if the asset's size isn't known.
+const FALLBACK_IMAGE_RATIO = 9 / 16;
 
 // preparing: building items. asking: question shown, waiting for a guess.
 // answered: guess made, waiting for "Next". finished: all answered.
@@ -67,18 +76,51 @@ const QUIZ_SCENARIOS = [
 
 type QuizScenario = (typeof QUIZ_SCENARIOS)[number];
 
-function selectQuizScenarios(): QuizScenario[] {
-  const scenarios = [...QUIZ_SCENARIOS];
-  for (let i = scenarios.length - 1; i > 0; i--) {
+function shuffled<T>(items: readonly T[]): T[] {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [scenarios[i], scenarios[j]] = [scenarios[j], scenarios[i]];
+    [copy[i], copy[j]] = [copy[j], copy[i]];
   }
-  return scenarios.slice(0, QUIZ_LENGTH);
+  return copy;
+}
+
+// One entry per question, in quiz order: a drawn image, or a slot to fill
+// from the AI.
+type QuizSlot = { type: "image"; image: QuizImage } | { type: "ai" };
+
+// Decided before any AI call: each question independently has a
+// IMAGE_QUESTION_CHANCE of being an image, drawn without repeats. If the
+// image set runs out, the slot falls back to AI.
+// `exclude`: images just played, kept out of the next round.
+function planQuizSlots(exclude: ReadonlySet<QuizImage>): QuizSlot[] {
+  const pool = shuffled(QUIZ_IMAGES.filter((image) => !exclude.has(image)));
+  return Array.from({ length: QUIZ_LENGTH }, (): QuizSlot => {
+    const image = Math.random() < IMAGE_QUESTION_CHANCE ? pool.pop() : undefined;
+    return image ? { type: "image", image } : { type: "ai" };
+  });
 }
 
 let nextQuizItemId = 0;
 
-// Text items only for now. TODO: image items from a hand-made set.
+function imageQuizItem(image: QuizImage): QuizItem {
+  // Metro records each bundled image's size, so it isn't typed by hand.
+  const { width, height } = Asset.fromModule(image.source);
+  return {
+    id: String(nextQuizItemId++),
+    kind: image.kind,
+    from: image.from,
+    content: {
+      type: "image",
+      source: image.source,
+      aspectRatio: width && height ? width / height : null,
+      alt: image.alt,
+    },
+    isScam: image.isScam,
+    explanation: image.explanation,
+  };
+}
+
 async function generateQuizItem(scenario: QuizScenario): Promise<QuizItem> {
   // Decided here, not by the model: models can't pick 50/50 reliably.
   const isScam = Math.random() < 0.5;
@@ -117,11 +159,46 @@ async function generateQuizItem(scenario: QuizScenario): Promise<QuizItem> {
   };
 }
 
-function scoreLine(score: number) {
-  if (score === QUIZ_LENGTH) {
+// Image questions are planned first; only the remaining slots (QUIZ_LENGTH
+// minus the image count) call the AI, concurrently, each with a distinct
+// scenario. Slot order is kept. Rejects if any AI call fails; async so a
+// synchronous throw (e.g. a bad image asset) becomes a rejection too.
+async function buildQuiz(
+  exclude: ReadonlySet<QuizImage> = new Set()
+): Promise<QuizItem[]> {
+  const scenarios = shuffled(QUIZ_SCENARIOS);
+  let nextScenario = 0;
+  return Promise.all(
+    planQuizSlots(exclude).map((slot) =>
+      slot.type === "image"
+        ? imageQuizItem(slot.image)
+        : generateQuizItem(scenarios[nextScenario++])
+    )
+  );
+}
+
+// Fallback when the AI is unreachable: up to QUIZ_LENGTH distinct images
+// (fewer if the set is smaller; empty if there are none).
+function pickFallbackImages(): QuizImage[] {
+  return shuffled(QUIZ_IMAGES).slice(0, QUIZ_LENGTH);
+}
+
+type QuizBuild = { ok: true; items: QuizItem[] } | { ok: false; error: unknown };
+
+// Never rejects, so a background build that's never awaited can't raise an
+// unhandled rejection.
+function settle(build: Promise<QuizItem[]>): Promise<QuizBuild> {
+  return build.then(
+    (items) => ({ ok: true, items }),
+    (error: unknown) => ({ ok: false, error })
+  );
+}
+
+function scoreLine(score: number, total: number) {
+  if (score === total) {
     return "You caught every one. Those signs will help you when a real one arrives.";
   }
-  if (score >= 3) {
+  if (score >= total * 0.6) {
     return "Nicely done. Each round makes the signs easier to see.";
   }
   return "Scams are built to fool people. Each round you practice makes the next one easier to spot.";
@@ -135,31 +212,55 @@ export default function Quiz() {
   const [state, setState] = useState<QuizState>(initialState);
   const latestRun = useRef(0);
 
+  // The build the next/current createQuiz() awaits: a background build
+  // started after the AI failed, or the in-flight one (shared so a double
+  // tap / StrictMode remount reuses it instead of calling the AI again).
+  const quizBuild = useRef<Promise<QuizBuild> | null>(null);
+
   const createQuiz = useCallback(async () => {
     const run = ++latestRun.current;
     setState(initialState);
 
-    try {
-      // Assign distinct scenarios before making the independent requests.
-      const items = await Promise.all(
-        selectQuizScenarios().map((scenario) => generateQuizItem(scenario))
-      );
-      // A newer run (double tap, StrictMode re-mount) or an unmount
-      // superseded this one — applying it would wipe the player's progress.
-      if (run !== latestRun.current) {
-        return;
-      }
-      setState({ ...initialState, status: "asking", items });
-    } catch (error) {
-      if (run !== latestRun.current) {
-        return;
-      }
-      setState({
-        ...initialState,
-        status: "error",
-        error: error instanceof Error ? error.message : "Something went wrong.",
-      });
+    const pending = (quizBuild.current ??= settle(buildQuiz()));
+    const build = await pending;
+
+    // A newer run (double tap, StrictMode re-mount) or an unmount
+    // superseded this one — applying it would wipe the player's progress.
+    if (run !== latestRun.current) {
+      return;
     }
+    // Only the run that applies a build clears it.
+    // The run that applies a build consumes it.
+    quizBuild.current = null;
+    if (build.ok) {
+      setState({ ...initialState, status: "asking", items: build.items });
+      return;
+    }
+
+    // AI failed: play the hand-made images now, and quietly retry the AI
+    // in the background for the next round (without these images). A
+    // broken image entry shows the error state rather than hanging on
+    // "preparing".
+    const fallbackImages = pickFallbackImages();
+    let fallback: QuizItem[] = [];
+    try {
+      fallback = fallbackImages.map(imageQuizItem);
+    } catch (caught) {
+      console.warn("Image fallback quiz failed", caught);
+    }
+    if (fallback.length > 0) {
+      setState({ ...initialState, status: "asking", items: fallback });
+      quizBuild.current = settle(buildQuiz(new Set(fallbackImages)));
+      return;
+    }
+    setState({
+      ...initialState,
+      status: "error",
+      error:
+        build.error instanceof Error
+          ? build.error.message
+          : "Something went wrong.",
+    });
   }, []);
 
   const answer = useCallback((guessIsScam: boolean) => {
@@ -290,11 +391,18 @@ export default function Quiz() {
               <AppText style={layout.messageBody}>{current.content.text}</AppText>
             ) : (
               <Image
-                source={{ uri: current.content.uri }}
-                style={{
-                  width: "100%",
-                  aspectRatio: current.content.width / current.content.height,
-                }}
+                source={current.content.source}
+                accessible
+                accessibilityRole="image"
+                accessibilityLabel={current.content.alt}
+                contentFit="contain"
+                style={[
+                  layout.messageImage,
+                  {
+                    aspectRatio:
+                      current.content.aspectRatio ?? FALLBACK_IMAGE_RATIO,
+                  },
+                ]}
               />
             )}
           </LeafCard>
@@ -361,7 +469,7 @@ export default function Quiz() {
             <AppText variant="display" tone="quiz">
               {score} of {items.length}
             </AppText>
-            <AppText style={layout.scoreLine}>{scoreLine(score)}</AppText>
+            <AppText style={layout.scoreLine}>{scoreLine(score, items.length)}</AppText>
           </LeafCard>
           <View style={layout.answers}>
             <PillButton title="Try again" variant="quiz" onPress={createQuiz} />
@@ -401,6 +509,13 @@ const layout = StyleSheet.create({
   center: { textAlign: "center" },
   message: { overflow: "hidden" },
   messageBody: { padding: 18 },
+  // Centered: when maxHeight clamps, native Yoga narrows the box to keep
+  // the ratio, which would otherwise sit at the left edge.
+  messageImage: {
+    width: "100%",
+    maxHeight: MAX_IMAGE_HEIGHT,
+    alignSelf: "center",
+  },
   answers: { gap: 12 },
   answered: { gap: 14 },
   feedback: {

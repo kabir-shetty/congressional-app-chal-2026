@@ -20,6 +20,6 @@ images/: icon, splash-icon, favicon, android-icon-*; template leftovers unused: 
 ios/ android/ gitignored (CNG). .claude/settings.json enables expo plugin. .vscode: fixAll/organizeImports/sortMembers on save. README = stock create-expo-app.
 
 ## env
-Root `.env.example` → copy to `.env.local` (gitignored `.env*.local`): `EXPO_PUBLIC_AI_API_URL` (server host + port = server `PORT`, default 8787; LAN IP or public IP, not localhost, on phone), `EXPO_PUBLIC_AI_API_TOKEN` (= server API_TOKEN). Inlined at bundle time; static `process.env.EXPO_PUBLIC_X` only.
+Root `.env.example` → copy to `.env` (gitignored, as is `.env*.local`): `EXPO_PUBLIC_AI_API_URL` (server host + port = server `PORT`, default 8787; LAN IP or public IP, not localhost, on phone), `EXPO_PUBLIC_AI_API_TOKEN` (= server API_TOKEN). Inlined at bundle time; static `process.env.EXPO_PUBLIC_X` only. Not available to EAS Build (gitignored) → EAS env vars needed ([[issues]]).
 ## server/
 Independent Docker build context (`docker build -t porch-watch-ai ./server`). Node 22 Alpine; `npm ci --omit=dev` as root (node_modules root-owned), then USER node; port 8787 (ENV PORT; HEALTHCHECK reads process.env.PORT). Moved off 8080 (taken on user's Docker host). Config via `--env-file server/.env` (template `.env.example`); off-GCP mount ADC JSON read-only + `GOOGLE_APPLICATION_CREDENTIALS` (readable by uid 1000). `.env` ignored. Image build not verified (no docker daemon on dev machine). Own package-lock.json (npm, not expo install).

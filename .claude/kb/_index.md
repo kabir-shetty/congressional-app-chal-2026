@@ -20,7 +20,7 @@ app/_layout.tsx          fonts (Public Sans + Atkinson) + ThemeProvider + splash
 app/(tabs)/_layout.tsx   headless expo-router/ui Tabs; icon+1-line-label TabButton, active cell filled
 app/(tabs)/index.tsx     Home (navy arched band, ThemeButton, Check for Scam, 2 section cards)
 app/(tabs)/check.tsx     Scam Checker (input/checking/result; checkForScam→callAI)
-app/(tabs)/quiz.tsx      Spot the Scam (5 items; generateQuizItem→callAI; score)
+app/(tabs)/quiz.tsx      Spot the Scam (5 slots: 30% image each, rest generateQuizItem→callAI; score)
 app/(tabs)/ai-scams.tsx  AI Scams accordion (?topic= opens one)
 components/app-text.tsx       AppText (variant, tone)
 components/icon.tsx           Icon (expo-symbols: tab icons, shield, moon, sun)
@@ -33,13 +33,14 @@ components/step-list.tsx      StepList (yellow numbered circles)
 components/theme-button.tsx   ThemeButton (Home band light/dark)
 components/verdict-panel.tsx  VerdictPanel + verdictStyle
 constants/ai-scam-topics.ts   AI_SCAM_TOPICS, AiScamTopicId, isAiScamTopicId
+constants/quiz-images.ts      QUIZ_IMAGES (image quiz questions; files in assets/images/quiz/)
 theme/colors.ts          Palette light/dark, SchemeContext, useColors, makeStyles
 theme/type.ts            fonts, typography
 theme/shape.ts           gutter, leaf, pill, minTouchTarget, pressedOpacity, shadows
 theme/theme-provider.tsx ThemeProvider + useTheme (AsyncStorage pw.theme)
 services/ai.ts           global callAI (POST server /v1/ai, image JPEG re-encode) + MAX_AI_IMAGES, parseJsonReply, UNEXPECTED_REPLY_MESSAGE
 types/scam-check.ts      ScamCheckImage/Input, SCAM_VERDICTS/ScamVerdict/isScamVerdict, ScamSign, ScamCheckResult
-types/quiz.ts            QuizItemContent/QuizItem (kind, from)
+types/quiz.ts            BundledImageSource, QuizItemContent/QuizItem (kind, from)
 ```
 No app tests. `server/` has Node tests. No utils/ dir. services/ holds only ai.ts.
 
