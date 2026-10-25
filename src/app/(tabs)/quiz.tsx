@@ -26,6 +26,8 @@ const IMAGE_QUESTION_CHANCE = 0.3;
 // Tall screenshots are capped to this height (shrunk, centered) so the
 // answer buttons stay near.
 const MAX_IMAGE_HEIGHT = 480;
+// How long a quiz waits for the AI before switching to image questions.
+const AI_WAIT_MS = 15_000;
 // Phone-screenshot shape, used if the asset's size isn't known.
 const FALLBACK_IMAGE_RATIO = 9 / 16;
 
@@ -183,7 +185,15 @@ function pickFallbackImages(): QuizImage[] {
   return shuffled(QUIZ_IMAGES).slice(0, QUIZ_LENGTH);
 }
 
+function delay(ms: number): Promise<null> {
+  return new Promise((resolve) => setTimeout(() => resolve(null), ms));
+}
+
 type QuizBuild = { ok: true; items: QuizItem[] } | { ok: false; error: unknown };
+
+// A build in progress (or done) plus the time after which a quiz stops
+// waiting for it and plays images instead.
+type PendingBuild = { result: Promise<QuizBuild>; deadline: number };
 
 // Never rejects, so a background build that's never awaited can't raise an
 // unhandled rejection.
@@ -192,6 +202,13 @@ function settle(build: Promise<QuizItem[]>): Promise<QuizBuild> {
     (items) => ({ ok: true, items }),
     (error: unknown) => ({ ok: false, error })
   );
+}
+
+function startBuild(exclude?: ReadonlySet<QuizImage>): PendingBuild {
+  return {
+    result: settle(buildQuiz(exclude)),
+    deadline: Date.now() + AI_WAIT_MS,
+  };
 }
 
 function scoreLine(score: number, total: number) {
@@ -212,45 +229,61 @@ export default function Quiz() {
   const [state, setState] = useState<QuizState>(initialState);
   const latestRun = useRef(0);
 
-  // The build the next/current createQuiz() awaits: a background build
-  // started after the AI failed, or the in-flight one (shared so a double
-  // tap / StrictMode remount reuses it instead of calling the AI again).
-  const quizBuild = useRef<Promise<QuizBuild> | null>(null);
+  // The build the next/current createQuiz() awaits: the in-flight one
+  // (shared so a double tap / StrictMode remount reuses it instead of
+  // calling the AI again), one that missed AI_WAIT_MS and carries over to
+  // the next round, or a background retry after the AI failed.
+  const quizBuild = useRef<PendingBuild | null>(null);
 
   const createQuiz = useCallback(async () => {
     const run = ++latestRun.current;
     setState(initialState);
 
-    const pending = (quizBuild.current ??= settle(buildQuiz()));
-    const build = await pending;
+    const pending = (quizBuild.current ??= startBuild());
+    // An unreachable server can take the full request timeout to fail, so
+    // wait only until the build's deadline (null = still running). The
+    // deadline is per build, so a carried-over build that's already late
+    // doesn't make the next round wait again.
+    let build = await Promise.race([
+      pending.result,
+      delay(Math.max(0, pending.deadline - Date.now())),
+    ]);
 
     // A newer run (double tap, StrictMode re-mount) or an unmount
     // superseded this one — applying it would wipe the player's progress.
     if (run !== latestRun.current) {
       return;
     }
-    // Only the run that applies a build clears it.
+
+    if (!build?.ok) {
+      // AI failed or is too slow: play the hand-made images now. A broken
+      // image entry falls back to waiting for the AI (error state if that
+      // fails) rather than hanging on "preparing".
+      const fallbackImages = pickFallbackImages();
+      let fallback: QuizItem[] = [];
+      try {
+        fallback = fallbackImages.map(imageQuizItem);
+      } catch (caught) {
+        console.warn("Image fallback quiz failed", caught);
+      }
+      if (fallback.length > 0) {
+        setState({ ...initialState, status: "asking", items: fallback });
+        // Quietly set up the next round: a build still running stays in
+        // quizBuild; a failed one is retried without these images.
+        if (build) quizBuild.current = startBuild(new Set(fallbackImages));
+        return;
+      }
+      // No images to fall back on: keep waiting for the AI.
+      build ??= await pending.result;
+      if (run !== latestRun.current) {
+        return;
+      }
+    }
+
     // The run that applies a build consumes it.
     quizBuild.current = null;
     if (build.ok) {
       setState({ ...initialState, status: "asking", items: build.items });
-      return;
-    }
-
-    // AI failed: play the hand-made images now, and quietly retry the AI
-    // in the background for the next round (without these images). A
-    // broken image entry shows the error state rather than hanging on
-    // "preparing".
-    const fallbackImages = pickFallbackImages();
-    let fallback: QuizItem[] = [];
-    try {
-      fallback = fallbackImages.map(imageQuizItem);
-    } catch (caught) {
-      console.warn("Image fallback quiz failed", caught);
-    }
-    if (fallback.length > 0) {
-      setState({ ...initialState, status: "asking", items: fallback });
-      quizBuild.current = settle(buildQuiz(new Set(fallbackImages)));
       return;
     }
     setState({
