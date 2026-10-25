@@ -1,35 +1,29 @@
 import { Image } from "expo-image";
+import { router } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AccessibilityInfo, ActivityIndicator, View } from "react-native";
+import { AccessibilityInfo, StyleSheet, View } from "react-native";
 
-import { AppButton } from "@/components/app-button";
 import { AppText } from "@/components/app-text";
-import { Card } from "@/components/card";
-import { StepChart } from "@/components/charts";
-import { Inset } from "@/components/inset";
-import { InstructionStrip } from "@/components/instruction-strip";
+import { LeafCard } from "@/components/leaf-card";
+import { FadeIn, PulseDots } from "@/components/motion";
+import { PillButton } from "@/components/pill-button";
 import { Screen } from "@/components/screen";
-import { ScreenIntro } from "@/components/screen-intro";
-import { makeStyles, radius, spacing, useColors } from "@/constants/theme";
+import { ScreenHeader } from "@/components/screen-header";
 import {
   callAI,
   parseJsonReply,
   UNEXPECTED_REPLY_MESSAGE,
 } from "@/services/ai";
+import { makeStyles, useColors } from "@/theme/colors";
+import { pill } from "@/theme/shape";
 import type { QuizItem } from "@/types/quiz";
 
 const QUIZ_LENGTH = 5;
 
-// preparing: building items. prepared: items ready, waiting for "Start".
-// asking: question shown, waiting for a guess. answered: guess made,
-// waiting for "Next". finished: all answered. error: createQuiz() failed.
-type QuizStatus =
-  | "preparing"
-  | "prepared"
-  | "asking"
-  | "answered"
-  | "finished"
-  | "error";
+// preparing: building items. asking: question shown, waiting for a guess.
+// answered: guess made, waiting for "Next". finished: all answered.
+// error: createQuiz() failed.
+type QuizStatus = "preparing" | "asking" | "answered" | "finished" | "error";
 
 type QuizState = {
   status: QuizStatus;
@@ -37,7 +31,7 @@ type QuizState = {
   index: number;
   error: string | null;
   score: number;
-  // One entry per answered question, in order; drives the step chart.
+  // One entry per answered question, in order; drives the progress pills.
   results: boolean[];
   lastAnswerCorrect: boolean | null;
 };
@@ -54,19 +48,21 @@ const initialState: QuizState = {
 
 const QUIZ_ITEM_SYSTEM = `You write practice items for a "Spot the Scam" quiz that teaches older adults to recognize scams, including AI-powered ones (cloned voices, deepfakes, AI-written phishing).
 Write one realistic short message (1-3 sentences). The user says what kind of message it is and whether it must be a scam or legitimate. Make legitimate messages realistic too, not obviously safe.
+Also give the sender as it would appear on a phone: a name, organization, or phone number (e.g. "Dr. Patel's Office", "+1 (844) 555-0192"). Use 555 numbers and made-up names only.
 Then explain in one or two short, plain sentences, with no jargon, which signs show it is or isn't a scam. The reader already knows the answer, so don't restate it; only describe the signs.
 Reply with only JSON, no other text:
-{"text": string, "explanation": string}`;
+{"from": string, "text": string, "explanation": string}`;
 
 // Picked in code so the 5 calls don't all return the same kind of message.
+// `kind` is shown in the message card header.
 const QUIZ_SCENARIOS = [
-  "text message from a bank",
-  "voicemail transcript from a grandchild",
-  "email about a package delivery",
-  "phone call transcript from a government agency",
-  "social media message from a friend",
-  "email about a computer or account problem",
-  "text message about a prize or refund",
+  { kind: "Text message", about: "from a bank" },
+  { kind: "Voicemail", about: "from a grandchild" },
+  { kind: "Email", about: "about a package delivery" },
+  { kind: "Phone call", about: "from a government agency" },
+  { kind: "Social media message", about: "from a friend" },
+  { kind: "Email", about: "about a computer or account problem" },
+  { kind: "Text message", about: "about a prize or refund" },
 ] as const;
 
 type QuizScenario = (typeof QUIZ_SCENARIOS)[number];
@@ -91,7 +87,7 @@ async function generateQuizItem(scenario: QuizScenario): Promise<QuizItem> {
   try {
     reply = await callAI({
       system: QUIZ_ITEM_SYSTEM,
-      prompt: `Write a ${isScam ? "scam" : "legitimate"} ${scenario}.`,
+      prompt: `Write a ${isScam ? "scam" : "legitimate"} ${scenario.kind.toLowerCase()} ${scenario.about}.`,
     });
   } catch (caught) {
     // Network/model failures carry technical messages; show a plain one.
@@ -99,9 +95,11 @@ async function generateQuizItem(scenario: QuizScenario): Promise<QuizItem> {
     throw new Error("Check that you're online, then tap Try again.");
   }
 
-  const { text, explanation } = parseJsonReply(reply);
-  // Blank strings would render an empty question or explanation.
+  const { from, text, explanation } = parseJsonReply(reply);
+  // Blank strings would render an empty card or explanation.
   if (
+    typeof from !== "string" ||
+    !from.trim() ||
     typeof text !== "string" ||
     !text.trim() ||
     typeof explanation !== "string" ||
@@ -111,14 +109,26 @@ async function generateQuizItem(scenario: QuizScenario): Promise<QuizItem> {
   }
   return {
     id: String(nextQuizItemId++),
+    kind: scenario.kind,
+    from,
     content: { type: "text", text },
     isScam,
     explanation,
   };
 }
 
-// Route: /quiz — true/false game where the player guesses whether each
-// piece of content is a scam.
+function scoreLine(score: number) {
+  if (score === QUIZ_LENGTH) {
+    return "You caught every one. Those signs will help you when a real one arrives.";
+  }
+  if (score >= 3) {
+    return "Nicely done. Each round makes the signs easier to see.";
+  }
+  return "Scams are built to fool people. Each round you practice makes the next one easier to spot.";
+}
+
+// Route: /quiz — guess whether each message is a scam, then see the sign
+// that gives it away.
 export default function Quiz() {
   const styles = useStyles();
   const colors = useColors();
@@ -139,7 +149,7 @@ export default function Quiz() {
       if (run !== latestRun.current) {
         return;
       }
-      setState({ ...initialState, status: "prepared", items });
+      setState({ ...initialState, status: "asking", items });
     } catch (error) {
       if (run !== latestRun.current) {
         return;
@@ -150,12 +160,6 @@ export default function Quiz() {
         error: error instanceof Error ? error.message : "Something went wrong.",
       });
     }
-  }, []);
-
-  const start = useCallback(() => {
-    setState((prev) =>
-      prev.status === "prepared" ? { ...prev, status: "asking" } : prev
-    );
   }, []);
 
   const answer = useCallback((guessIsScam: boolean) => {
@@ -202,200 +206,243 @@ export default function Quiz() {
   const { status, items, index, error, score, results, lastAnswerCorrect } =
     state;
 
-  // Feedback renders below the question; announce it so screen reader
-  // users (iOS has no live regions) hear the result right away.
+  // Feedback renders below the message; announce it so screen reader users
+  // (iOS has no live regions) hear the result right away.
   useEffect(() => {
     if (status === "answered") {
       AccessibilityInfo.announceForAccessibility(
-        lastAnswerCorrect ? "Correct." : "Not quite."
+        lastAnswerCorrect ? "You got it." : "Not quite."
       );
     }
   }, [status, lastAnswerCorrect]);
 
-  // Only expose the current question once the player has started, so the
-  // prepared quiz stays hidden until then.
-  const isPlaying = status === "asking" || status === "answered";
-  const current = isPlaying ? items[index] : null;
-  const questionNumber = index + 1;
-  const totalQuestions = items.length;
+  const current =
+    status === "asking" || status === "answered" ? items[index] : null;
   const isLastQuestion = index === items.length - 1;
 
   return (
-    <Screen>
-      <ScreenIntro
-        label="Spot the Scam"
-        lead="Can you tell"
-        accent="which ones are scams?"
-        subtitle="Read each message and decide if it's a scam."
-      />
-
+    // Reset scroll per question/phase, not on a guess: feedback renders
+    // where the answer buttons were.
+    <Screen scrollKey={current ? index : status}>
       {status === "preparing" && (
-        <Card style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <AppText tone="textMuted">Getting your quiz ready...</AppText>
-        </Card>
-      )}
-
-      {status === "prepared" && (
-        <Card>
-          <AppText variant="title" accessibilityRole="header">
-            {totalQuestions} practice messages are ready
-          </AppText>
-          <AppText>
-            Some are scams and some aren&apos;t. After each guess, you&apos;ll
-            see what gave it away.
-          </AppText>
-          <AppButton
-            title="Start quiz"
-            icon="play"
-            onPress={start}
-            align="stretch"
-          />
-        </Card>
+        <>
+          <ScreenHeader title="Spot the Scam" />
+          <View style={layout.waiting} accessibilityLiveRegion="polite">
+            <PulseDots color={colors.quiz} />
+            <AppText tone="muted" style={layout.center}>
+              Getting your practice messages ready…
+            </AppText>
+          </View>
+        </>
       )}
 
       {status === "error" && error && (
-        <Card>
-          <InstructionStrip tone="warning" label="That didn't work">
-            {error}
-          </InstructionStrip>
-          <AppButton
-            title="Try again"
-            icon="refresh"
-            onPress={createQuiz}
-            align="stretch"
-          />
-        </Card>
-      )}
-
-      {status === "finished" && (
-        <Card>
-          <AppText variant="title" accessibilityRole="header">
-            You got {score} of {totalQuestions} right.
-          </AppText>
-          <StepChart
-            results={results}
-            total={totalQuestions}
-            current={null}
-          />
-          <AppText>
-            {score === totalQuestions
-              ? "A perfect score. You know what to look for."
-              : "Every round makes the warning signs easier to spot."}
-          </AppText>
-          <AppButton
-            title="Play again"
-            icon="refresh"
-            onPress={createQuiz}
-            align="stretch"
-          />
-        </Card>
+        <FadeIn style={layout.stage}>
+          <ScreenHeader title="Spot the Scam" />
+          <LeafCard border="line" style={layout.feedback}>
+            <AppText variant="feedbackTitle">That didn&apos;t work.</AppText>
+            <AppText variant="bodyStrong">{error}</AppText>
+          </LeafCard>
+          <PillButton title="Try again" variant="quiz" onPress={createQuiz} />
+        </FadeIn>
       )}
 
       {current && (
-        <>
-          <Inset style={styles.progress}>
-            <View style={styles.progressText}>
-              <AppText variant="bodyStrong">
-                Question {questionNumber} of {totalQuestions}
+        <View style={layout.stage}>
+          <View style={layout.header}>
+            <AppText variant="title" accessibilityRole="header">
+              Spot the Scam
+            </AppText>
+            <View style={layout.progressRow}>
+              <AppText variant="callout" tone="muted">
+                Message {index + 1} of {items.length}
               </AppText>
+              <View
+                style={layout.pills}
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+              >
+                {items.map((item, i) => (
+                  <View
+                    key={item.id}
+                    style={[
+                      styles.pill,
+                      results[i] === true && styles.pillRight,
+                      results[i] === false && styles.pillWrong,
+                      results[i] === undefined &&
+                        i === index &&
+                        styles.pillCurrent,
+                    ]}
+                  />
+                ))}
+              </View>
             </View>
-            <StepChart
-              results={results}
-              total={totalQuestions}
-              current={status === "asking" ? index : null}
-            />
-          </Inset>
+          </View>
 
-          {/* Every item sits in the same fixed frame so messages compare
-              fairly; content is either plain text or an image to inspect. */}
-          <Card>
-            <AppText variant="bodyStrong">The message</AppText>
-            <View style={styles.message}>
-              {current.content.type === "text" ? (
-                <AppText tone="text">{current.content.text}</AppText>
-              ) : (
-                <Image
-                  source={{ uri: current.content.uri }}
-                  style={{
-                    width: "100%",
-                    aspectRatio: current.content.width / current.content.height,
-                  }}
-                />
-              )}
+          <LeafCard border="line" style={layout.message}>
+            <View style={styles.messageHeader}>
+              <AppText variant="small" tone="muted">
+                {current.kind}
+              </AppText>
+              <AppText variant="calloutStrong">{current.from}</AppText>
             </View>
-          </Card>
+            {current.content.type === "text" ? (
+              <AppText style={layout.messageBody}>{current.content.text}</AppText>
+            ) : (
+              <Image
+                source={{ uri: current.content.uri }}
+                style={{
+                  width: "100%",
+                  aspectRatio: current.content.width / current.content.height,
+                }}
+              />
+            )}
+          </LeafCard>
 
           {status === "asking" && (
-            <Inset style={styles.answers}>
-              <AppButton
+            <View style={layout.answers}>
+              <PillButton
                 title="It's a scam"
-                icon="flag"
-                variant="secondary"
+                variant="quiz"
+                size="large"
                 onPress={() => answer(true)}
-                align="stretch"
               />
-              <AppButton
+              <PillButton
                 title="It's not a scam"
-                icon="check"
-                variant="secondary"
+                variant="quizOutline"
+                size="large"
                 onPress={() => answer(false)}
-                align="stretch"
               />
-            </Inset>
+            </View>
           )}
 
           {status === "answered" && (
-            <Card>
-              <AppText
-                variant="title"
-                tone={lastAnswerCorrect ? "success" : "danger"}
-                accessibilityRole="header"
+            <FadeIn style={layout.answered}>
+              <LeafCard
+                fill={lastAnswerCorrect ? "safeTint" : "scamTint"}
+                style={layout.feedback}
               >
-                {lastAnswerCorrect ? "Correct." : "Not quite."}
+                <AppText
+                  variant="feedbackTitle"
+                  tone={lastAnswerCorrect ? "safeInk" : "scamInk"}
+                  accessibilityRole="header"
+                >
+                  {lastAnswerCorrect ? "You got it." : "Not quite."}
+                </AppText>
+                <AppText variant="bodyStrong">
+                  {current.isScam
+                    ? "This one is a scam."
+                    : "This one is not a scam."}
+                </AppText>
+              </LeafCard>
+              <AppText variant="subheading" accessibilityRole="header">
+                The sign to remember
               </AppText>
-              <InstructionStrip
-                tone={current.isScam ? "danger" : "success"}
-                label={current.isScam ? "This was a scam" : "This was not a scam"}
-              >
-                {current.explanation}
-              </InstructionStrip>
-              <AppButton
-                title={isLastQuestion ? "See my score" : "Next question"}
-                icon="arrow"
+              <AppText>{current.explanation}</AppText>
+              <PillButton
+                title={isLastQuestion ? "See my score" : "Next message"}
+                variant="quiz"
                 onPress={next}
-                align="stretch"
               />
-            </Card>
+            </FadeIn>
           )}
-        </>
+        </View>
+      )}
+
+      {status === "finished" && (
+        <FadeIn style={layout.finished}>
+          <AppText variant="title" accessibilityRole="header">
+            Spot the Scam
+          </AppText>
+          <LeafCard border="line" style={layout.score}>
+            <AppText variant="callout" tone="muted">
+              Your score
+            </AppText>
+            <AppText variant="display" tone="quiz">
+              {score} of {items.length}
+            </AppText>
+            <AppText style={layout.scoreLine}>{scoreLine(score)}</AppText>
+          </LeafCard>
+          <View style={layout.answers}>
+            <PillButton title="Try again" variant="quiz" onPress={createQuiz} />
+            <PillButton
+              title="Read about AI Scams"
+              variant="quizGhost"
+              size="small"
+              onPress={() => router.navigate("/ai-scams")}
+            />
+          </View>
+        </FadeIn>
       )}
     </Screen>
   );
 }
 
-const useStyles = makeStyles((c) => ({
-  centered: {
-    alignItems: "center",
-  },
-  progress: {
-    gap: spacing.sm,
-  },
-  progressText: {
+const layout = StyleSheet.create({
+  stage: { gap: 18 },
+  header: { gap: 12 },
+  progressRow: {
     flexDirection: "row",
     flexWrap: "wrap",
+    alignItems: "center",
     justifyContent: "space-between",
-    alignItems: "baseline",
-    gap: spacing.sm,
+    gap: 8,
   },
-  message: {
-    minHeight: 120,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: c.surface,
+  pills: {
+    flexDirection: "row",
+    gap: 6,
   },
-  // Separated more than usual so a shaky tap can't land on the other answer.
-  answers: {
-    gap: spacing.lg,
+  waiting: {
+    minHeight: 360,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 24,
+  },
+  center: { textAlign: "center" },
+  message: { overflow: "hidden" },
+  messageBody: { padding: 18 },
+  answers: { gap: 12 },
+  answered: { gap: 14 },
+  feedback: {
+    padding: 18,
+    gap: 8,
+  },
+  finished: {
+    gap: 22,
+    paddingTop: 20,
+  },
+  score: {
+    paddingVertical: 28,
+    paddingHorizontal: 22,
+    gap: 10,
+    alignItems: "flex-start",
+  },
+  scoreLine: { marginTop: 6 },
+});
+
+const useStyles = makeStyles((c) => ({
+  pill: {
+    width: 16,
+    height: 10,
+    borderRadius: pill,
+    borderWidth: 2,
+    borderColor: c.lineStrong,
+  },
+  pillRight: {
+    backgroundColor: c.safeInk,
+    borderColor: c.safeInk,
+  },
+  pillWrong: {
+    backgroundColor: c.scamInk,
+    borderColor: c.scamInk,
+  },
+  pillCurrent: {
+    borderColor: c.accent,
+  },
+  messageHeader: {
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    gap: 2,
+    backgroundColor: c.soft,
   },
 }));

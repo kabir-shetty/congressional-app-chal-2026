@@ -2,6 +2,8 @@ import { createServer } from "node:http";
 import { timingSafeEqual } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
+import { GoogleAuth } from "google-auth-library";
+
 const MAX_BODY_BYTES = 10 * 1024 * 1024;
 const MAX_IMAGES = 5;
 const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
@@ -11,8 +13,21 @@ const ALLOWED_IMAGE_TYPES = new Set([
   "image/webp",
   "image/gif",
 ]);
-const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models";
+const CLOUD_PLATFORM_SCOPE = "https://www.googleapis.com/auth/cloud-platform";
+
+// Vertex AI generateContent. The "global" location has no regional host
+// prefix; every other location uses <location>-aiplatform.googleapis.com.
+export function vertexGenerateUrl({ project, location, model }) {
+  const host =
+    location === "global"
+      ? "aiplatform.googleapis.com"
+      : `${location}-aiplatform.googleapis.com`;
+  return (
+    `https://${host}/v1/projects/${encodeURIComponent(project)}` +
+    `/locations/${encodeURIComponent(location)}` +
+    `/publishers/google/models/${encodeURIComponent(model)}:generateContent`
+  );
+}
 
 class HttpError extends Error {
   constructor(status, message) {
@@ -161,15 +176,31 @@ async function handleRequest(request, response, config) {
     })),
   ];
 
+  // Short-lived OAuth token from Application Default Credentials; the
+  // auth library caches and refreshes it.
+  // The ADC message is logged (server-side only) because it's the one clue
+  // to a credentials misconfiguration; clients get a generic 502.
+  let accessToken;
+  try {
+    accessToken = await config.getAccessToken();
+    if (!accessToken) console.error("Google Cloud ADC returned no access token.");
+  } catch (error) {
+    console.error("Google Cloud ADC token request failed:", error?.message);
+  }
+  if (!accessToken) {
+    sendJson(response, 502, { error: { message: "Gemini service is unavailable." } });
+    return;
+  }
+
   let geminiResponse;
   try {
     geminiResponse = await config.fetchImpl(
-      `${GEMINI_API_URL}/${encodeURIComponent(config.model)}:generateContent`,
+      vertexGenerateUrl(config),
       {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-goog-api-key": config.geminiApiKey,
+          authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: input.system }] },
@@ -231,12 +262,16 @@ export function createAppServer(config) {
 }
 
 export function loadConfig(environment = process.env) {
-  const geminiApiKey = environment.GEMINI_API_KEY;
+  const project = environment.GOOGLE_CLOUD_PROJECT;
+  const location = environment.GOOGLE_CLOUD_LOCATION || "global";
   const apiToken = environment.API_TOKEN;
-  const port = Number(environment.PORT ?? 8080);
+  const port = Number(environment.PORT ?? 8787);
 
-  if (!geminiApiKey) {
-    throw new Error("GEMINI_API_KEY is required.");
+  if (!project) {
+    throw new Error("GOOGLE_CLOUD_PROJECT is required.");
+  }
+  if (!/^[a-z0-9-]+$/.test(location)) {
+    throw new Error("GOOGLE_CLOUD_LOCATION must be a location such as global or us-central1.");
   }
   if (!apiToken || apiToken.length < 32) {
     throw new Error("API_TOKEN is required and must be at least 32 characters.");
@@ -245,11 +280,17 @@ export function loadConfig(environment = process.env) {
     throw new Error("PORT must be an integer from 1 to 65535.");
   }
 
+  // ADC: GOOGLE_APPLICATION_CREDENTIALS file, gcloud user credentials, or
+  // the attached service account via the metadata server on Google Cloud.
+  const auth = new GoogleAuth({ scopes: CLOUD_PLATFORM_SCOPE });
+
   return {
     apiToken,
-    geminiApiKey,
+    project,
+    location,
     model: environment.GEMINI_MODEL || "gemini-2.5-flash",
     port,
+    getAccessToken: () => auth.getAccessToken(),
     fetchImpl: fetch,
   };
 }

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Public+Sans:wght@600;700&display=swap" rel="stylesheet">
+<style>
+html{font-size:16px}:root{--bg:#F4F6F9;--surface:#FFFFFF;--ink:#142033;--muted:#46536A;--line:#D5DCE6;--line-strong:#8C99AD;--soft:#E9EDF3;--accent:#1F3A5F;--accent-hover:#162B47;--on-accent:#FFFFFF;--on-accent-muted:#D6E0EE;--scam-tint:#FBE3DE;--scam-ink:#A12C1C;--safe-tint:#DDF0E4;--safe-ink:#1F6440;--unsure-tint:#F7EBCB;--unsure-ink:#7A5300;--disabled-bg:#DCE2EA;--disabled-fg:#4F5B6E;--page:#DDE2EA;--band:#1F3A5F;--on-band:#FFFFFF;--on-band-muted:#D6E0EE;--band-btn:#F2C14E;--band-btn-ink:#142033;--sun:#F2C14E;--quiz:#1C7472;--quiz-tint:#D6EFEC;--learn:#77479C;--learn-tint:#EEE4F6;--check-tint:#FFF1C9;--check:#F2C14E;--on-check:#142033;--check-soft:#FFF8E3}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0F1621;--surface:#18212F;--ink:#EEF2F7;--muted:#AEB9CA;--line:#2C3747;--line-strong:#5B687C;--soft:#222C3B;--accent:#9DBCEB;--accent-hover:#B8CFF2;--on-accent:#0F1621;--on-accent-muted:#1E2E45;--scam-tint:#3A1E1A;--scam-ink:#F2A595;--safe-tint:#16301F;--safe-ink:#8FD3A8;--unsure-tint:#33290F;--unsure-ink:#E8C46E;--disabled-bg:#2C3747;--disabled-fg:#AEB9CA;--page:#05080D;--band:#1A2B42;--on-band:#EEF2F7;--on-band-muted:#C3CEDD;--band-btn:#F2C14E;--band-btn-ink:#0F1621;--sun:#E8B940;--quiz:#7FD3CF;--quiz-tint:#14302F;--learn:#CDAAEE;--learn-tint:#271D35;--check-tint:#2A2312;--check:#E8B940;--on-check:#0F1621;--check-soft:#241E10}}:root[data-theme=dark]{--bg:#0F1621;--surface:#18212F;--ink:#EEF2F7;--muted:#AEB9CA;--line:#2C3747;--line-strong:#5B687C;--soft:#222C3B;--accent:#9DBCEB;--accent-hover:#B8CFF2;--on-accent:#0F1621;--on-accent-muted:#1E2E45;--scam-tint:#3A1E1A;--scam-ink:#F2A595;--safe-tint:#16301F;--safe-ink:#8FD3A8;--unsure-tint:#33290F;--unsure-ink:#E8C46E;--disabled-bg:#2C3747;--disabled-fg:#AEB9CA;--page:#05080D;--band:#1A2B42;--on-band:#EEF2F7;--on-band-muted:#C3CEDD;--band-btn:#F2C14E;--band-btn-ink:#0F1621;--sun:#E8B940;--quiz:#7FD3CF;--quiz-tint:#14302F;--learn:#CDAAEE;--learn-tint:#271D35;--check-tint:#2A2312;--check:#E8B940;--on-check:#0F1621;--check-soft:#241E10}
+body{margin:0;background:var(--page);font-family:'Atkinson Hyperlegible',system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}a:hover{color:var(--accent-hover)}
+button{font-family:inherit;cursor:pointer}
+textarea{font-family:inherit}
+textarea:focus,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@keyframes pwpulse{0%,100%{transform:scale(.6);opacity:.35}50%{transform:scale(1);opacity:1}}
+@keyframes pwin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;box-sizing:border-box">
+<div style="width:390px;height:844px;border-radius:54px;border:11px solid #1B1D1B;background:var(--bg);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 60px rgba(40,30,10,.18);position:relative;flex:none">
+
+<div style="height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px 0 34px;font:700 16px system-ui,sans-serif;color:{{ statusFg }};background:{{ statusBg }}">
+<span>9:41</span>
+<div style="width:120px;height:32px;border-radius:20px;background:#1B1D1B;position:absolute;left:50%;top:10px;transform:translateX(-50%)"></div>
+<div style="display:flex;gap:6px;align-items:center"><div style="width:24px;height:12px;border:2px solid currentColor;border-radius:4px;padding:1px;box-sizing:border-box"><div style="width:70%;height:100%;background:currentColor;border-radius:1px"></div></div></div>
+</div>
+
+<div ref="{{ scrollRef }}" style="flex:1;overflow-y:auto;overflow-x:hidden">
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<main style="display:flex;flex-direction:column;animation:pwin .3s ease">
+<section style="background:var(--band);color:var(--on-band);padding:16px 22px 40px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden;border-radius:0 0 50% 50% / 0 0 36px 36px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;z-index:1">
+<div style="display:flex;align-items:center;gap:10px">
+<div aria-hidden="true" style="display:flex;align-items:flex-end;gap:3px"><div style="width:20px;height:10px;border-radius:20px 20px 0 0;background:var(--sun)"></div><div style="width:8px;height:8px;border-radius:50%;background:#7FD3CF;margin-bottom:6px"></div></div>
+<span style="font:700 1rem 'Atkinson Hyperlegible',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--on-band)">Porch Watch</span>
+</div>
+<button onClick="{{ toggleTheme }}" style-active="opacity:.6" style="transition:opacity .1s;min-height:56px;padding:0 20px;border:none;border-radius:999px;background:var(--surface);color:var(--ink);box-shadow:0 4px 12px rgba(0,0,0,.18);font:700 1.05rem 'Atkinson Hyperlegible',sans-serif;white-space:nowrap;display:flex;align-items:center;gap:8px"><ion-icon name="{{ themeIcon }}" aria-hidden="true" style="font-size:22px"></ion-icon><span>{{ themeLabel }}</span></button>
+</div>
+<h1 style="margin:0;font:700 1.8rem/1.15 'Public Sans',sans-serif;color:var(--on-band);text-wrap:pretty;position:relative;z-index:1;padding-right:4.6rem">Know the signs<br>before they<br>reach your door.<ion-icon name="shield-checkmark" aria-hidden="true" style="position:absolute;right:18px;top:0.8rem;font-size:4.6rem;color:var(--sun);pointer-events:none"></ion-icon></h1>
+<p style="margin:10px 0 0;font-size:1.25rem;line-height:1.4;color:var(--on-band-muted);position:relative;z-index:1">Got a message that worries you? Check it before you reply, click, or pay.</p>
+<button onClick="{{ goCheck }}" style-active="opacity:.6" style="transition:opacity .1s;position:relative;z-index:1;margin-top:6px;min-height:64px;border:none;border-radius:999px;background:var(--band-btn);color:var(--band-btn-ink);box-shadow:0 8px 20px rgba(0,0,0,.22);font:700 1.35rem 'Atkinson Hyperlegible',sans-serif">Check for Scam</button>
+</section>
+<div style="padding:24px 22px 32px;display:flex;flex-direction:column;gap:18px">
+<button onClick="{{ goQuiz }}" style-active="opacity:.6" style="transition:opacity .1s;text-align:left;border:none;background:var(--quiz-tint);color:var(--ink);border-radius:28px 28px 28px 8px;padding:22px;display:flex;flex-direction:column;gap:8px">
+<div aria-hidden="true" style="display:flex;gap:6px;margin-bottom:4px"><div style="width:22px;height:22px;border-radius:50%;background:var(--quiz)"></div><div style="width:22px;height:22px;border-radius:50%;border:3px solid var(--quiz);box-sizing:border-box"></div><div style="width:22px;height:22px;border-radius:50%;background:var(--quiz);opacity:.3"></div></div>
+<span style="font:700 1.4rem/1.2 'Public Sans',sans-serif">Spot the Scam</span>
+<span style="font-size:1.2rem;line-height:1.4;color:var(--muted)">Practice with 5 messages. See how you do.</span>
+<span style="margin-top:6px;font:700 1.2rem 'Atkinson Hyperlegible',sans-serif;color:var(--quiz);min-height:44px;display:flex;align-items:center">Start practice →</span>
+</button>
+
+<button onClick="{{ goLearn }}" style-active="opacity:.6" style="transition:opacity .1s;text-align:left;border:none;background:var(--learn-tint);color:var(--ink);border-radius:28px 28px 28px 8px;padding:22px;display:flex;flex-direction:column;gap:8px">
+<div aria-hidden="true" style="display:flex;align-items:flex-end;gap:0;margin-bottom:4px"><div style="width:44px;height:22px;border-radius:44px 44px 0 0;background:var(--learn)"></div><div style="width:22px;height:22px;border-radius:50%;background:var(--learn);opacity:.3;margin-left:4px"></div></div>
+<span style="font:700 1.4rem/1.2 'Public Sans',sans-serif">How AI changed scams</span>
+<span style="font-size:1.2rem;line-height:1.4;color:var(--muted)">Cloned voices, fake photos, perfect-sounding messages.</span>
+<span style="margin-top:6px;font:700 1.2rem 'Atkinson Hyperlegible',sans-serif;color:var(--learn);min-height:44px;display:flex;align-items:center">Read about AI Scams →</span>
+</button>
+
+<p style="margin:0;font-size:1.1rem;line-height:1.5;color:var(--muted)">Free. No sign-in. Nothing to set up.</p>
+</div>
+</main>
+</sc-if>
+
+<sc-if value="{{ isCheck }}" hint-placeholder-val="{{ false }}">
+<main style="padding:16px 22px 32px;display:flex;flex-direction:column;gap:20px">
+
+<sc-if value="{{ stageInput }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:20px;animation:pwin .3s ease">
+<header style="display:flex;flex-direction:column;gap:8px">
+<h1 style="margin:0;font:700 2rem/1.15 'Public Sans',sans-serif">Scam Checker</h1>
+<p style="margin:0;font-size:1.25rem;line-height:1.45;color:var(--muted)">Take your time. Paste the message or add a screenshot of it.</p>
+</header>
+<label style="display:flex;flex-direction:column;gap:8px">
+<span style="font:700 1.15rem 'Atkinson Hyperlegible',sans-serif">The message</span>
+<textarea value="{{ text }}" onChange="{{ onText }}" placeholder="Paste the message here" rows="6" style="font-size:1.25rem;line-height:1.45;padding:16px;border:2px solid var(--line-strong);border-radius:28px 28px 28px 8px;background:var(--surface);color:var(--ink);resize:none;box-sizing:border-box;width:100%"></textarea>
+</label>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<button onClick="{{ addShot }}" style-active="opacity:.6" style="flex:1;transition:opacity .1s;min-height:56px;border:none;background:var(--check);color:var(--on-check);box-shadow:0 6px 16px rgba(20,32,51,.18);border-radius:999px;font:700 1.15rem 'Atkinson Hyperlegible',sans-serif;padding:0 14px">Add screenshot</button>
+</div>
+<sc-if value="{{ hasShots }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+<sc-for list="{{ shots }}" as="s" hint-placeholder-count="1">
+<div style="display:flex;flex-direction:column;gap:6px;align-items:center">
+<div style="width:96px;height:150px;border-radius:28px 28px 28px 8px;border:2px solid var(--line-strong);background:repeating-linear-gradient(135deg,var(--soft) 0 8px,var(--line) 8px 16px);display:flex;align-items:center;justify-content:center;font:12px ui-monospace,Menlo,monospace;color:var(--muted);text-align:center;padding:6px;box-sizing:border-box">screenshot {{ s.n }}</div>
+<button onClick="{{ s.remove }}" style-active="opacity:.6" style="transition:opacity .1s;min-height:44px;border:none;background:none;color:var(--scam-ink);font:700 1rem 'Atkinson Hyperlegible',sans-serif;text-decoration:underline">Remove</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<button onClick="{{ check }}" disabled="{{ cannotCheck }}" style-active="opacity:{{ checkActiveOpacity }}" style="transition:opacity .1s;min-height:64px;border:none;border-radius:999px;font:700 1.35rem 'Atkinson Hyperlegible',sans-serif;background:{{ checkBg }};color:{{ checkFg }}">Check for Scam</button>
+<div style="display:flex;flex-direction:column;gap:10px;padding-top:6px;border-top:2px solid var(--line)">
+<span style="font:700 1.1rem 'Atkinson Hyperlegible',sans-serif;padding-top:14px">Or try an example</span>
+<sc-for list="{{ samples }}" as="x" hint-placeholder-count="3">
+<button onClick="{{ x.use }}" style-active="opacity:.6" style="transition:opacity .1s;text-align:left;min-height:56px;border:2px solid var(--line);background:var(--surface);border-radius:28px;padding:12px 20px;font-size:1.15rem;color:var(--ink)">{{ x.label }}</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ stageChecking }}" hint-placeholder-val="{{ false }}">
+<div role="status" aria-live="polite" style="min-height:600px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center;padding:0 10px">
+{{ loader }}
+<h1 style="margin:0;font:700 1.8rem/1.2 'Public Sans',sans-serif">Reading the message…</h1>
+<p style="margin:0;font-size:1.25rem;line-height:1.5;color:var(--muted)">While you wait: you don't have to reply to anyone right now.</p>
+</div>
+</sc-if>
+
+<sc-if value="{{ stageResult }}" hint-placeholder-val="{{ false }}">
+<div aria-live="assertive" style="display:flex;flex-direction:column;gap:22px;animation:pwin .35s ease">
+<section style="background:{{ r.tint }};border-radius:28px 28px 28px 8px;padding:24px 22px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:10px">
+<div style="width:16px;height:16px;border-radius:50%;background:{{ r.ink }}"></div>
+<span style="font:700 1.1rem 'Atkinson Hyperlegible',sans-serif;letter-spacing:.04em;text-transform:uppercase;color:{{ r.ink }}">{{ r.label }}</span>
+</div>
+<h1 style="margin:0;font:700 1.9rem/1.15 'Public Sans',sans-serif;color:var(--ink);text-wrap:pretty">{{ r.headline }}</h1>
+<p style="margin:0;font-size:1.3rem;line-height:1.45;font-weight:700;color:var(--ink)">{{ r.action }}</p>
+<p style="margin:0;font-size:1.1rem;color:var(--ink)">How sure: <strong>{{ r.sure }}</strong></p>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font:700 1.4rem 'Public Sans',sans-serif">What we noticed</h2>
+<sc-for list="{{ r.signs }}" as="sg" hint-placeholder-count="3">
+<div style="background:var(--surface);border:2px solid var(--line);border-radius:28px 28px 28px 8px;padding:16px;display:flex;flex-direction:column;gap:6px">
+<strong style="font-size:1.2rem;line-height:1.3">{{ sg.h }}</strong>
+<span style="font-size:1.15rem;line-height:1.45;color:var(--muted)">{{ sg.p }}</span>
+</div>
+</sc-for>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font:700 1.4rem 'Public Sans',sans-serif">What to do now</h2>
+<ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ r.steps }}" as="st" hint-placeholder-count="3">
+<li style="display:flex;gap:14px;align-items:flex-start;font-size:1.2rem;line-height:1.45">
+<span style="flex:none;width:34px;height:34px;border-radius:50%;background:var(--check);color:var(--on-check);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:1.05rem">{{ st.n }}</span>
+<span>{{ st.t }}</span>
+</li>
+</sc-for>
+</ol>
+</section>
+<div style="display:flex;flex-direction:column;gap:12px;padding-top:4px">
+<button onClick="{{ reset }}" style-active="opacity:.6" style="transition:opacity .1s;min-height:60px;border:none;border-radius:999px;background:var(--check);color:var(--on-check);box-shadow:0 6px 16px rgba(20,32,51,.18);font:700 1.25rem 'Atkinson Hyperlegible',sans-serif">Check another message</button>
+<button onClick="{{ r.learn }}" style-active="opacity:.6" style="transition:opacity .1s;min-height:56px;border:2px solid var(--ink);border-radius:999px;background:var(--check-soft);color:var(--ink);font:700 1.15rem 'Atkinson Hyperlegible',sans-serif;padding:8px 14px">{{ r.learnLabel }}</button>
+</div>
+<p style="margin:0;font-size:1rem;line-height:1.5;color:var(--muted)">This is a second opinion, not a guarantee. When in doubt, call the person or company on a number you already trust.</p>
+</div>
+</sc-if>
+</main>
+</sc-if>
+
+<sc-if value="{{ isQuiz }}" hint-placeholder-val="{{ false }}">
+<main style="padding:16px 22px 32px;display:flex;flex-direction:column;gap:20px">
+<sc-if value="{{ quizPlaying }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:18px">
+<header style="display:flex;flex-direction:column;gap:12px">
+<h1 style="margin:0;font:700 2rem/1.15 'Public Sans',sans-serif">Spot the Scam</h1>
+<div style="display:flex;align-items:center;justify-content:space-between">
+<span style="font-size:1.15rem;color:var(--muted);white-space:nowrap;flex:none">Message {{ qNum }} of 5</span>
+<div style="display:flex;gap:6px" aria-hidden="true">
+<sc-for list="{{ dots }}" as="d" hint-placeholder-count="5"><div style="width:16px;height:10px;border-radius:999px;background:{{ d.bg }};border:2px solid {{ d.border }};box-sizing:border-box"></div></sc-for>
+</div>
+</div>
+</header>
+<article style="background:var(--surface);border:2px solid var(--line);border-radius:28px 28px 28px 8px;overflow:hidden">
+<div style="padding:12px 18px;background:var(--soft);display:flex;flex-direction:column;gap:2px">
+<span style="font-size:1rem;color:var(--muted)">{{ q.kind }}</span>
+<strong style="font-size:1.15rem">{{ q.from }}</strong>
+</div>
+<p style="margin:0;padding:18px;font-size:1.25rem;line-height:1.5;text-wrap:pretty">{{ q.body }}</p>
+</article>
+<sc-if value="{{ unanswered }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<button onClick="{{ guessScam }}" style-active="opacity:.6" style="transition:opacity .1s;min-height:64px;border:none;border-radius:999px;background:var(--quiz);color:var(--on-accent);box-shadow:0 6px 16px rgba(20,32,51,.18);font:700 1.3rem 'Atkinson Hyperlegible',sans-serif">It's a scam</button>
+<button onClick="{{ guessSafe }}" style-active="opacity:.6" style="transition:opacity .1s;min-height:64px;border:2px solid var(--quiz);border-radius:999px;background:var(--surface);color:var(--quiz);font:700 1.3rem 'Atkinson Hyperlegible',sans-serif">It's not a scam</button>
+</div>
+</sc-if>
+<sc-if value="{{ answered }}" hint-placeholder-val="{{ false }}">
+<section aria-live="assertive" style="display:flex;flex-direction:column;gap:14px;animation:pwin .3s ease">
+<div style="background:{{ fb.tint }};border-radius:28px 28px 28px 8px;padding:18px;display:flex;flex-direction:column;gap:8px">
+<strong style="font:700 1.5rem/1.2 'Public Sans',sans-serif;color:{{ fb.ink }}">{{ fb.title }}</strong>
+<span style="font-size:1.2rem;line-height:1.4;font-weight:700">{{ q.answerLine }}</span>
+</div>
+<h2 style="margin:0;font:700 1.3rem 'Public Sans',sans-serif">The sign to remember</h2>
+<p style="margin:0;font-size:1.2rem;line-height:1.5">{{ q.why }}</p>
+<button onClick="{{ next }}" style-active="opacity:.6" style="transition:opacity .1s;min-height:60px;border:none;border-radius:999px;background:var(--quiz);color:var(--on-accent);box-shadow:0 6px 16px rgba(20,32,51,.18);font:700 1.25rem 'Atkinson Hyperlegible',sans-serif">{{ nextLabel }}</button>
+</section>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ quizDone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:22px;padding-top:20px;animation:pwin .35s ease">
+<h1 style="margin:0;font:700 2rem/1.15 'Public Sans',sans-serif">Spot the Scam</h1>
+<div style="background:var(--surface);border:2px solid var(--line);border-radius:28px 28px 28px 8px;padding:28px 22px;display:flex;flex-direction:column;gap:10px;align-items:flex-start">
+<span style="font-size:1.15rem;color:var(--muted)">Your score</span>
+<span style="font:700 3.2rem/1 'Public Sans',sans-serif;color:var(--quiz)">{{ score }} of 5</span>
+<p style="margin:6px 0 0;font-size:1.25rem;line-height:1.45">{{ scoreLine }}</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<button onClick="{{ restart }}" style-active="opacity:.6" style="transition:opacity .1s;min-height:60px;border:none;border-radius:999px;background:var(--quiz);color:var(--on-accent);box-shadow:0 6px 16px rgba(20,32,51,.18);font:700 1.25rem 'Atkinson Hyperlegible',sans-serif">Try again</button>
+<button onClick="{{ goLearn }}" style-active="opacity:.6" style="transition:opacity .1s;min-height:56px;border:2px solid var(--quiz);border-radius:999px;background:transparent;color:var(--quiz);font:700 1.2rem 'Atkinson Hyperlegible',sans-serif">Read about AI Scams</button>
+</div>
+</div>
+</sc-if>
+</main>
+</sc-if>
+
+<sc-if value="{{ isLearn }}" hint-placeholder-val="{{ false }}">
+<main style="padding:16px 22px 32px;display:flex;flex-direction:column;gap:18px;animation:pwin .3s ease">
+<header style="display:flex;flex-direction:column;gap:8px">
+<h1 style="margin:0;font:700 2rem/1.15 'Public Sans',sans-serif">AI Scams</h1>
+<p style="margin:0;font-size:1.25rem;line-height:1.45;color:var(--muted)">AI makes scams look and sound more real. The warning signs stay the same.</p>
+</header>
+<sc-for list="{{ topics }}" as="t" hint-placeholder-count="4">
+<section style="background:var(--surface);border:2px solid {{ t.border }};border-radius:28px 28px 28px 8px;overflow:hidden">
+<button onClick="{{ t.toggle }}" aria-expanded="{{ t.open }}" style-active="opacity:.6" style="transition:opacity .1s;width:100%;min-height:64px;border:none;background:none;text-align:left;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--ink)">
+<h2 style="margin:0;font:700 1.3rem/1.25 'Public Sans',sans-serif">{{ t.title }}</h2>
+<span style="flex:none;font:700 1rem 'Atkinson Hyperlegible',sans-serif;color:var(--learn)">{{ t.cta }}</span>
+</button>
+<sc-if value="{{ t.open }}" hint-placeholder-val="{{ false }}">
+<div style="padding:0 18px 20px;display:flex;flex-direction:column;gap:14px">
+<p style="margin:0;font-size:1.2rem;line-height:1.5">{{ t.intro }}</p>
+<sc-for list="{{ t.items }}" as="it" hint-placeholder-count="2">
+<div style="border-top:2px solid var(--soft);padding-top:12px;display:flex;flex-direction:column;gap:4px">
+<strong style="font-size:1.15rem;color:var(--learn)">{{ it.h }}</strong>
+<span style="font-size:1.15rem;line-height:1.45">{{ it.p }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</section>
+</sc-for>
+</main>
+</sc-if>
+</div>
+
+<nav aria-label="Main" style="flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--surface);border-top:2px solid var(--line);padding:0 4px 22px">
+<sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="4">
+<button onClick="{{ tb.go }}" aria-current="{{ tb.current }}" style-active="opacity:.6" style="transition:opacity .1s;min-height:68px;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;padding:0 2px;color:{{ tb.color }}">
+<div style="width:44px;height:5px;border-radius:0 0 999px 999px;background:{{ tb.bar }}"></div>
+<span style="font-size:1rem;line-height:1.15;font-weight:{{ tb.weight }};text-align:center;padding-top:4px">{{ tb.label }}</span>
+</button>
+</sc-for>
+</nav>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;textScale&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;100%&quot;,&quot;115%&quot;,&quot;130%&quot;],&quot;default&quot;:&quot;100%&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Accessibility&quot;},&quot;startTab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;home&quot;,&quot;check&quot;,&quot;quiz&quot;,&quot;learn&quot;],&quot;default&quot;:&quot;home&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;}}">
+const SAMPLES = [
+  { key: 'grandson', label: '"Grandma, it\'s Josh. I\'m in trouble…"', text: "Grandma it's Josh. I got in a car accident and I'm at the police station. Please don't tell Mom. The lawyer says I need $2,000 for bail today and gift cards are the fastest way. Can you help?" },
+  { key: 'pharmacy', label: 'Pharmacy refill reminder', text: "Maple Street Pharmacy: Your prescription is ready for pickup. Questions? Call the number on your bottle label." },
+  { key: 'newnumber', label: '"Hi Mom, this is my new number"', text: "Hi Mom, I dropped my phone in the sink so this is my new number. Save it! Text me back when you can." }
+];
+const V = {
+  scam: { label: 'Likely a scam', tint: 'var(--scam-tint)', ink: 'var(--scam-ink)' },
+  safe: { label: 'Likely not a scam', tint: 'var(--safe-tint)', ink: 'var(--safe-ink)' },
+  unsure: { label: "Can't tell", tint: 'var(--unsure-tint)', ink: 'var(--unsure-ink)' }
+};
+const RESULTS = {
+  grandson: { v: 'scam', headline: 'This looks like a scam.', action: "Don't reply and don't buy gift cards.", sure: 'Very likely', topic: 0, learnLabel: 'Learn about cloned voices',
+    signs: [
+      { h: 'It asks for gift cards.', p: 'Police, lawyers, and courts never take gift cards. Once you share the numbers, the money is gone.' },
+      { h: 'It asks you to keep it secret.', p: '"Don\'t tell Mom" keeps you from checking with someone who knows the truth.' },
+      { h: 'It rushes you.', p: 'Bail "today" is meant to stop you from thinking it over.' }
+    ],
+    steps: ['Don\'t reply to this message.', 'Call Josh on the number you already have for him, or call his mom.', 'If you already sent money or card numbers, call your bank and the store that sold the cards.'] },
+  pharmacy: { v: 'safe', headline: 'This looks like a normal message.', action: 'You can pick up your prescription as usual.', sure: 'Fairly sure', topic: 3, learnLabel: 'See the signs that never change',
+    signs: [
+      { h: 'It doesn\'t ask for money or information.', p: 'It only tells you something is ready.' },
+      { h: 'There\'s no link to tap.', p: 'It points you to a number you already have, on your bottle.' }
+    ],
+    steps: ['If you weren\'t expecting a refill, call the pharmacy using the number on your bottle.', 'Never give card or Medicare details by text.'] },
+  newnumber: { v: 'unsure', headline: "We can't tell from this message alone.", action: 'Check with your child before you save the number.', sure: 'Not sure either way', topic: 3, learnLabel: 'See the signs that never change',
+    signs: [
+      { h: 'A "new number" is a common way scams start.', p: 'The next message often asks for money for a bill or an emergency.' },
+      { h: 'Nothing is asked for yet.', p: 'It could be real. People do change phones.' }
+    ],
+    steps: ['Call or text your child on their old number and ask.', 'If this number asks for money, stop and check first.'] },
+  scam: { v: 'scam', headline: 'This looks like a scam.', action: "Don't reply, click any link, or pay.", sure: 'Fairly sure', topic: 3, learnLabel: 'See the signs that never change',
+    signs: [
+      { h: 'It asks for money or private details.', p: 'Gift cards, wire transfers, crypto, passwords, or account numbers are what scammers want.' },
+      { h: 'It pushes you to act fast.', p: 'Real companies give you time to check.' }
+    ],
+    steps: ["Don't reply or tap any link.", 'Contact the company or person yourself, using a number or app you already trust.', 'If you already paid or shared details, call your bank.'] },
+  safe: { v: 'safe', headline: 'This looks like a normal message.', action: 'Nothing here asks for money or private details.', sure: 'Fairly sure', topic: 3, learnLabel: 'See the signs that never change',
+    signs: [{ h: 'No request for money or information.', p: 'It doesn\'t rush you or ask you to keep anything secret.' }],
+    steps: ['If it asks for money later, stop and check first.'] },
+  unsure: { v: 'unsure', headline: "We can't tell from this message alone.", action: 'Check with the sender another way before you act.', sure: 'Not sure either way', topic: 3, learnLabel: 'See the signs that never change',
+    signs: [{ h: 'Not enough to go on.', p: 'There are no clear warning signs, and no clear signs it\'s safe.' }],
+    steps: ['Contact the person or company using a number you already trust.', "Don't send money or details until you've checked."] }
+};
+const QUIZ = [
+  { kind: 'Text message', from: '+1 (844) 555-0192', body: 'USPS: Your package is on hold due to an incomplete address. Update within 12 hours to avoid return: usps-redelivery-help.com', scam: true,
+    why: 'The deadline is meant to rush you, and the link is not usps.com. The Postal Service won\'t text you a link to fix an address.' },
+  { kind: 'Text message', from: "Dr. Patel's Office", body: 'Reminder: You have an appointment Thursday, Nov 6 at 10:30 AM. Reply C to confirm, or call our office at the number on your card.', scam: false,
+    why: 'It asks for nothing but a yes. No link, no money, and it sends you to a number you already have.' },
+  { kind: 'Voicemail', from: 'Unknown caller', body: "Grandpa, it's me. I messed up, I'm at the police station. Please don't tell Dad. I need $3,000 for bail. They said gift cards are fastest. Please hurry.", scam: true,
+    why: 'AI can copy a voice from a short video online. Secrecy, hurry, and gift cards together are the giveaway, however real the voice sounds.' },
+  { kind: 'Email', from: 'Medicare Benefits Team', body: "We're pleased to let you know you qualify for a 2026 benefits adjustment of $1,240. To receive your payment, please verify your Medicare number and bank details using the secure form below.", scam: true,
+    why: 'The writing is polished because AI wrote it. Medicare already has your details and won\'t email you to ask for them.' },
+  { kind: 'Text message', from: 'Chase', body: "Chase: A purchase of $12.47 at Walgreens was made on your card ending 4417. If you don't recognize it, open the Chase app or call the number on the back of your card.", scam: false,
+    why: 'It has no link and asks for nothing. It tells you to use the app or the number on your own card, which is the safe way to check.' }
+];
+const TOPICS = [
+  { title: 'Cloned voices', intro: 'With a few seconds of someone\'s voice from a video online, AI can make a call that sounds just like your grandchild.',
+    items: [{ h: 'The sign', p: 'A loved one in trouble who needs money fast and asks you not to tell anyone.' }, { h: 'What to do', p: 'Hang up and call them back on the number you already have. A family code word helps too.' }] },
+  { title: 'Fake photos and videos', intro: 'AI can make pictures and videos of people who don\'t exist, or of real people saying things they never said.',
+    items: [{ h: 'The sign', p: 'A new online friend, or a famous person, who never meets in person and soon asks for money.' }, { h: 'What to do', p: 'Never send money to someone you have only met online.' }] },
+  { title: 'Messages that sound perfect', intro: 'Scam messages used to have spelling mistakes. AI now writes clean, friendly, official-sounding text.',
+    items: [{ h: 'The sign', p: 'Good spelling doesn\'t mean safe. Look at what the message asks you to do.' }, { h: 'What to do', p: 'Go to the company\'s app or website yourself instead of tapping a link.' }] },
+  { title: 'Signs that never change', intro: 'However real a scam looks or sounds, it almost always does one of these.',
+    items: [{ h: 'It rushes you', p: '"Today," "within 12 hours," "right now."' }, { h: 'It asks for secrecy', p: '"Don\'t tell anyone" keeps you from checking.' }, { h: 'It wants unusual payment', p: 'Gift cards, wire transfers, or cryptocurrency.' }, { h: 'It asks for private details', p: 'Passwords, PINs, Medicare or Social Security numbers.' }] }
+];
+const SCALES = { '100%': 16, '115%': 18.4, '130%': 20.8 };
+
+class Component extends DCLogic {
+  state = { theme: this.props.theme ?? 'system', tab: this.props.startTab ?? 'home', stage: 'input', text: '', shots: [], sample: null, resultKey: null, qi: 0, ans: null, score: 0, results: [], done: false, open: 0 };
+  scrollRef = React.createRef();
+  applyScale() { const d = document.documentElement; d.style.fontSize = (SCALES[this.props.textScale] || 16) + 'px'; const t = this.state.theme; if (t === 'system') d.removeAttribute('data-theme'); else d.setAttribute('data-theme', t); }
+  componentDidMount() { this.applyScale(); this.mq = window.matchMedia('(prefers-color-scheme: dark)'); this.onMq = () => this.forceUpdate(); this.mq.addEventListener('change', this.onMq); }
+  componentDidUpdate(pp, ps) {
+    if (pp.theme !== this.props.theme && this.props.theme) this.setState({ theme: this.props.theme });
+    this.applyScale();
+    if ((ps.tab !== this.state.tab || ps.stage !== this.state.stage || ps.qi !== this.state.qi || ps.done !== this.state.done) && this.scrollRef.current) this.scrollRef.current.scrollTop = 0;
+  }
+  go(tab, extra) { this.setState({ tab, ...(extra || {}) }); }
+  verdictFor() {
+    const { text, sample, shots } = this.state;
+    const s = SAMPLES.find(x => x.key === sample);
+    if (s && s.text === text) return sample;
+    if (/gift ?card|wire|bitcoin|crypto|bail|verify|suspend|urgent|act now|password|social security|ssn|bank details|pin\b/i.test(text)) return 'scam';
+    if (/appointment|reminder|ready for pickup|refill/i.test(text)) return 'safe';
+    return 'unsure';
+  }
+  renderVals() {
+    const st = this.state;
+    const canCheck = st.text.trim().length > 0 || st.shots.length > 0;
+    const rk = st.resultKey && RESULTS[st.resultKey];
+    const r = rk ? { ...V[rk.v], ...rk, signs: rk.signs, steps: rk.steps.map((t, i) => ({ n: i + 1, t })), learn: () => this.go('learn', { open: rk.topic }) } : { signs: [], steps: [] };
+    const q = QUIZ[st.qi];
+    const correct = st.ans !== null && st.ans === q.scam;
+    const tabs = [['home', 'Home'], ['check', 'Scam Checker'], ['quiz', 'Spot the Scam'], ['learn', 'AI Scams']].map(([k, label]) => {
+      const on = st.tab === k; const c = { home: 'var(--accent)', check: 'var(--ink)', quiz: 'var(--quiz)', learn: 'var(--learn)' }[k];
+      return { label, current: on ? 'page' : undefined, color: on ? c : 'var(--muted)', weight: on ? 700 : 400, bar: on ? (k === 'check' ? 'var(--check)' : c) : 'transparent', go: () => this.go(k) };
+    });
+    return {
+      scrollRef: this.scrollRef,
+      statusBg: st.tab === 'home' ? 'var(--band)' : 'var(--bg)', statusFg: st.tab === 'home' ? 'var(--on-band)' : 'var(--ink)',
+      ...(() => { const dark = st.theme === 'dark' || (st.theme === 'system' && !!(this.mq ? this.mq.matches : window.matchMedia('(prefers-color-scheme: dark)').matches)); return { themeLabel: dark ? 'Light' : 'Dark', themeIcon: dark ? 'sunny' : 'moon', toggleTheme: () => this.setState({ theme: dark ? 'light' : 'dark' }) }; })(),
+      isHome: st.tab === 'home', isCheck: st.tab === 'check', isQuiz: st.tab === 'quiz', isLearn: st.tab === 'learn',
+      goCheck: () => this.go('check'), goQuiz: () => this.go('quiz'), goLearn: () => this.go('learn'),
+      tabs,
+      stageInput: st.stage === 'input', stageChecking: st.stage === 'checking', stageResult: st.stage === 'result',
+      text: st.text, onText: e => this.setState({ text: e.target.value }),
+      paste: () => { const s = SAMPLES[0]; this.setState({ text: s.text, sample: s.key }); },
+      addShot: () => this.setState(s => ({ shots: [...s.shots, Date.now()] })),
+      hasShots: st.shots.length > 0,
+      shots: st.shots.map((id, i) => ({ n: i + 1, remove: () => this.setState(s => ({ shots: s.shots.filter(x => x !== id) })) })),
+      cannotCheck: !canCheck, checkActiveOpacity: canCheck ? 0.6 : 1, checkBg: canCheck ? 'var(--check)' : 'var(--disabled-bg)', checkFg: canCheck ? 'var(--on-check)' : 'var(--disabled-fg)',
+      samples: SAMPLES.map(s => ({ label: s.label, use: () => this.setState({ text: s.text, sample: s.key }) })),
+      check: () => {
+        if (!canCheck) return;
+        const key = this.verdictFor();
+        this.setState({ stage: 'checking' });
+        clearTimeout(this.t);
+        this.t = setTimeout(() => this.setState({ stage: 'result', resultKey: key }), 1800);
+      },
+      loader: React.createElement('div', { 'aria-hidden': true, style: { display: 'flex', gap: 12 } },
+        [0, 1, 2].map(i => React.createElement('div', { key: i, style: { width: 18, height: 18, borderRadius: '50%', background: 'var(--check)', animation: `pwpulse 1.2s ${i * 0.2}s infinite ease-in-out` } }))),
+      r,
+      reset: () => this.setState({ stage: 'input', text: '', shots: [], sample: null, resultKey: null }),
+      quizPlaying: !st.done, quizDone: st.done, qNum: st.qi + 1,
+      dots: QUIZ.map((_, i) => {
+        const res = st.results[i];
+        if (res === true) return { bg: 'var(--safe-ink)', border: 'var(--safe-ink)' };
+        if (res === false) return { bg: 'var(--scam-ink)', border: 'var(--scam-ink)' };
+        return { bg: 'transparent', border: i === st.qi ? 'var(--accent)' : 'var(--line-strong)' };
+      }),
+      q: { ...q, answerLine: q.scam ? 'This one is a scam.' : 'This one is not a scam.' },
+      unanswered: st.ans === null, answered: st.ans !== null,
+      fb: correct ? { title: 'You got it.', tint: 'var(--safe-tint)', ink: 'var(--safe-ink)' } : { title: 'Not quite.', tint: 'var(--scam-tint)', ink: 'var(--scam-ink)' },
+      guessScam: () => this.answer(true), guessSafe: () => this.answer(false),
+      nextLabel: st.qi === QUIZ.length - 1 ? 'See my score' : 'Next message',
+      next: () => this.setState(s => s.qi === QUIZ.length - 1 ? { done: true } : { qi: s.qi + 1, ans: null }),
+      score: st.score,
+      scoreLine: st.score === 5 ? 'You caught every one. Those signs will help you when a real one arrives.' : st.score >= 3 ? 'Nicely done. Each round makes the signs easier to see.' : 'Scams are built to fool people. Each round you practice makes the next one easier to spot.',
+      restart: () => this.setState({ qi: 0, ans: null, score: 0, results: [], done: false }),
+      topics: TOPICS.map((t, i) => ({ ...t, open: st.open === i, cta: st.open === i ? 'Close' : 'Read', border: st.open === i ? 'var(--learn)' : 'var(--line)', toggle: () => this.setState(s => ({ open: s.open === i ? -1 : i })) }))
+    };
+  }
+  answer(guess) {
+    if (this.state.ans !== null) return;
+    const ok = guess === QUIZ[this.state.qi].scam;
+    this.setState(s => ({ ans: guess, score: s.score + (ok ? 1 : 0), results: [...s.results, ok] }));
+  }
+  componentWillUnmount() { clearTimeout(this.t); this.mq && this.mq.removeEventListener('change', this.onMq); }
+}
+</script>
+</body>
+</html>

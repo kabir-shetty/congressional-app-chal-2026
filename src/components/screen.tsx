@@ -1,104 +1,76 @@
-import { useState, type PropsWithChildren } from "react";
+import { useFocusEffect } from "expo-router";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  type PropsWithChildren,
+} from "react";
 import {
   Platform,
   ScrollView,
+  StyleSheet,
   View,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
+  type ScrollViewInstance,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { AppText } from "@/components/app-text";
-import { Icon } from "@/components/icon";
-import { SchemeToggle } from "@/components/scheme-toggle";
-import { gutter, makeStyles, spacing, useColors } from "@/constants/theme";
+import { makeStyles } from "@/theme/colors";
+import { gutter } from "@/theme/shape";
 
-// Themed, scrollable content area shared by every tab, under a fixed top bar
-// holding the wordmark and the light/dark toggle. The bar gains a hairline
-// once content scrolls beneath it.
-// Taps on buttons still register while the keyboard is open.
-export function Screen({ children }: PropsWithChildren) {
+type ScreenProps = PropsWithChildren<{
+  // Content draws under the status bar and handles the top inset itself
+  // (the Home band); otherwise the screen pads it and the side gutter.
+  edgeToEdge?: boolean;
+  // Scrolls back to the top whenever this changes (stage / question).
+  scrollKey?: string | number;
+}>;
+
+// Themed, scrollable content area shared by every tab. Taps on buttons
+// still register while the keyboard is open.
+export function Screen({ children, edgeToEdge = false, scrollKey }: ScreenProps) {
   const styles = useStyles();
-  const colors = useColors();
   const { top } = useSafeAreaInsets();
-  const [scrolled, setScrolled] = useState(false);
+  const scrollRef = useRef<ScrollViewInstance>(null);
 
-  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const next = e.nativeEvent.contentOffset.y > 8;
-    if (next !== scrolled) setScrolled(next);
-  };
+  // Screen changes start at the top: tabs stay mounted, so reset on focus
+  // as well as on stage changes.
+  const scrollToTop = useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, []);
+  useFocusEffect(scrollToTop);
+  useEffect(scrollToTop, [scrollKey, scrollToTop]);
 
   return (
-    <View style={styles.root}>
-      <View
-        style={[
-          styles.bar,
-          { paddingTop: top + spacing.sm },
-          scrolled && styles.barScrolled,
-        ]}
-      >
-        <View style={styles.brand}>
-          <Icon name="shield" color={colors.primary} size={26} />
-          <AppText
-            variant="headline"
-            numberOfLines={1}
-            maxFontSizeMultiplier={1.15}
-          >
-            Porch Watch
-          </AppText>
-        </View>
-        <SchemeToggle />
-      </View>
+    <View style={[styles.root, !edgeToEdge && { paddingTop: top }]}>
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.container}
+        ref={scrollRef}
+        style={layout.scroll}
+        contentContainerStyle={edgeToEdge ? layout.fill : layout.padded}
         keyboardShouldPersistTaps="handled"
-        onScroll={onScroll}
-        scrollEventThrottle={32}
         // Native indicators are expected; the web one is an unthemed gutter.
         showsVerticalScrollIndicator={Platform.OS !== "web"}
       >
-        <View style={styles.content}>{children}</View>
+        {children}
       </ScrollView>
     </View>
   );
 }
 
+const layout = StyleSheet.create({
+  scroll: { flex: 1 },
+  fill: { flexGrow: 1 },
+  padded: {
+    flexGrow: 1,
+    paddingTop: 16,
+    paddingHorizontal: gutter,
+    paddingBottom: 32,
+    gap: 20,
+  },
+});
+
 const useStyles = makeStyles((c) => ({
   root: {
     flex: 1,
-    backgroundColor: c.background,
-  },
-  bar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: gutter,
-    paddingBottom: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: "transparent",
-    backgroundColor: c.background,
-  },
-  barScrolled: {
-    borderBottomColor: c.border,
-  },
-  brand: {
-    flexShrink: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-  },
-
-  scroll: {
-    flex: 1,
-  },
-  container: {
-    flexGrow: 1,
-  },
-  // Cards carry their own side margin; loose content wraps itself in Inset.
-  content: {
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xxl,
-    gap: spacing.lg,
+    backgroundColor: c.bg,
   },
 }));

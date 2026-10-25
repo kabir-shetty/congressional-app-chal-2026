@@ -6,7 +6,9 @@ export type QuizItemContent =
 
 export type QuizItem = {
   id: string;
+  kind: string; // message type shown in the card header ("Text message")
+  from: string; // sender shown in the card header
   content: QuizItemContent; // grouped together since there's two possible formats
   isScam: boolean; // the correct answer to "is this a scam?"
-  explanation: string; // explains why the answer is what it is
+  explanation: string; // the sign to remember
 };

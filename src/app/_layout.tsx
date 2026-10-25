@@ -2,36 +2,30 @@ import {
   AtkinsonHyperlegible_400Regular,
   AtkinsonHyperlegible_700Bold,
 } from "@expo-google-fonts/atkinson-hyperlegible";
+import { PublicSans_700Bold } from "@expo-google-fonts/public-sans";
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack } from "expo-router";
+import { SplashScreen, Stack, usePathname } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 
-import {
-  SchemeProvider,
-  useSchemeControl,
-} from "@/components/scheme-provider";
+import { ThemeProvider, useTheme } from "@/theme/theme-provider";
 
-// Hold the splash until the fonts are in, so text never flashes in the
-// system face and then jumps.
+// Hold the splash until the fonts and the saved theme are in, so text never
+// flashes in the system face or the wrong scheme.
 SplashScreen.preventAutoHideAsync();
 
-// Status bar icons follow the scheme: light icons on the dark ground, dark
-// icons on the paper one.
-function ThemedStatusBar() {
-  const { scheme } = useSchemeControl();
-  return <StatusBar style={scheme === "dark" ? "light" : "dark"} />;
+// Home's navy band runs under the status bar, so it always takes light
+// icons there; elsewhere icons follow the scheme. Separate component so
+// route changes re-render only this, not the Stack.
+function SchemeStatusBar() {
+  const { isDark } = useTheme();
+  const pathname = usePathname();
+  return <StatusBar style={pathname === "/" || isDark ? "light" : "dark"} />;
 }
 
-// Root stack. The "(tabs)" group draws its own top bar, so the stack header
-// is hidden. If a font fails to load the app still opens in the system font (bold
-// then comes from the platform, not Atkinson).
-export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    AtkinsonHyperlegible_400Regular,
-    AtkinsonHyperlegible_700Bold,
-  });
-  const ready = loaded || !!error;
+function AppShell({ fontsReady }: { fontsReady: boolean }) {
+  const { loaded } = useTheme();
+  const ready = fontsReady && loaded;
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
@@ -40,11 +34,27 @@ export default function RootLayout() {
   if (!ready) return null;
 
   return (
-    <SchemeProvider>
-      <ThemedStatusBar />
+    <>
+      <SchemeStatusBar />
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
-    </SchemeProvider>
+    </>
+  );
+}
+
+// Root stack; the "(tabs)" group draws its own headers. If a font fails to
+// load the app still opens in the system font.
+export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    PublicSans_700Bold,
+    AtkinsonHyperlegible_400Regular,
+    AtkinsonHyperlegible_700Bold,
+  });
+
+  return (
+    <ThemeProvider>
+      <AppShell fontsReady={loaded || !!error} />
+    </ThemeProvider>
   );
 }

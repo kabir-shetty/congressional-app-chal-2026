@@ -1,70 +1,123 @@
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
+
 import { AppText } from "@/components/app-text";
-import { Card } from "@/components/card";
-import { InstructionStrip } from "@/components/instruction-strip";
+import { LeafCard } from "@/components/leaf-card";
+import { FadeIn } from "@/components/motion";
 import { Screen } from "@/components/screen";
-import { ScreenIntro } from "@/components/screen-intro";
-import { SectionLabel } from "@/components/section-label";
+import { ScreenHeader } from "@/components/screen-header";
+import {
+  AI_SCAM_TOPICS,
+  isAiScamTopicId,
+  type AiScamTopicId,
+} from "@/constants/ai-scam-topics";
+import { makeStyles } from "@/theme/colors";
+import { pressedOpacity } from "@/theme/shape";
 
-type Topic = {
-  title: string;
-  body: string;
-  advice: string;
-};
-
-const topics: Topic[] = [
-  {
-    title: "A voice that sounds exactly like family",
-    body: "A few seconds of audio from a video or voicemail is enough to clone a voice today.",
-    advice: "If a relative calls asking for money urgently, hang up and call them back on a number you already have.",
-  },
-  {
-    title: "Photos and videos that never happened",
-    body: "AI can generate a photo of an accident, a hospital bed, or a face on a video call, all from scratch. A photo isn't proof by itself anymore.",
-    advice: "Don't send money because of a photo or video alone, especially when you're told to hurry.",
-  },
-  {
-    title: "Messages written to sound just right",
-    body: "The clumsy, misspelled scam email is mostly gone. AI now writes messages in fluent, personal-sounding English.",
-    advice: "Don't trust a message because it's well written. Check who really sent it.",
-  },
-];
-
-// Route: /ai-scams — a short read: what's new, one raised card per topic,
-// then what still gives scams away.
+// Route: /ai-scams — one expandable section per topic, one open at a time.
+// `?topic=<id>` (from a Scam Checker result) opens that section.
 export default function AiScamsInfo() {
+  const styles = useStyles();
+  // URL params are untrusted strings; ignore unknown topics.
+  const params = useLocalSearchParams<{ topic?: string }>();
+  const topic = isAiScamTopicId(params.topic) ? params.topic : undefined;
+  const [open, setOpen] = useState<AiScamTopicId | null>(
+    topic ?? AI_SCAM_TOPICS[0].id
+  );
+  // Tabs stay mounted, so a later link with a new topic must reopen here
+  // (state adjusted during render rather than in an effect).
+  const [linkedTopic, setLinkedTopic] = useState(topic);
+  if (topic !== linkedTopic) {
+    setLinkedTopic(topic);
+    if (topic) setOpen(topic);
+  }
+  // Consume the param so the next link, even to the same topic, is a change.
+  useEffect(() => {
+    if (topic) router.setParams({ topic: undefined });
+  }, [topic]);
+
   return (
     <Screen>
-      <ScreenIntro
-        label="AI Scams"
-        lead="What's changed"
-        accent="about scams lately."
-        subtitle="And what still gives them away."
-      />
+      <FadeIn style={layout.stage}>
+        <ScreenHeader
+          title="AI Scams"
+          subtitle="AI makes scams look and sound more real. The warning signs stay the same."
+        />
 
-      {topics.map((topic, i) => (
-        <Card key={topic.title} index={i + 1}>
-          <AppText variant="headline" accessibilityRole="header">
-            {topic.title}
-          </AppText>
-          <AppText>{topic.body}</AppText>
-          <InstructionStrip tone="success">{topic.advice}</InstructionStrip>
-        </Card>
-      ))}
+        {AI_SCAM_TOPICS.map((t) => {
+          const isOpen = open === t.id;
+          return (
+            <LeafCard
+              key={t.id}
+              border={isOpen ? "learn" : "line"}
+              style={layout.section}
+            >
+              <Pressable
+                onPress={() => setOpen(isOpen ? null : t.id)}
+                accessibilityRole="button"
+                accessibilityState={{ expanded: isOpen }}
+                accessibilityLabel={t.title}
+                style={({ pressed }) => [
+                  layout.toggle,
+                  pressed && layout.pressed,
+                ]}
+              >
+                <AppText variant="subheading" style={layout.title}>
+                  {t.title}
+                </AppText>
+                <AppText variant="smallStrong" tone="learn">
+                  {isOpen ? "Close" : "Read"}
+                </AppText>
+              </Pressable>
 
-      <Card index={topics.length + 1}>
-        <SectionLabel>The signs</SectionLabel>
-        <AppText variant="title" accessibilityRole="header">
-          What still gives it away
-        </AppText>
-        <AppText>
-          However real the voice, photo, or writing seems, these are still the
-          clearest warning signs:
-        </AppText>
-        <InstructionStrip tone="danger" label="Stop if you see">
-          Pressure to act right now, a request to keep it secret, or payment
-          by gift card, wire transfer, or cryptocurrency.
-        </InstructionStrip>
-      </Card>
+              {isOpen && (
+                <View style={layout.body}>
+                  <AppText>{t.intro}</AppText>
+                  {t.items.map((item) => (
+                    <View key={item.title} style={styles.item}>
+                      <AppText variant="calloutStrong" tone="learn">
+                        {item.title}
+                      </AppText>
+                      <AppText variant="callout">{item.detail}</AppText>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </LeafCard>
+          );
+        })}
+      </FadeIn>
     </Screen>
   );
 }
+
+const layout = StyleSheet.create({
+  stage: { gap: 18 },
+  section: { overflow: "hidden" },
+  toggle: {
+    minHeight: 64,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  pressed: { opacity: pressedOpacity },
+  title: { flex: 1 },
+  body: {
+    paddingHorizontal: 18,
+    paddingBottom: 20,
+    gap: 14,
+  },
+});
+
+const useStyles = makeStyles((c) => ({
+  item: {
+    gap: 4,
+    paddingTop: 12,
+    borderTopWidth: 2,
+    borderTopColor: c.soft,
+  },
+}));

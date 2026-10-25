@@ -1,20 +1,24 @@
 # data
 ## types/scam-check.ts
-ScamCheckImage{uri,width,height} · ScamCheckInput{text, images:ScamCheckImage[]} · ScamVerdict "likely_scam"|"likely_safe"|"uncertain" · ScamCheckResult{verdict, confidence:0-1, explanation}
+ScamCheckImage{uri,width,height} · ScamCheckInput{text, images:ScamCheckImage[]} · `SCAM_VERDICTS` ["likely_scam","likely_safe","uncertain"] → ScamVerdict + `isScamVerdict(v)` · ScamSign{title,detail} · ScamCheckResult{verdict, confidence:0-1 (words only), action, signs:ScamSign[], steps:string[], topic:AiScamTopicId}
 ## types/quiz.ts
-QuizItemContent = {type:"text",text} | {type:"image",uri,width,height} · QuizItem{id, content, isScam, explanation:string}
+QuizItemContent = {type:"text",text} | {type:"image",uri,width,height} · QuizItem{id, kind, from, content, isScam, explanation}
+## constants/ai-scam-topics.ts
+`AiScamTopicId` voice|photos|writing|signs · `AiScamTopic{id,title,intro,items:{title,detail}[],learnLabel}` · `AI_SCAM_TOPICS` (copy from prototype: Cloned voices / Fake photos and videos / Messages that sound perfect / Signs that never change; learnLabels "Learn about cloned voices", "Learn about fake photos and videos", "Learn about messages that sound perfect", "See the signs that never change") · `isAiScamTopicId(v)`.
 
-## check.tsx state (was useScamCheck hook, now component-local)
-ScamCheckStatus = idle|loading|success; ScamCheckState {status,result} (no error state).
-- handleSubmit: async, set loading → await checkForScam({text,images}) → success; on throw `console.error("Scam check failed:", caught)` (whole error) + `Alert.alert("Couldn't check that", "Please check your internet connection, then try again.")` + reset to initialCheckState (no in-screen error UI, user request). Reset clears checkState + text + images.
-Picker: `selectionLimit: MAX_AI_IMAGES - images.length`, appended list `.slice(0, MAX_AI_IMAGES)` (pickImage deps [images.length]); "Add a screenshot" disabled when isLoading || images.length >= MAX_AI_IMAGES.
-`checkForScam(input)` (file-private): callAI({system:SCAM_CHECK_SYSTEM, prompt:text.trim()||"(No text — see the attached screenshots.)", images}) (no try/catch; errors propagate to handleSubmit) → parseJsonReply → `toScamCheckResult` (verdict ∈ verdictCopy keys, confidence number in [0,1], explanation string; else throw UNEXPECTED_REPLY_MESSAGE).
+## check.tsx logic
+Stage input|checking|result; state text, focused, images, stage, result. MAX_LIST_ITEMS 4.
+- handleSubmit: checking → await checkForScam → setResult + result; catch → console.error("Scam check failed:", caught) + Alert + input. handleReset clears all. canCheck = text.trim()||images.length.
+- Picker: `selectionLimit: MAX_AI_IMAGES - images.length`, append `.slice(0, MAX_AI_IMAGES)` (deps [images.length]).
+- `SCAM_CHECK_SYSTEM` asks JSON {verdict, confidence 0-1, action (one sentence), signs 1-3 {title,detail}, steps 1-3, topic voice|photos|writing|signs}; plain words, never overstate, "uncertain" when unclear.
+- `checkForScam(input)`: callAI({system, prompt:text.trim()||"(No text — see the attached screenshots.)", images}) → parseJsonReply → `toScamCheckResult`: requires isScamVerdict, confidence number in [0,1], non-blank action, ≥1 valid sign (non-blank title+detail), ≥1 non-blank step (lists filtered + sliced to 4); unknown topic → "signs"; else throw UNEXPECTED_REPLY_MESSAGE.
+- `sureInWords`: uncertain → "Not sure either way"; confidence ≥0.85 → "Very likely"; else "Fairly sure".
 
-## quiz.tsx state (was useQuiz hook, now component-local)
-QUIZ_LENGTH=5. QuizStatus = preparing|prepared|asking|answered|finished|error; QuizState {status,items,index,error,score,results:boolean[] (per answered question; reset by initialState),lastAnswerCorrect}.
-- createQuiz: run id `latestRun` ref (++ per call; unmount cleanup also ++) → reset to initial → shuffle 7 `QUIZ_SCENARIOS`, use first 5 unique; `Promise.all` calls `generateQuizItem(scenario)` concurrently, preserving scenario order (all-or-nothing: fail any = fail all) → prepared|error; stale run result dropped.
-- start: prepared→asking. answer(guessIsScam): no-op unless asking; →answered, score++ if correct. next: no-op unless answered; index+1 → asking, or finished after last.
-`generateQuizItem(scenario:QuizScenario)` (file-private): isScam = Math.random()<0.5; scenario is unique within a quiz, selected in code from 7 strings → callAI({system:QUIZ_ITEM_SYSTEM, prompt:`Write a ${scam|legitimate} ${scenario}.`}) in local try/catch (console.warn + throw "Check that you're online, then tap Try again.") → parseJsonReply → require non-blank `text` + `explanation` strings (else UNEXPECTED_REPLY_MESSAGE) → {id:String(nextQuizItemId++) module counter, content:{type:"text",text}, isScam, explanation}. Text items only.
+## quiz.tsx logic
+QUIZ_LENGTH=5. QuizStatus = preparing|asking|answered|finished|error (no "prepared"/Start step); QuizState {status,items,index,error,score,results:boolean[],lastAnswerCorrect}.
+- createQuiz: run id `latestRun` ref (++ per call; unmount cleanup ++) → reset → shuffle 7 `QUIZ_SCENARIOS` {kind,about} (Text message/bank, Voicemail/grandchild, Email/package, Phone call/government agency, Social media message/friend, Email/computer or account problem, Text message/prize or refund), first 5 → `Promise.all(generateQuizItem)` (all-or-nothing) → asking|error; stale run dropped.
+- answer(guessIsScam): only when asking → answered, score++ if correct. next: only when answered → index+1 asking, or finished.
+`generateQuizItem(scenario)`: isScam = Math.random()<0.5 → callAI({system:QUIZ_ITEM_SYSTEM, prompt:`Write a ${scam|legitimate} ${kind.toLowerCase()} ${about}.`}) in try/catch (console.warn + throw "Check that you're online, then tap Try again.") → parseJsonReply → require non-blank `from`, `text`, `explanation` (else UNEXPECTED_REPLY_MESSAGE) → {id:String(nextQuizItemId++), kind:scenario.kind, from, content:{type:"text",text}, isScam, explanation}. System prompt asks 555 numbers / made-up names for sender. Text items only.
 
 ## services/ai.ts (global AI entry point)
 - `AIImage{uri,width,height}` · `AIRequest{system, prompt, images?:AIImage[]}` (system = fixed instructions, prompt = user content).
@@ -28,8 +32,9 @@ QUIZ_LENGTH=5. QuizStatus = preparing|prepared|asking|answered|finished|error; Q
 No persistence.
 
 ## server/
-- Standalone Node 22 HTTP service, no npm dependencies. `GET /healthz`; authenticated `POST /v1/ai`.
-- Env required: `GEMINI_API_KEY`, `API_TOKEN` (≥32 chars); optional `GEMINI_MODEL` (default `gemini-2.5-flash`), `PORT` (default `8080`).
-- Request `{system,prompt,images?:[{mimeType,data}]}`; images base64, max 5, MIME JPEG/PNG/WebP/GIF, max 6 MiB each; JSON max 10 MiB.
-- Response `{text}`; errors `{error:{message}}`. Upstream: Gemini `generateContent`, API key in `x-goog-api-key`.
-- `Dockerfile`, `.env.example`, tests, deploy/API contract in `server/README.md`. Client = services/ai.ts `callAI`.
+- Standalone Node 22 ESM HTTP service; one dep `google-auth-library` ^11.3.1. `GET /healthz`; authenticated `POST /v1/ai` (Bearer `API_TOKEN`, timing-safe compare).
+- Gemini via Vertex AI + Google Cloud ADC (no API key). `vertexGenerateUrl({project,location,model})` (exported): global → `https://aiplatform.googleapis.com/v1/projects/P/locations/global/publishers/google/models/M:generateContent`; else `https://<loc>-aiplatform.googleapis.com/...`. Header `authorization: Bearer <ADC token>`.
+- Env: `GOOGLE_CLOUD_PROJECT` (required), `GOOGLE_CLOUD_LOCATION` (default `global`, /^[a-z0-9-]+$/), `GEMINI_MODEL` (default `gemini-2.5-flash`), `API_TOKEN` (≥32 chars), `PORT` (default 8787); ADC sources: `GOOGLE_APPLICATION_CREDENTIALS` file, gcloud user ADC, metadata server (attached SA). Needs Vertex AI API + `roles/aiplatform.user`.
+- loadConfig → {apiToken, project, location, model, port, getAccessToken: () => GoogleAuth({scopes cloud-platform}).getAccessToken(), fetchImpl}. Token fetched per request after auth+validation (library caches); throw/empty → console.error (ADC message logged server-side) + 502 "Gemini service is unavailable.".
+- Request `{system,prompt,images?:[{mimeType,data}]}`; images base64, max 5, MIME JPEG/PNG/WebP/GIF, max 6 MiB each; JSON max 10 MiB. Upstream body {systemInstruction, contents:[{role:"user", parts:[text, inlineData…]}]}, 60s timeout (504). Response `{text}`; errors `{error:{message}}`.
+- Tests (`npm test`, node --test): 8 (health, 401, Vertex URL + bearer + body mapping, invalid image, ADC throw/null → 502, regional host, config defaults). Client = services/ai.ts `callAI`.

@@ -1,15 +1,20 @@
 import { StyleSheet, Text, type TextProps } from "react-native";
 
-import {
-  makeStyles,
-  typography,
-  type Palette,
-  type TypographyVariant,
-} from "@/constants/theme";
+import { makeStyles, type ColorName } from "@/theme/colors";
+import { typography, type TypographyVariant } from "@/theme/type";
 
 type TextTone = Extract<
-  keyof Palette,
-  "text" | "textMuted" | "primary" | "danger" | "warning" | "success"
+  ColorName,
+  | "ink"
+  | "muted"
+  | "accent"
+  | "onBand"
+  | "onBandMuted"
+  | "quiz"
+  | "learn"
+  | "scamInk"
+  | "safeInk"
+  | "unsureInk"
 >;
 
 type AppTextProps = TextProps & {
@@ -21,45 +26,13 @@ type AppTextProps = TextProps & {
 // from the active scheme. `style` merges last for layout tweaks.
 export function AppText({
   variant = "body",
-  tone,
+  tone = "ink",
   style,
   ...props
 }: AppTextProps) {
   const toneStyles = useToneStyles();
-  // Body copy reads in the softer muted tone; headings in full-strength text.
-  const defaultTone =
-    variant === "body" || variant === "callout" ? "textMuted" : "text";
   return (
-    <Text
-      style={[typeStyles[variant], toneStyles[tone ?? defaultTone], style]}
-      {...props}
-    />
-  );
-}
-
-type HeadlineProps = TextProps & {
-  variant?: "largeTitle" | "title";
-  // Plain lead-in, then the key words in the accent blue.
-  lead: string;
-  accent: string;
-};
-
-export function Headline({
-  variant = "title",
-  lead,
-  accent,
-  style,
-  ...props
-}: HeadlineProps) {
-  const toneStyles = useToneStyles();
-  return (
-    <Text
-      accessibilityRole="header"
-      style={[typeStyles[variant], toneStyles.text, style]}
-      {...props}
-    >
-      {lead} <Text style={toneStyles.primary}>{accent}</Text>
-    </Text>
+    <Text style={[typeStyles[variant], toneStyles[tone], style]} {...props} />
   );
 }
 
@@ -68,10 +41,14 @@ const typeStyles = StyleSheet.create(typography);
 // One precomputed color style per tone, so text nodes don't allocate a new
 // style object every render.
 const useToneStyles = makeStyles((c) => ({
-  text: { color: c.text },
-  textMuted: { color: c.textMuted },
-  primary: { color: c.primary },
-  danger: { color: c.danger },
-  warning: { color: c.warning },
-  success: { color: c.success },
+  ink: { color: c.ink },
+  muted: { color: c.muted },
+  accent: { color: c.accent },
+  onBand: { color: c.onBand },
+  onBandMuted: { color: c.onBandMuted },
+  quiz: { color: c.quiz },
+  learn: { color: c.learn },
+  scamInk: { color: c.scamInk },
+  safeInk: { color: c.safeInk },
+  unsureInk: { color: c.unsureInk },
 }));

@@ -1,16 +1,17 @@
 # arch
 ## Nav (expo-router, typedRoutes on → Href checked at build)
-- app/_layout.tsx: useFonts (Atkinson Hyperlegible 400/700; splash held via expo-router SplashScreen until loaded or error) → `<SchemeProvider>` > `ThemedStatusBar` (light icons on dark, dark on light) + `<Stack>` w/ Screen "(tabs)"(headerShown:false).
-- app/(tabs)/_layout.tsx: `<Tabs>` headerShown false (each Screen draws own top bar w/ wordmark + SchemeToggle); screens in order index"Home", check"Scam Checker"(tabBarLabel "Checker"), quiz"Spot the Scam"(tabBarLabel "Quiz"), ai-scams"AI Scams". `tabIcon(name)` → named `TabBarIcon` → `TabIcon` (Icon 24 in 56x32 pill; focused: primaryTint bg). Icons home/search/quiz/sparkles. screenOptions: active primary, inactive textMuted, tabBar bg surface/borderTop border 1/pt8/height `TAB_BAR_HEIGHT`(72)+useSafeAreaInsets().bottom, label Atkinson bold 16, tabBarAllowFontScaling false, sceneStyle bg background.
-- Routes: `/`, `/check`, `/quiz`, `/ai-scams`.
+- app/_layout.tsx: useFonts (PublicSans_700Bold, Atkinson 400/700) → `<ThemeProvider>` > `AppShell({fontsReady})`: ready = fontsReady(loaded||error) && theme `loaded`; SplashScreen held until ready, null before. Renders `SchemeStatusBar` (usePathname: "/" → "light" (navy band), else isDark ? light : dark; own component so routes don't re-render Stack) + `<Stack>` Screen "(tabs)" headerShown false.
+- app/(tabs)/_layout.tsx: headless `expo-router/ui` `<Tabs style bg>` > `<TabSlot/>` + `<TabList accessibilityRole="tablist">` of `TabTrigger name href asChild` > `TabButton` (Pressable role tab, selected state; drops TabTrigger's View-typed ref/style). `TABS` {name,href,label,color,onColor}. Spec in [[screens]].
+- Routes: `/`, `/check`, `/quiz`, `/ai-scams` (`?topic=` voice|photos|writing|signs).
 
 ## State pattern
-State local to each screen (no hooks/ dir): `status` union + async fn calling `callAI`; actions in useCallback; error msg = `error instanceof Error ? error.message : "Something went wrong."`. Detail: [[data]].
+State local to each screen (no hooks/ dir): status/stage union + async fn calling `callAI`; actions in useCallback; error msg = `error instanceof Error ? error.message : "Something went wrong."`. Detail: [[data]].
 
 ## Conventions
-- Styles: themed → `const useStyles = makeStyles((c) => ({...}))` at file bottom; scheme-independent → `StyleSheet.create`. Values only from theme tokens ([[ui]]; no shadows); never import raw palettes (read via useColors/makeStyles). Inline style only for dynamic values.
-- Text: always `AppText` (variant + tone), never raw Text (except inside AppButton). Buttons: AppButton (filled = one main action, tonal = rest), sentence-case labels except locked "Check for Scam".
-- Recurring idioms: `Screen` + `ScreenIntro` per tab; `Card`s (never nested) w/ `index` stagger; advice/verdicts via `InstructionStrip` (quiz errors: warning "That didn't work"; checker errors: console + native Alert); destinations via FeatureCard; headings role header (Headline/AppText); result changes announced via `AccessibilityInfo.announceForAccessibility`. Layout: Screen has no side padding; Card/FeatureCard margin themselves gutter, loose content in `Inset`. Buttons: one primary per screen, rest secondary. SectionLabel tag above headings. Card entrance respects reduce-motion. Charts via charts.tsx, always with a text summary.
+- Follow claude-design/SKILL.md rules: tokens only (no raw hex in screens), pills for buttons, leaf for cards, pressed opacity 0.6 (except disabled), section colors, verdict colors reserved, icons beside text or hidden, sentence-case labels ("Check for Scam" keeps casing), confidence in words never %, no accuracy claims / testimonials / accounts / payments / privacy statement.
+- Styles: themed → `const useStyles = makeStyles((c) => ({...}))` at file bottom; scheme-independent → `StyleSheet.create` (often `layout`); never import raw palettes in screens (useColors/makeStyles). Inline style only for dynamic values. Shadows via `boxShadow` strings from shape.ts.
+- Text: always `AppText` (variant + tone) except inside PillButton/ThemeButton/tab labels/StepList numbers. Headings role header. Results announced via `AccessibilityInfo.announceForAccessibility`.
+- Layout: `Screen` pads gutter (except edgeToEdge Home); stage content wrapped in `FadeIn` with own gap; `scrollKey` per stage.
 - Comments: explain why, 1 per block, above declarations. Double quotes, semicolons, trailing commas.
-- Import order mixed (some files externals first, some @/ first); VS Code organizeImports on save.
+- Import order mixed; VS Code organizeImports on save.
 - reactCompiler enabled (experiments) — useCallback still used manually.

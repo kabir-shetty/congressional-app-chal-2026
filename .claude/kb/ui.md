@@ -1,26 +1,31 @@
 # ui
-Direction "Calm blue": minimal, professional, trust. White + pale blue surfaces, one trust blue for everything interactive/key, navy text, hairline-bordered cards, flat buttons, no shadows/shape art/glow; Atkinson Hyperlegible only. Two minimal charts (one color). Dark = same blue on deep navy. Supersedes Porch geometry / Dark Luxury (`claude-design/`, root DESIGN.md, `.impeccable/` stale).
-Seniors/a11y (PRODUCT.md): body 20, min 16, touch 56, text ≥4.5:1 (verified both schemes), icons beside text, charts always described in text.
+Source of truth: `claude-design/` — `Porch Watch.dc.html` (HTML prototype, wins) > `DESIGN.md` (tokens/type/shape/screens) > `SKILL.md` (rules + checklist). Direction: plain, calm, civic; navy base, one color per section (Home navy `accent`, Scam Checker yellow `check` (fill behind dark text only), Spot the Scam teal `quiz`, AI Scams violet `learn`). Red/green/amber (`scam*`/`safe*`/`unsure*`) only for verdicts + quiz feedback. Leaf cards, pill buttons, circles; no uniform rounded rects.
+Seniors/a11y (PRODUCT.md): body 20, min 16, touch 56, contrast ≥4.5:1, text label on every control, font scaling on.
+Known HTML vs DESIGN.md mismatch: quiz current-pill outline = `accent` (HTML) vs "teal" (DESIGN.md:106); code follows HTML.
 
-## constants/theme.ts
-`Palette`: background surface card text textMuted border borderStrong(≥3:1 on card) primary onPrimary primaryTint track danger/dangerTint warning/warningTint success/successTint.
-light: bg #FFF surface #F3F8FD card #FFF text #0F2744 muted #475A73 border #DCE7F3 borderStrong #7B93B0 primary #1D5FB8 onPrimary #FFF primaryTint #E3EEFB track #DCE7F3 danger #B42318/#FDECEA warning #8A5300/#FFF4DC success #1B7048/#E6F4EC.
-dark: bg #0B1626 surface #10203A card #12233C text #EAF1FA muted #A9BBD2 border #223A59 borderStrong #6F89AB primary #74B2F5 onPrimary #08203F primaryTint #1B3556 track #27415F danger #FF8D7B/#3A1D1B warning #F5C25B/#33290F success #5ED69A/#143325.
-- `SchemeContext` default "light"; `useColors()`; `makeStyles(c=>styles)` both-scheme sheets at load.
-- spacing xs4 sm8 md16 lg24 xl32 xxl48 · `gutter`24 · `radius` sm8 md12 lg16 pill999 · `minTouchTarget`56.
-- `fonts` regular AtkinsonHyperlegible_400Regular, bold _700Bold (loaded in app/_layout). `typography`: largeTitle 38/44 bold · title 28/34 · headline 22/28 · body 20/30 · bodyStrong 20/28 bold · callout 18/26 · label 16/20 bold +1 uppercase.
+## theme/colors.ts
+`Palette` keys + light / dark:
+bg #F4F6F9/#0F1621 · surface #FFFFFF/#18212F · ink #142033/#EEF2F7 · muted #46536A/#AEB9CA · line #D5DCE6/#2C3747 · lineStrong #8C99AD/#5B687C · soft #E9EDF3/#222C3B · accent #1F3A5F/#9DBCEB · onAccent #FFFFFF/#0F1621 · band #1F3A5F/#1A2B42 · onBand #FFFFFF/#EEF2F7 · onBandMuted #D6E0EE/#C3CEDD · sun #F2C14E/#E8B940 · bandButton #F2C14E/#F2C14E · onBandButton #142033/#0F1621 · logoDot #7FD3CF both · check #F2C14E/#E8B940 · onCheck #142033/#0F1621 · checkSoft #FFF8E3/#241E10 · quiz #1C7472/#7FD3CF · quizTint #D6EFEC/#14302F · learn #77479C/#CDAAEE · learnTint #EEE4F6/#271D35 · scamInk #A12C1C/#F2A595 · scamTint #FBE3DE/#3A1E1A · safeInk #1F6440/#8FD3A8 · safeTint #DDF0E4/#16301F · unsureInk #7A5300/#E8C46E · unsureTint #F7EBCB/#33290F · disabledBg #DCE2EA/#2C3747 · disabledFg #4F5B6E/#AEB9CA.
+Exports: `light`, `dark`, `ColorScheme`, `ColorName`, `SchemeContext` (default "light"), `useColors()`, `makeStyles<const T extends Record<string, View|Text|ImageStyle>>(c=>styles)` (both sheets at load; RN 0.88 has no StyleSheet.NamedStyles).
+
+## theme/type.ts
+`fonts` heading PublicSans_700Bold · regular AtkinsonHyperlegible_400Regular · bold AtkinsonHyperlegible_700Bold.
+`typography` (size/lineHeight): display 51/56 H · title 32/37 H · resultTitle 30/35 H · homeTitle 29/33 H · statusTitle 29/35 H · feedbackTitle 24/29 H · heading 22/27 H · subheading 21/26 H · body 20/29 · bodyStrong 20/28 b · callout 18/26 · calloutStrong 18/24 b · small 16/24 · smallStrong 16/22 b · wordmark 16/22 b ls1.28 upper · label 17/22 b ls0.7 upper. (H = Public Sans.) `TypographyVariant`.
+
+## theme/shape.ts
+`gutter` 22 · `leaf` {TL28 TR28 BR28 BL8} · `pill` 999 · `minTouchTarget` 56 · `pressedOpacity` 0.6 · `shadows` (boxShadow strings) button "0px 6px 16px rgba(20,32,51,0.18)", bandButton "0px 8px 20px rgba(0,0,0,0.22)", chip "0px 4px 12px rgba(0,0,0,0.18)".
+
+## theme/theme-provider.tsx
+`ThemeProvider` + `useTheme()` {colors, isDark, toggle, loaded}. scheme = override ?? useColorScheme() (live). Override read once from AsyncStorage key `pw.theme` ("light"|"dark"), errors → console.warn + follow phone; `loaded` true after read. toggle sets + saves opposite. Root returns null until loaded (see [[arch]]). Provides `SchemeContext`.
 
 ## components (named exports)
-- `SchemeProvider`/`useSchemeControl()` {scheme,toggle}: scheme = override ?? system (in-memory, NOT persisted); web holds "light" until mounted.
-- `SchemeToggle`: pill (primaryTint bg, height 40 + hitSlop→56) Icon sun/moon + callout "Light"/"Dark" (scale cap 1.3); a11y "Switch to light/dark mode".
-- `AppText({variant?="body", tone?})` default tone body/callout→textMuted else text; tones text textMuted primary danger warning success. `Headline({variant?="title"|"largeTitle", lead, accent})` role header; accent in primary. Note: pass tone="text" for primary content text (message, explanation).
-- `SectionLabel({children})` label variant primary.
-- `AppButton({title,onPress,disabled?,variant?="primary"|"secondary",icon?,align?})` Pressable role button; radius 12, minH 56, border 1.5; primary solid primary/onPrimary; secondary card bg + borderStrong border + primary text; disabled surface bg/border, textMuted; pressed opacity .8; align on the Pressable.
-- `Card({index?=0}&ViewProps)` FadeInDown 400ms delay index*80; margin gutter, padding 24, gap 16, radius 16, 1px border, card bg, no shadow. Never nest.
-- `FeatureCard({href,icon,title,detail,index?})` Card padding0; link row: 52 primaryTint chip + Icon 26, headline + callout, chevron; pressed bg surface; a11y label "title. detail".
-- `Inset` px gutter. `InstructionStrip({tone,label?="What to do",children})` SIGNATURE: tinted panel radius 12, uppercase label in tone color + sentence (text tone). `StatusTone`.
-- `ConfidenceBar({value 0-1,label})` (charts.tsx): "{label}: N%" + 12px pill track/fill primary + "Not sure"/"Very sure" ends; accessible label "{label}: N%".
-- `StepChart({results:boolean[],total,current:number|null})`: one column per question, height encodes: unanswered 16 (surface, borderStrong outline) < missed 28 (primary outline) < right 48 (solid primary) < current 56 (primaryTint, only while asking); text summary "{right} right[, {missed} missed]" + "{total} questions"; a11y label summary.
-- `Screen({children})` bg background: fixed top bar (safe-area top; Icon shield + "Porch Watch" headline (1 line, scale cap 1.15) left, SchemeToggle right; hairline when scrolled >8) above ScrollView (content pt md, pb xxl, gap lg; no side padding).
-- `ScreenIntro({label,lead,accent,subtitle})` SectionLabel + Headline + body.
-- `Icon({name,color,size?=24})` SymbolView map. Keys: home search quiz sparkles addPhoto check chevron shield arrow refresh play flag moon sun.
+- `AppText({variant?="body", tone?="ink"})` tones ink muted accent onBand onBandMuted quiz learn scamInk safeInk unsureInk.
+- `PillButton({title,onPress,variant,size?="medium",disabled?,style?:StyleProp<ViewStyle>,accessibilityHint?})` role button. variants: check (check bg, onCheck, shadow button) · band (bandButton, onBandButton, shadow bandButton) · quiz (quiz bg, onAccent, shadow) · quizOutline (surface bg, 2 quiz border) · quizGhost (transparent, 2 quiz border) · outline (checkSoft bg, 2 ink border). sizes minH large 64 / medium 60 / small 56; label 22 / 20 / 18 Atkinson bold. disabled → disabledBg/Fg, no shadow, no press dim. pressed opacity 0.6.
+- `LeafCard({fill?="surface", border?: ColorName}&ViewProps)` leaf radius; border 2 when set; caller sets padding/gap.
+- `VerdictPanel({verdict,action,sure})` fill verdict tint, padding 24/22 gap 12: 16 dot (ink) + label variant, resultTitle headline (header), bodyStrong action, callout "How sure: " + calloutStrong sure. `verdictStyle: Record<ScamVerdict,{label,headline,ink,tint}>` likely_scam "Likely a scam"/"This looks like a scam." · likely_safe "Likely not a scam"/"This looks like a normal message." · uncertain "Can't tell"/"We can't tell from this message alone.".
+- `StepList({steps})` role list; 34 circle check bg + onCheck number (hidden from a11y), text a11y "Step N: …"; gap 12/14.
+- `ScreenHeader({title,subtitle?})` title (header) + muted body, gap 8.
+- `ThemeButton` Home band only: surface pill minH 56 px20 shadow chip; Icon moon/sun 22 + "Dark"/"Light" (opposite mode); a11y "Switch to dark/light mode".
+- `Screen({children, edgeToEdge?, scrollKey?})` bg; not edgeToEdge → paddingTop safe top + content padding 16/22/32 gap 20; edgeToEdge → none (Home band handles inset). Scroll to top on focus (useFocusEffect) + when scrollKey changes. keyboardShouldPersistTaps handled; no web scroll indicator.
+- motion.tsx: `FadeIn({style?})` entering FadeInDown 300ms from translateY 8 (reanimated skips w/ Reduce Motion). `PulseDots({color})` 3×18 dots, scale .6→1 + opacity .35→1, 600ms repeat reverse, 200ms stagger; static when useReducedMotion; hidden from a11y.
+- `Icon({name,color,size?=24})` expo-symbols; keys home (house.fill/home), search (magnifyingglass/search), quiz (questionmark.circle.fill/help), sparkles (sparkles/auto_awesome) = tab icons; shield (checkmark.shield.fill/verified_user), moon, sun. Ionicons not used (@expo/vector-icons slated for deprecation per Expo docs).
