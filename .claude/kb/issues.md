@@ -7,6 +7,7 @@
 - assets/images/quiz/ has 2 files without QUIZ_IMAGE_INFO (skipped, but bundled by require.context into every build): bankfive-username-text.png (604KB; key "reply with username" line hidden under nav bar, browser chrome), wells-fargo-blocked-card-text.jpg (same flow as genuine Fortera → ambiguous). User to decide: add entry or delete. PAC screenshot already removed from folder.
 - Quiz image cues: only genuine images carry teaching annotations (credit-union green arrows, Fortera caption labels) → "annotated = genuine" tell. Crop/replace if better sources found.
 - Lint: quiz.tsx setState-in-effect (createQuiz on mount) + ref-cleanup warning.
+- Server default `GEMINI_MODEL` gemini-2.5-flash → Vertex 404 (retired for project, 2026-10-25); `server/.env.local` overrides to gemini-3.5-flash (works; gemini-3-flash-preview also works). Code default + `.env.example` still stale. See [[data]].
 ## dead / stale
 - assets/images/tabIcons/* unused (tabs use expo-symbols Icon).
 - Web: SymbolView loads Material Symbols font async → icons blank briefly on first paint.
